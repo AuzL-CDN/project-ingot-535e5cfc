@@ -3,9 +3,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, FileText, Building, Hash, Calendar } from 'lucide-react';
+import { Save, FileText, Building, Hash, Calendar, User, Mail, Users } from 'lucide-react';
 import { MainFormData } from '@/hooks/useInspectionState';
 import { useToast } from '@/hooks/use-toast';
+import { AddressLookup } from '@/components/AddressLookup';
 
 interface MainFormProps {
   mainForm: MainFormData;
@@ -22,6 +23,20 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormPro
       title: "Activity Saved",
       description: `Activity ${activity.id} has been saved successfully.`,
     });
+  };
+
+  const handleNumberOfACSOs = (value: string) => {
+    const num = parseInt(value);
+    const newACSOs = Array.from({ length: num }, (_, i) => 
+      mainForm.acsos[i] || { fullName: '', email: '' }
+    );
+    updateMainForm({ numberOfACSOs: num, acsos: newACSOs });
+  };
+
+  const updateACSO = (index: number, field: 'fullName' | 'email', value: string) => {
+    const updatedACSOs = [...mainForm.acsos];
+    updatedACSOs[index] = { ...updatedACSOs[index], [field]: value };
+    updateMainForm({ acsos: updatedACSOs });
   };
 
   const contractTypes = [
@@ -52,10 +67,10 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormPro
   ];
 
   const inspectionClasses = [
-    { value: '1F', label: '1F - Initial FSC' },
-    { value: '1G', label: '1G - Renewal FSC' },
-    { value: '19F', label: '19F - Initial DoC' },
-    { value: '19G', label: '19G - Renewal DoC' }
+    { value: '1F', label: '1F - Protected Inspection' },
+    { value: '1G', label: '1G - Secret+ Inspection' },
+    { value: '19F', label: '19F - Protected DoC' },
+    { value: '19G', label: '19G - Secret+ DoC' }
   ];
 
   const generateRootFolder = () => {
@@ -125,6 +140,35 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormPro
                   placeholder="e.g., DND, RCMP, etc."
                 />
               </div>
+
+              {/* CSO Full Name */}
+              <div className="space-y-2">
+                <Label htmlFor="cso-full-name" className="flex items-center space-x-2">
+                  <User className="h-4 w-4" />
+                  <span>Full Name of CSO</span>
+                </Label>
+                <Input
+                  id="cso-full-name"
+                  value={mainForm.csoFullName}
+                  onChange={(e) => updateMainForm({ csoFullName: e.target.value })}
+                  placeholder="Enter CSO's full name"
+                />
+              </div>
+
+              {/* CSO Email */}
+              <div className="space-y-2">
+                <Label htmlFor="cso-email" className="flex items-center space-x-2">
+                  <Mail className="h-4 w-4" />
+                  <span>CSO's E-mail Address</span>
+                </Label>
+                <Input
+                  id="cso-email"
+                  type="email"
+                  value={mainForm.csoEmail}
+                  onChange={(e) => updateMainForm({ csoEmail: e.target.value })}
+                  placeholder="cso@organization.com"
+                />
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -188,8 +232,92 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormPro
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Number of ACSOs */}
+              <div className="space-y-2">
+                <Label htmlFor="number-acsos" className="flex items-center space-x-2">
+                  <Users className="h-4 w-4" />
+                  <span>Number of ACSOs</span>
+                </Label>
+                <Select 
+                  value={mainForm.numberOfACSOs.toString()}
+                  onValueChange={handleNumberOfACSOs}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select number of ACSOs" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 11 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString()}>{i}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="date" className="flex items-center space-x-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>Date</span>
+                </Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={mainForm.date}
+                  onChange={(e) => updateMainForm({ date: e.target.value })}
+                />
+              </div>
             </div>
           </div>
+
+          {/* Address Lookup Section */}
+          <AddressLookup
+            orgSiteNumber={mainForm.orgSiteNumber}
+            currentAddress={mainForm.address}
+            onAddressUpdate={(address) => updateMainForm({ address })}
+            onCompanyUpdate={(companyName) => updateMainForm({ companyName })}
+          />
+
+          {/* ACSO Fields */}
+          {mainForm.numberOfACSOs > 0 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-foreground flex items-center space-x-2">
+                <Users className="h-4 w-4" />
+                <span>Assistant Chief Security Officers</span>
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {mainForm.acsos.map((acso, index) => (
+                  <Card key={index} className="bg-muted/30">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base">ACSO #{index + 1}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="space-y-2">
+                        <Label htmlFor={`acso-name-${index}`}>Full Name of ACSO</Label>
+                        <Input
+                          id={`acso-name-${index}`}
+                          value={acso.fullName}
+                          onChange={(e) => updateACSO(index, 'fullName', e.target.value)}
+                          placeholder="Enter ACSO's full name"
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor={`acso-email-${index}`}>ACSO E-mail Field</Label>
+                        <Input
+                          id={`acso-email-${index}`}
+                          type="email"
+                          value={acso.email}
+                          onChange={(e) => updateACSO(index, 'email', e.target.value)}
+                          placeholder="acso@organization.com"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
@@ -207,19 +335,6 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormPro
                   ))}
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="date" className="flex items-center space-x-2">
-                <Calendar className="h-4 w-4" />
-                <span>Date</span>
-              </Label>
-              <Input
-                id="date"
-                type="date"
-                value={mainForm.date}
-                onChange={(e) => updateMainForm({ date: e.target.value })}
-              />
             </div>
           </div>
 

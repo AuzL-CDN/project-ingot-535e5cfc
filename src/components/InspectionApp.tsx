@@ -5,6 +5,7 @@ import { InspectorInfo } from './tabs/InspectorInfo';
 import { MainForm } from './tabs/MainForm';
 import { SearchTab } from './tabs/SearchTab';
 import { ApprovalLetter } from './tabs/ApprovalLetter';
+import { EmailsTab } from './tabs/EmailsTab';
 import { StatusTab } from './tabs/StatusTab';
 import { DocTab } from './tabs/DocTab';
 import { MemorandumTab } from './tabs/MemorandumTab';
@@ -17,6 +18,7 @@ export type TabId =
   | 'main' 
   | 'search' 
   | 'approval' 
+  | 'emails'
   | 'status' 
   | 'doc' 
   | 'memorandum' 
@@ -50,6 +52,8 @@ export const InspectionApp = () => {
         return <SearchTab {...inspectionState} />;
       case 'approval':
         return <ApprovalLetter {...inspectionState} />;
+      case 'emails':
+        return <EmailsTab {...inspectionState} />;
       case 'status':
         return <StatusTab {...inspectionState} />;
       case 'doc':

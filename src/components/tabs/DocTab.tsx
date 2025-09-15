@@ -29,7 +29,7 @@ DECLARATION OF COMPLIANCE (DoC)
 Organization Information:
 Name: ${docData.orgName}
 Number: ${docData.orgNumber}
-Address: ${docData.orgAddress || '[Address to be looked up]'}
+Address: ${mainForm.address || '[Address to be looked up from Main tab]'}
 
 Chief Security Officer: ${docData.csoName}
 
@@ -100,23 +100,6 @@ Activity Number: ${mainForm.activityNumber || '[Not specified]'}
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="doc-org-address" className="flex items-center space-x-2">
-                  <MapPin className="h-4 w-4" />
-                  <span>Organization Address</span>
-                </Label>
-                <Textarea
-                  id="doc-org-address"
-                  value={docData.orgAddress}
-                  onChange={(e) => setDocData({ ...docData, orgAddress: e.target.value })}
-                  placeholder="Auto-lookup from Org Directory or enter manually"
-                  rows={3}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Address will be automatically looked up from the Organization Directory
-                </p>
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor="doc-cso-name">Chief Security Officer Name</Label>
                 <Input
                   id="doc-cso-name"
@@ -166,6 +149,7 @@ Activity Number: ${mainForm.activityNumber || '[Not specified]'}
                   <p>• Security Level: {mainForm.securityLevel || 'Not set'}</p>
                   <p>• Inspection Class: {mainForm.inspectionClass || 'Not set'}</p>
                   <p>• Activity Number: {mainForm.activityNumber || 'Not set'}</p>
+                  <p>• Address: {mainForm.address || 'Not set'}</p>
                 </div>
               </div>
             </div>

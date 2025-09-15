@@ -62,7 +62,7 @@ Contract Number: ${memoData.contractNumber}
 
 ORGANIZATION INFORMATION:
 Name: ${memoData.orgName}
-DISIS #: ${memoData.disisNumber}
+Organization - Site Number: ${mainForm.orgSiteNumber || '[Not specified]'}
 Address: ${memoData.orgAddress || '[Address to be looked up]'}
 
 Chief Security Officer: ${memoData.csoName}
@@ -193,12 +193,13 @@ Contact: [Inspector Contact Information]
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="memo-disis">DISIS #</Label>
+                <Label htmlFor="memo-org-site">Organization - Site Number</Label>
                 <Input
-                  id="memo-disis"
-                  value={memoData.disisNumber}
-                  onChange={(e) => setMemoData({ ...memoData, disisNumber: e.target.value })}
-                  placeholder="Enter DISIS number"
+                  id="memo-org-site"
+                  value={mainForm.orgSiteNumber || ''}
+                  placeholder="Auto-populated from Main"
+                  className="bg-muted"
+                  readOnly
                 />
               </div>
 

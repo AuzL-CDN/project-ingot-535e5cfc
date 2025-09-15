@@ -10,6 +10,7 @@ export interface MainFormData {
   activityNumber: string;
   orgSiteNumber: string;
   companyName: string;
+  address: string;
   clientDepartment: string;
   contractType: string;
   contractNumber: string;
@@ -17,6 +18,13 @@ export interface MainFormData {
   inspectionType: string;
   inspectionClass: '1F' | '1G' | '19F' | '19G' | '';
   date: string;
+  csoFullName: string;
+  csoEmail: string;
+  numberOfACSOs: number;
+  acsos: Array<{
+    fullName: string;
+    email: string;
+  }>;
 }
 
 export interface ApprovalLetterData {
@@ -24,6 +32,7 @@ export interface ApprovalLetterData {
   isCSC: boolean;
   date: string;
   csoFullName: string;
+  csoEmail: string;
   companyName: string;
   orgNumber: string;
   contracts: string;
@@ -73,13 +82,18 @@ export const useInspectionState = () => {
     activityNumber: '',
     orgSiteNumber: '',
     companyName: '',
+    address: '',
     clientDepartment: '',
     contractType: '',
     contractNumber: '',
     securityLevel: '',
     inspectionType: '',
     inspectionClass: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    csoFullName: '',
+    csoEmail: '',
+    numberOfACSOs: 0,
+    acsos: []
   });
 
   const [approvalLetter, setApprovalLetter] = useState<ApprovalLetterData>({
@@ -87,6 +101,7 @@ export const useInspectionState = () => {
     isCSC: false,
     date: new Date().toISOString().split('T')[0],
     csoFullName: '',
+    csoEmail: '',
     companyName: '',
     orgNumber: '',
     contracts: '',
@@ -115,7 +130,9 @@ export const useInspectionState = () => {
         companyName: newForm.companyName,
         orgNumber: newForm.orgSiteNumber,
         securityLevel: newForm.securityLevel,
-        contracts: `${newForm.contractType}: ${newForm.contractNumber}`.trim()
+        contracts: `${newForm.contractType}: ${newForm.contractNumber}`.trim(),
+        csoFullName: newForm.csoFullName,
+        csoEmail: newForm.csoEmail
       }));
 
       return newForm;

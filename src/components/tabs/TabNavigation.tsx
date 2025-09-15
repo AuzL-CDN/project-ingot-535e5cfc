@@ -42,6 +42,7 @@ export const TabNavigation = ({
     { id: 'main', label: 'Main', icon: FileText, requiresInspector: true },
     { id: 'search', label: 'Search', icon: Search, isStatic: true, requiresInspector: true },
     { id: 'approval', label: 'Approval Letter', icon: CheckCircle, isStatic: true, requiresInspector: true },
+    { id: 'emails', label: 'E-Mails', icon: Mail, isStatic: true, requiresInspector: true },
     { id: 'status', label: 'Status', icon: Activity, isStatic: true, requiresInspector: true },
     { id: 'doc', label: 'DoC', icon: FileCheck, requiresInspector: true },
     { id: 'memorandum', label: 'Memorandum', icon: Mail, requiresInspector: true },
