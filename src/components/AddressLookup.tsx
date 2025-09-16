@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Search, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { orgDirectory } from '@/data/orgDirectory';
 
 interface AddressLookupProps {
   orgSiteNumber: string;
@@ -16,24 +17,7 @@ interface AddressLookupProps {
   onCompanyUpdate?: (companyName: string) => void;
 }
 
-// Mock organization directory - in real implementation, this would come from SharePoint
-const orgDirectory = [
-  {
-    orgSiteNumber: '123-00',
-    companyName: 'ABC Defense Systems Inc.',
-    address: '123 Main Street\nSuite 100\nOttawa, ON K1A 0A6\nCanada'
-  },
-  {
-    orgSiteNumber: '456-01',
-    companyName: 'Secure Technologies Ltd.',
-    address: '456 Security Blvd\nFloor 5\nToronto, ON M5V 3A8\nCanada'
-  },
-  {
-    orgSiteNumber: '789-02',
-    companyName: 'National Defense Contractors',
-    address: '789 Defence Drive\nBuilding A\nHalifax, NS B3H 3C3\nCanada'
-  }
-];
+// Organization directory loaded from ORGDirectory.xlsx
 
 export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, onCompanyUpdate }: AddressLookupProps) => {
   const [isLooking, setIsLooking] = useState(false);
@@ -183,10 +167,9 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
             
             <div className="space-y-2">
               <Label className="text-sm font-medium">Found Address</Label>
-              <Textarea 
+              <Input 
                 value={foundAddress}
-                className="bg-muted resize-none"
-                rows={4}
+                className="bg-muted"
                 readOnly
               />
             </div>
