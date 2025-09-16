@@ -10,7 +10,8 @@ import {
   Mail, 
   ClipboardList, 
   AlertTriangle, 
-  FolderOpen 
+  FolderOpen,
+  BookOpen 
 } from 'lucide-react';
 
 interface TabNavigationProps {
@@ -19,6 +20,7 @@ interface TabNavigationProps {
   showDocMemo: boolean;
   showInspectionCorrective: boolean;
   isInspectorSetup: boolean;
+  isActivityCompleted: boolean;
 }
 
 interface TabItem {
@@ -34,25 +36,31 @@ export const TabNavigation = ({
   onTabChange, 
   showDocMemo, 
   showInspectionCorrective,
-  isInspectorSetup 
+  isInspectorSetup,
+  isActivityCompleted 
 }: TabNavigationProps) => {
   
   const tabs: TabItem[] = [
     { id: 'inspector', label: 'Inspector Information', icon: User, isStatic: true },
     { id: 'main', label: 'Main', icon: FileText, requiresInspector: true },
     { id: 'search', label: 'Search', icon: Search, isStatic: true, requiresInspector: true },
-    { id: 'approval', label: 'Approval Letter', icon: CheckCircle, isStatic: true, requiresInspector: true },
     { id: 'emails', label: 'E-Mails', icon: Mail, isStatic: true, requiresInspector: true },
-    { id: 'status', label: 'Status', icon: Activity, isStatic: true, requiresInspector: true },
     { id: 'doc', label: 'DoC', icon: FileCheck, requiresInspector: true },
     { id: 'memorandum', label: 'Memorandum', icon: Mail, requiresInspector: true },
     { id: 'inspection', label: 'Inspection', icon: ClipboardList, requiresInspector: true },
     { id: 'corrective', label: 'Corrective Measures', icon: AlertTriangle, requiresInspector: true },
     { id: 'documents', label: 'Supporting Documents', icon: FolderOpen, isStatic: true, requiresInspector: true },
+    { id: 'approval', label: 'Approval Letter', icon: CheckCircle, isStatic: true, requiresInspector: true },
+    { id: 'finalreport', label: 'Final Report', icon: BookOpen, isStatic: true, requiresInspector: true },
+    { id: 'status', label: 'Status', icon: Activity, isStatic: true, requiresInspector: true },
   ];
 
   const isTabVisible = (tab: TabItem) => {
     if (!isInspectorSetup && tab.requiresInspector) {
+      return false;
+    }
+
+    if (tab.id === 'approval' && !isActivityCompleted) {
       return false;
     }
 

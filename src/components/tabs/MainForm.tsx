@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, FileText, Building, Hash, Calendar, User, Mail, Users } from 'lucide-react';
+import { Save, FileText, Building, Hash, Calendar, User, Mail, Users, CheckCircle } from 'lucide-react';
 import { MainFormData } from '@/hooks/useInspectionState';
 import { useToast } from '@/hooks/use-toast';
 import { AddressLookup } from '@/components/AddressLookup';
@@ -12,10 +12,28 @@ interface MainFormProps {
   mainForm: MainFormData;
   updateMainForm: (updates: Partial<MainFormData>) => void;
   saveActivity: () => any;
+  completeActivity: () => void;
 }
 
-export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormProps) => {
+export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActivity }: MainFormProps) => {
   const { toast } = useToast();
+
+  const handleBeginActivity = () => {
+    saveActivity();
+    toast({
+      title: "Activity Begun",
+      description: "Your inspection activity has been started and saved successfully.",
+    });
+  };
+
+  const handleCompleteActivity = () => {
+    saveActivity();
+    completeActivity();
+    toast({
+      title: "Activity Completed",
+      description: "Activity completed! Approval Letter tab is now available.",
+    });
+  };
 
   const handleSave = () => {
     const activity = saveActivity();
@@ -343,10 +361,14 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity }: MainFormPro
             <p className="text-sm font-mono text-muted-foreground">{generateRootFolder()}</p>
           </div>
 
-          <div className="pt-4 border-t">
-            <Button onClick={handleSave} className="w-full">
+          <div className="pt-4 border-t space-y-3">
+            <Button onClick={handleBeginActivity} className="w-full" variant="outline">
               <Save className="h-4 w-4 mr-2" />
-              Save Activity
+              Begin Activity
+            </Button>
+            <Button onClick={handleCompleteActivity} className="w-full">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Complete Activity
             </Button>
           </div>
         </CardContent>

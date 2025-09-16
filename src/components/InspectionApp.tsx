@@ -12,6 +12,7 @@ import { MemorandumTab } from './tabs/MemorandumTab';
 import { InspectionTab } from './tabs/InspectionTab';
 import { CorrectiveMeasuresTab } from './tabs/CorrectiveMeasuresTab';
 import { SupportingDocuments } from './tabs/SupportingDocuments';
+import { FinalReportTab } from './tabs/FinalReportTab';
 
 export type TabId = 
   | 'inspector' 
@@ -24,13 +25,14 @@ export type TabId =
   | 'memorandum' 
   | 'inspection' 
   | 'corrective' 
-  | 'documents';
+  | 'documents'
+  | 'finalreport';
 
 export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
   const inspectionState = useInspectionState();
 
-  const { mainForm, inspector } = inspectionState;
+  const { mainForm, inspector, isActivityCompleted } = inspectionState;
 
   // Check if inspector profile is set up
   const isInspectorSetup = !!(inspector.name && inspector.initials && inspector.email);
@@ -66,6 +68,8 @@ export const InspectionApp = () => {
         return showInspectionCorrective ? <CorrectiveMeasuresTab {...inspectionState} /> : <MainForm {...inspectionState} />;
       case 'documents':
         return <SupportingDocuments {...inspectionState} />;
+      case 'finalreport':
+        return <FinalReportTab {...inspectionState} />;
       default:
         return <MainForm {...inspectionState} />;
     }
@@ -96,6 +100,7 @@ export const InspectionApp = () => {
         showDocMemo={showDocMemo}
         showInspectionCorrective={showInspectionCorrective}
         isInspectorSetup={isInspectorSetup}
+        isActivityCompleted={isActivityCompleted}
       />
 
       <main className="max-w-7xl mx-auto px-4 py-6">

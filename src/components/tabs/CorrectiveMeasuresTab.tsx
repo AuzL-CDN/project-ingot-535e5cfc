@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertTriangle, Save, Eye, FileText, Plus, Trash2 } from 'lucide-react';
 import { CorrectiveMeasure } from '@/hooks/useInspectionState';
 import { useToast } from '@/hooks/use-toast';
@@ -136,7 +137,23 @@ This report is generated in accordance with the Government Security Policy and r
                   <Card key={index} className="border-l-4 border-l-accent">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">Corrective Measure #{measure.index}</CardTitle>
+                        <div className="flex items-center space-x-3">
+                          <CardTitle className="text-lg">Corrective Measure #{measure.index}</CardTitle>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`completed-${index}`}
+                              checked={measure.completed || false}
+                              onCheckedChange={(checked) => {
+                                const newMeasures = [...correctiveMeasures];
+                                newMeasures[index] = { ...newMeasures[index], completed: checked as boolean };
+                                setCorrectiveMeasures(newMeasures);
+                              }}
+                            />
+                            <Label htmlFor={`completed-${index}`} className="text-sm text-muted-foreground">
+                              Completed
+                            </Label>
+                          </div>
+                        </div>
                         {correctiveMeasures.length > 1 && (
                           <Button 
                             onClick={() => removeMeasure(index)}

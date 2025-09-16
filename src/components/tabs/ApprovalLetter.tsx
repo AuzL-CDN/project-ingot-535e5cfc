@@ -373,7 +373,7 @@ ${approvalLetter.ccs.map(cc => `${cc.name} - ${cc.title}, ${cc.department} (${cc
           <div className="pt-4 border-t">
             <Button className="w-full">
               <FileText className="h-4 w-4 mr-2" />
-              Generate Approval Letter (DOCX + PDF)
+              PDF only
             </Button>
           </div>
         </CardContent>

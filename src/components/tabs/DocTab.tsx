@@ -108,6 +108,21 @@ Activity Number: ${mainForm.activityNumber || '[Not specified]'}
                   placeholder="Enter CSO full name"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="doc-company-address" className="flex items-center space-x-2">
+                  <MapPin className="h-4 w-4" />
+                  <span>Company Address</span>
+                </Label>
+                <Textarea
+                  id="doc-company-address"
+                  value={mainForm.address || ''}
+                  className="bg-muted"
+                  rows={3}
+                  readOnly
+                  placeholder="Auto-populated from Main tab address lookup"
+                />
+              </div>
             </div>
 
             <div className="space-y-4">

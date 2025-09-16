@@ -90,11 +90,14 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
 
     // In real implementation, this would update the SharePoint OrgDirectory list
     onAddressUpdate(updateAddress);
+    if (onCompanyUpdate && foundCompany) {
+      onCompanyUpdate(foundCompany);
+    }
     setShowUpdateDialog(false);
     
     toast({
       title: "Address Updated",
-      description: "The organization directory has been updated with the new address.",
+      description: "The organization directory has been updated with the new address and company details populated.",
     });
   };
 
@@ -107,7 +110,7 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
             <span>Address Lookup</span>
           </CardTitle>
           <CardDescription className="text-sm">
-            Automatically lookup organization details from the directory
+            Automatically lookup organization details from the directory. Please verify in DISIS that the address is correctly displayed.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

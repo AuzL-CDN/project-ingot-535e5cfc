@@ -59,6 +59,7 @@ export interface ApprovalLetterData {
 export interface CorrectiveMeasure {
   index: number;
   text: string;
+  completed?: boolean;
 }
 
 export interface ActivityRecord {
@@ -115,6 +116,8 @@ export const useInspectionState = () => {
     ccs: []
   });
 
+  const [isActivityCompleted, setIsActivityCompleted] = useState(false);
+  
   const [correctiveMeasures, setCorrectiveMeasures] = useState<CorrectiveMeasure[]>([]);
 
   const [currentActivity, setCurrentActivity] = useState<string>('');
@@ -204,18 +207,24 @@ export const useInspectionState = () => {
     return results;
   }, []);
 
+  const completeActivity = () => {
+    setIsActivityCompleted(true);
+  };
+
   return {
     inspector,
     mainForm,
     approvalLetter,
     correctiveMeasures,
     currentActivity,
+    isActivityCompleted,
     updateInspector,
     updateMainForm,
     setApprovalLetter,
     setCorrectiveMeasures,
     loadActivity,
     saveActivity,
-    searchActivities
+    searchActivities,
+    completeActivity
   };
 };
