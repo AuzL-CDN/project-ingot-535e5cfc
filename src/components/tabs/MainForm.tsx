@@ -85,8 +85,8 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
   ];
 
   const inspectionClasses = [
-    { value: '1F', label: '1F - Protected Inspection' },
-    { value: '1G', label: '1G - Secret+ Inspection' },
+    { value: '1F', label: '1F - Protected Ins.' },
+    { value: '1G', label: '1G - Secret+ Ins.' },
     { value: '19F', label: '19F - Protected DoC' },
     { value: '19G', label: '19G - Secret+ DoC' }
   ];
