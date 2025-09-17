@@ -86,50 +86,167 @@ export const FinalReportTab = ({ mainForm, correctiveMeasures, saveActivity }: F
     return `PROTECTED A
 Information Technology Security Inspection Report
 
-Organization Name: ${mainForm.companyName || '[Company Name]'}
+Organization Name: ${mainForm.companyName || 'XXXXXXXXXXXXXX'}
 
-Organization Number: ${mainForm.orgSiteNumber || '[Org Number]'}
+Organization Number: ${mainForm.orgSiteNumber || 'XXXXXXXXXXXXXX'}
 
-Gov. Department: ${mainForm.clientDepartment || '[Department]'}
+Gov. Department: ${mainForm.clientDepartment || 'XXXXXXXXXXXXXX'}
 
-Contract Number: ${mainForm.contractNumber || '[Contract Number]'}
+Contract Number: ${mainForm.contractNumber || 'XXXXXXXXXXXXXX'}
 
-Award Date: [Award Date]
+Award Date: XXXXXXXXXXXXXX
 
-Expiry Date: [Expiry Date]
+Expiry Date: XXXXXXXXXXXXXX
 
-Activity Number: ${mainForm.activityNumber || '[Activity Number]'}
+Activity Number: ${mainForm.activityNumber || 'XXXXXXXXXXXXXX'}
 
 # Attendees:
 
 | Name           | Position                                  |
 | -------------- | ----------------------------------------- |
-| ${mainForm.csoFullName || '[CSO Name]'} | Company Security Officer                  |
-| [ACSO Name]    | Alternate Company Security Officer        |
-| ${reportData.inspectorSignature || '[Inspector Name]'} | Information Technology Security Inspector |
+| ${mainForm.csoFullName || 'XXXXXXXXXXXXXX'} | Company Security Officer                  |
+| XXXXXXXXXXXXXX | Alternate Company Security Officer        |
+| ${reportData.inspectorSignature || 'XXXXXXXXXXXXXX'} | Information Technology Security Inspector |
 
-Date and Time: ${reportData.inspectionDate}
+Date and Time: ${reportData.inspectionDate || 'XXXXXXXXXXXXXX'}
 
-Location: ${mainForm.address || '[Address]'}
+Location: ${mainForm.address || '[Location]'}
 
 # Purpose:
 
-The purpose of the Information Technology Security (IT Sec) inspection was to determine if the company could process ${mainForm.securityLevel || '[Security Level]'} information in accordance with the Contract Security Program (CSP) and the contract Security Requirement Check List (SRCL) paragraph 11e, and with the contractual documentation provided by PWGSC.
+The purpose of the Information Technology Security (IT Sec) inspection was to determine if the company could process ${mainForm.securityLevel || 'XXXXXXXXXXXXXX'} information in accordance with the Contract Security Program (CSP) and the contract Security Requirement Check List (SRCL) paragraph 11e, and with the contractual documentation provided by PWGSC.
 
-${reportData.customFindings || '[Custom findings section]'}
+Supplier provides ${reportData.customFindings || 'XXXXXXXXXXXXXX'}
 
-${generateCorrectiveMeasuresText()}
-
-Contract Security Program
+# Contract Security Program
 
 Industrial Security Sector 1/5
 
 PROTECTED A
 
-Inspector: ${reportData.inspectorSignature || '[Digital Signature Required]'}
-Report Date: ${reportData.reportDate}
+PROTECTED A
+# Information Technology Security Inspection Report
 
-This report is prepared in accordance with the Government Security Policy and related security directives.
+${generateCorrectiveMeasuresText()}
+
+# Contract Security Program
+
+Industrial Security Sector
+
+2/5
+
+PROTECTED A
+
+PROTECTED A
+# Information Technology Security Inspection Report
+
+# General Comments:
+
+Client provides information on XXXXXXXXXXX and information will be returned on XXXXXXXXXXX, encrypted ( ). Encrypted IT media will be delivered to the client department, via courier or hand delivered, encryption at the AES 256 encryption standard and will be packaged in accordance with CSM article 506. (Packaging and transmittal of PROTECTED B information and assets). All USBs have been uniquely identified and labelled.
+
+# Corrective Measures:
+
+${groupCorrectiveMeasuresBySection()['IT MEDIA & MEDIA HANDLING']?.map((measure, index) => `${index + 1}. ${measure.text}`).join('\n') || 'None.'}
+
+# PERSONNEL SECURITY
+
+# General Comments:
+
+The section of the Personnel Security was filled with all of the employee's name that will be working on this contract. All employees were cross checked in DISIS and all were found to be cleared at the ${mainForm.securityLevel || 'XXXXXXXXXXX'} level of clearance required to work on this contract. Additionally, the CSO also stated that there was a documented Security Awareness program for all personnel involved with this contract. All personnel were aware of the handling of information at the ${mainForm.securityLevel || 'XXXXXXXXXXX'} level as defined in the Contract Security Manual (CSM).
+
+# Corrective Measures:
+
+${groupCorrectiveMeasuresBySection()['PERSONNEL SECURITY']?.map((measure, index) => `${index + 1}. ${measure.text}`).join('\n') || 'None.'}
+
+# IT PERSONNEL SECURITY
+
+# General Comments:
+
+The CSO indicated that XXXXXXXXXXX support and provide administrative support to for IT technical issues. All personnel will be briefed on the handling ${mainForm.securityLevel || 'XXXXXXXXXXX'} information as defined in the Contract Security Manual (CSM). IT XXXXXXXXXXX has administrative rights and has no involvement on contracts.
+
+# Corrective Measures:
+
+${groupCorrectiveMeasuresBySection()['IT PERSONNEL SECURITY']?.map((measure, index) => `${index + 1}. ${measure.text}`).join('\n') || 'None.'}
+
+# IT EQUIPMENT / INFORMATION TECHNOLOGY SECURITY
+
+# General Comments:
+
+The OS for the laptop is XXXXXXXXXXX. Updates and patches will be applied XXXXXXXXXXX. At the time of the IT
+
+# Contract Security Program
+
+Industrial Security Sector
+
+3/5
+
+PROTECTED A
+
+PROTECTED A
+# Information Technology Security Inspection Report
+
+# SECURITY INSPECTION
+
+There were unique usernames and passwords (XX characters) for the identified personnel to access the IS. The IS have a screensaver set to lock the user account out after 10 minutes of inactivity. It was confirmed by the ACSO that administrative accounts are used for administrative purposes while user accounts are used to process, produce and store the sensitive information in support of this contract.
+
+The antivirus solution for the COMPANY XXXXXXXXXXX, version XXXXXXXXXXX. Antivirus is updated prior to the start of the contract, updated monthly once work has started.
+
+# List of IT equipment being used in support of this contract:
+
+- Laptop / desktop / server – XXXXXXXXXXX
+- Printer - XXXXXXXXXXX
+- Firewall – XXXXXXXXXXX
+- Router- XXXXXXXXXXX
+
+Segregation is handled by XXXXXXXXXXX. AES encryption at the XXXXXXXXXXX level XXXXXXXXXXX are encrypted in transit, XXXXXXXXXXX encrypted at rest and locked in storage cabinet.
+
+# Corrective Measures:
+
+${groupCorrectiveMeasuresBySection()['IT EQUIPMENT / INFORMATION TECHNOLOGY SECURITY']?.map((measure, index) => `${index + 1}. ${measure.text}`).join('\n') || 'None.'}
+
+# RECOVERY
+
+# General Comments:
+
+The Supplier did/did not have a backup plan in place at the time of inspection. The supplier backup is XXXXXXXXXXX
+
+# Corrective Measures:
+
+${groupCorrectiveMeasuresBySection()['RECOVERY']?.map((measure, index) => `${index + 1}. ${measure.text}`).join('\n') || 'None.'}
+
+# DISPOSAL
+
+# General Comments:
+
+At the time of the IT Sec inspection, the company indicated that they will ensure that all ${mainForm.securityLevel || 'XXXXXXXXXXX'} information is completely removed from the information system once they have the go ahead from the client department and/or when this contract has been terminated. All information will be returned to the client department.
+
+# Corrective Measures:
+
+Contract Security Program
+Industrial Security Sector
+4/5
+PROTECTED A
+
+PROTECTED A
+Information Technology Security Inspection Report
+
+# SUMMARY
+
+The IT Sec Inspection revealed that Company Name has good IT security measures to safeguard government information for this contract. The CSO / ACSO demonstrated that Company Name has a good overall understanding and control of the ${mainForm.securityLevel || 'XXXXXXXXXXX'} information for when the company will be required to process, produce and/or store ${mainForm.securityLevel || 'XXXXXXXXXXX'} information associated with this contract.
+
+The 'corrective measures' as described ABOVE on various subjects, will, once implemented assist in maintaining the Confidentiality, Integrity, Availability and Accountability of the Government ${mainForm.securityLevel || 'XXXXXXXXXXX'} information related to this contract.
+
+The IT Sec Inspector recommends that this site be approved for processing at the ${mainForm.securityLevel || 'XXXXXXXXXXX'} level for this contract.
+
+Inspector Signature
+
+IT Sec Inspector
+
+Contract Security Program
+
+Industrial Security Sector    5/5
+
+PROTECTED A
     `.trim();
   };
 
