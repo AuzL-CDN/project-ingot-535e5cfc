@@ -57,7 +57,7 @@ export const InspectionApp = () => {
       case 'emails':
         return <EmailsTab {...inspectionState} />;
       case 'status':
-        return <StatusTab {...inspectionState} />;
+        return <StatusTab currentActivity={inspectionState.currentActivity} />;
       case 'doc':
         return showDocMemo ? <DocTab {...inspectionState} /> : <MainForm {...inspectionState} />;
       case 'memorandum':
@@ -69,7 +69,7 @@ export const InspectionApp = () => {
       case 'documents':
         return <SupportingDocuments {...inspectionState} />;
       case 'finalreport':
-        return <FinalReportTab {...inspectionState} />;
+        return <FinalReportTab mainForm={mainForm} correctiveMeasures={inspectionState.correctiveMeasures} saveActivity={inspectionState.saveActivity} />;
       default:
         return <MainForm {...inspectionState} />;
     }

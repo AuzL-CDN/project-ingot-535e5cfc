@@ -1,52 +1,77 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Activity, CheckCircle, XCircle, Clock, ExternalLink, FileText } from 'lucide-react';
+import { Clock, CheckCircle, AlertCircle, FileText, Mail, Calendar, Activity, Upload, Users, Shield } from 'lucide-react';
+
+export interface ActivityLogEntry {
+  id: string;
+  action: string;
+  result: 'success' | 'warning' | 'error';
+  timestamp: string;
+  details: string;
+  files?: Array<{
+    name: string;
+    type: string;
+    url?: string;
+  }>;
+}
 
 interface StatusTabProps {
   currentActivity: string;
+  activityLog?: ActivityLogEntry[];
 }
 
-// Mock data for demonstration
-const mockRunHistory = [
+// Sample activity log entries
+const sampleActivityLog: ActivityLogEntry[] = [
   {
     id: '1',
-    action: 'Generate Approval Letter',
-    result: 'Success',
-    timestamp: '2024-01-15T10:30:00Z',
-    message: 'DOCX and PDF generated successfully',
-    fileLinks: [
-      { name: 'Approval_Letter_20241234.docx', path: '/Deliverables/Approval_Letter_20241234.docx' },
-      { name: 'Approval_Letter_20241234.pdf', path: '/Deliverables/Approval_Letter_20241234.pdf' }
-    ]
+    action: 'Activity Created',
+    result: 'success',
+    timestamp: new Date().toISOString(),
+    details: 'New inspection activity initialized with main form data',
+    files: []
   },
   {
     id: '2',
-    action: 'Create Activity Folder',
-    result: 'Success',
-    timestamp: '2024-01-15T10:25:00Z',
-    message: 'Activity folder structure created',
-    fileLinks: [
-      { name: 'Activity Folder', path: '/20241234_(123-00) Example Company/' }
-    ]
+    action: 'Address Lookup Completed',
+    result: 'success',
+    timestamp: new Date(Date.now() - 60000).toISOString(),
+    details: 'Organization address verified from directory lookup',
   },
   {
     id: '3',
-    action: 'Generate DoC',
-    result: 'Error',
-    timestamp: '2024-01-15T09:45:00Z',
-    message: 'Missing required field: CSO Name'
+    action: 'Document Uploaded',
+    result: 'success',
+    timestamp: new Date(Date.now() - 120000).toISOString(),
+    details: 'Supporting document uploaded to activity folder',
+    files: [
+      { name: 'security_policy.pdf', type: 'PDF Document' }
+    ]
   },
   {
     id: '4',
-    action: 'Save Activity',
-    result: 'Success',
-    timestamp: '2024-01-15T09:30:00Z',
-    message: 'Activity data saved to SharePoint'
+    action: 'Corrective Measure Added',
+    result: 'success',
+    timestamp: new Date(Date.now() - 180000).toISOString(),
+    details: 'New corrective measure added under IT Equipment section',
+  },
+  {
+    id: '5',
+    action: 'Corrective Measure Completed',
+    result: 'success',
+    timestamp: new Date(Date.now() - 240000).toISOString(),
+    details: 'Corrective measure marked as completed with verification',
+  },
+  {
+    id: '6',
+    action: 'Email Sent',
+    result: 'success',
+    timestamp: new Date(Date.now() - 300000).toISOString(),
+    details: 'Notification email sent to CSO regarding inspection status',
   }
 ];
 
-export const StatusTab = ({ currentActivity }: StatusTabProps) => {
+export const StatusTab = ({ currentActivity, activityLog = sampleActivityLog }: StatusTabProps) => {
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -54,27 +79,43 @@ export const StatusTab = ({ currentActivity }: StatusTabProps) => {
   const getResultIcon = (result: string) => {
     switch (result.toLowerCase()) {
       case 'success':
-        return <CheckCircle className="h-4 w-4 text-success" />;
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'warning':
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
       case 'error':
-        return <XCircle className="h-4 w-4 text-destructive" />;
-      case 'pending':
-        return <Clock className="h-4 w-4 text-warning" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <Activity className="h-4 w-4 text-muted-foreground" />;
+        return <Clock className="h-4 w-4 text-gray-400" />;
     }
   };
 
   const getResultBadge = (result: string) => {
     switch (result.toLowerCase()) {
       case 'success':
-        return <Badge variant="default" className="bg-success text-success-foreground">Success</Badge>;
+        return <Badge className="bg-green-100 text-green-800 border-green-200">Success</Badge>;
+      case 'warning':
+        return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">Warning</Badge>;
       case 'error':
-        return <Badge variant="destructive">Error</Badge>;
-      case 'pending':
-        return <Badge variant="secondary" className="bg-warning text-warning-foreground">Pending</Badge>;
+        return <Badge className="bg-red-100 text-red-800 border-red-200">Error</Badge>;
       default:
-        return <Badge variant="outline">{result}</Badge>;
+        return <Badge variant="secondary">Unknown</Badge>;
     }
+  };
+
+  const getActionIcon = (action: string) => {
+    if (action.includes('Document') || action.includes('Upload')) {
+      return <Upload className="h-4 w-4" />;
+    }
+    if (action.includes('Email')) {
+      return <Mail className="h-4 w-4" />;
+    }
+    if (action.includes('Corrective')) {
+      return <Shield className="h-4 w-4" />;
+    }
+    if (action.includes('Address') || action.includes('Lookup')) {
+      return <Users className="h-4 w-4" />;
+    }
+    return <Activity className="h-4 w-4" />;
   };
 
   return (
@@ -83,10 +124,10 @@ export const StatusTab = ({ currentActivity }: StatusTabProps) => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Activity className="h-5 w-5 text-primary" />
-            <span>Activity Status</span>
+            <span>Activity Log</span>
           </CardTitle>
           <CardDescription>
-            View run history, generated files, and activity status for the current activity.
+            Real-time tracking of all actions, uploads, and status changes
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -98,38 +139,36 @@ export const StatusTab = ({ currentActivity }: StatusTabProps) => {
               </div>
 
               <div className="space-y-4">
-                <h4 className="font-semibold text-foreground">Run History</h4>
+                <h4 className="font-semibold text-foreground">Activity History</h4>
                 <div className="space-y-3">
-                  {mockRunHistory.map((run) => (
-                    <Card key={run.id} className="border-l-4 border-l-primary">
+                  {activityLog.map((entry) => (
+                    <Card key={entry.id} className="border-l-4 border-l-primary">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="space-y-2 flex-1">
                             <div className="flex items-center space-x-3">
-                              {getResultIcon(run.result)}
-                              <h5 className="font-medium text-foreground">{run.action}</h5>
-                              {getResultBadge(run.result)}
+                              {getActionIcon(entry.action)}
+                              {getResultIcon(entry.result)}
+                              <h5 className="font-medium text-foreground">{entry.action}</h5>
+                              {getResultBadge(entry.result)}
                             </div>
                             
-                            <p className="text-sm text-muted-foreground">{run.message}</p>
+                            <p className="text-sm text-muted-foreground">{entry.details}</p>
                             <p className="text-xs text-muted-foreground">
-                              {formatTimestamp(run.timestamp)}
+                              {formatTimestamp(entry.timestamp)}
                             </p>
 
-                            {run.fileLinks && run.fileLinks.length > 0 && (
+                            {entry.files && entry.files.length > 0 && (
                               <div className="space-y-1 mt-3">
-                                <p className="text-xs font-medium text-foreground">Generated Files:</p>
-                                {run.fileLinks.map((file, index) => (
-                                  <Button
+                                <p className="text-xs font-medium text-foreground">Files:</p>
+                                {entry.files.map((file, index) => (
+                                  <div
                                     key={index}
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-auto p-1 text-xs text-primary hover:text-primary-hover"
+                                    className="inline-flex items-center space-x-1 text-xs bg-muted hover:bg-muted/80 px-2 py-1 rounded mr-2"
                                   >
-                                    <FileText className="h-3 w-3 mr-1" />
-                                    <span>{file.name}</span>
-                                    <ExternalLink className="h-3 w-3 ml-1" />
-                                  </Button>
+                                    <FileText className="h-3 w-3" />
+                                    <span>{file.name} ({file.type})</span>
+                                  </div>
                                 ))}
                               </div>
                             )}
@@ -145,7 +184,7 @@ export const StatusTab = ({ currentActivity }: StatusTabProps) => {
                 <h4 className="font-semibold text-foreground mb-3">Quick Actions</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Button variant="outline" size="sm">
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <FileText className="h-4 w-4 mr-2" />
                     Open Activity Folder
                   </Button>
                   <Button variant="outline" size="sm">
@@ -157,7 +196,7 @@ export const StatusTab = ({ currentActivity }: StatusTabProps) => {
                     Refresh Status
                   </Button>
                   <Button variant="outline" size="sm">
-                    <ExternalLink className="h-4 w-4 mr-2" />
+                    <FileText className="h-4 w-4 mr-2" />
                     SharePoint Site
                   </Button>
                 </div>

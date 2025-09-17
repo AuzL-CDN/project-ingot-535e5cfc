@@ -60,6 +60,7 @@ export interface CorrectiveMeasure {
   index: number;
   text: string;
   completed?: boolean;
+  section?: string;
 }
 
 export interface ActivityRecord {

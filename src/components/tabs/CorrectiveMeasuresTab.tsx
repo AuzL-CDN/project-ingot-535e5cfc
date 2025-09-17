@@ -16,6 +16,18 @@ interface CorrectiveMeasuresTabProps {
   saveActivity: () => any;
 }
 
+const CORRECTIVE_SECTIONS = [
+  'INFORMATION SYSTEM / PHYSICAL LOCATION',
+  'THREAT RISK ASSESSMENT (TRA)',
+  'DATA TRANSFER',
+  'IT MEDIA & MEDIA HANDLING',
+  'PERSONNEL SECURITY',
+  'IT PERSONNEL SECURITY',
+  'IT EQUIPMENT / INFORMATION TECHNOLOGY SECURITY',
+  'RECOVERY',
+  'DISPOSAL'
+];
+
 export const CorrectiveMeasuresTab = ({ 
   correctiveMeasures, 
   setCorrectiveMeasures, 
@@ -36,10 +48,11 @@ export const CorrectiveMeasuresTab = ({
     setCorrectiveMeasures(newMeasures);
   };
 
-  const updateMeasure = (index: number, text: string) => {
-    const newMeasures = [...correctiveMeasures];
-    newMeasures[index] = { index: index + 1, text };
-    setCorrectiveMeasures(newMeasures);
+  const updateMeasure = (index: number, updates: Partial<CorrectiveMeasure>) => {
+    const updatedMeasures = correctiveMeasures.map((measure, i) => 
+      i === index ? { ...measure, ...updates } : measure
+    );
+    setCorrectiveMeasures(updatedMeasures);
   };
 
   const addMeasure = () => {
@@ -167,13 +180,32 @@ This report is generated in accordance with the Government Security Policy and r
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <Textarea
-                        value={measure.text}
-                        onChange={(e) => updateMeasure(index, e.target.value)}
-                        placeholder={`Describe corrective measure #${measure.index} in detail...`}
-                        rows={4}
-                        className="resize-none"
-                      />
+                      <div className="space-y-4">
+                        <div className="flex-1">
+                          <Select
+                            value={measure.section || ''}
+                            onValueChange={(value) => updateMeasure(index, { section: value })}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Choose a Section this falls under" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CORRECTIVE_SECTIONS.map((section) => (
+                                <SelectItem key={section} value={section}>
+                                  {section}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Textarea
+                          value={measure.text}
+                          onChange={(e) => updateMeasure(index, { text: e.target.value })}
+                          placeholder={`Describe corrective measure #${measure.index} in detail...`}
+                          rows={4}
+                          className="resize-none"
+                        />
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

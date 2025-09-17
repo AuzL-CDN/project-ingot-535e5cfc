@@ -5,23 +5,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Eye, Save, Calendar, Building } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FileText, Eye, Save, Calendar, Building, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import type { CorrectiveMeasure } from '@/hooks/useInspectionState';
 
 interface FinalReportTabProps {
   mainForm: any;
+  correctiveMeasures: CorrectiveMeasure[];
   saveActivity: () => any;
 }
 
-export const FinalReportTab = ({ mainForm, saveActivity }: FinalReportTabProps) => {
+export const FinalReportTab = ({ mainForm, correctiveMeasures, saveActivity }: FinalReportTabProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [reportData, setReportData] = useState({
     inspectionDate: new Date().toISOString().split('T')[0],
-    findings: '',
-    recommendations: '',
-    conclusion: '',
     inspectorSignature: '',
-    reportDate: new Date().toISOString().split('T')[0]
+    reportDate: new Date().toISOString().split('T')[0],
+    customFindings: '',
+    enableDigitalSignature: false
   });
   const { toast } = useToast();
 
@@ -33,31 +35,98 @@ export const FinalReportTab = ({ mainForm, saveActivity }: FinalReportTabProps) 
     });
   };
 
+  const groupCorrectiveMeasuresBySection = () => {
+    const grouped: { [key: string]: CorrectiveMeasure[] } = {};
+    
+    correctiveMeasures.forEach(measure => {
+      const section = measure.section || 'GENERAL';
+      if (!grouped[section]) {
+        grouped[section] = [];
+      }
+      grouped[section].push(measure);
+    });
+    
+    return grouped;
+  };
+
+  const generateCorrectiveMeasuresText = () => {
+    const grouped = groupCorrectiveMeasuresBySection();
+    let text = '';
+    
+    const sections = [
+      'INFORMATION SYSTEM / PHYSICAL LOCATION',
+      'THREAT RISK ASSESSMENT (TRA)',
+      'DATA TRANSFER',
+      'IT MEDIA & MEDIA HANDLING',
+      'PERSONNEL SECURITY',
+      'IT PERSONNEL SECURITY',
+      'IT EQUIPMENT / INFORMATION TECHNOLOGY SECURITY',
+      'RECOVERY',
+      'DISPOSAL'
+    ];
+    
+    sections.forEach(section => {
+      text += `\n# ${section}\n\n# General Comments:\n\n[To be filled by user]\n\n# Corrective Measures:\n\n`;
+      
+      if (grouped[section] && grouped[section].length > 0) {
+        grouped[section].forEach((measure, index) => {
+          text += `${index + 1}. ${measure.text}\n`;
+        });
+      } else {
+        text += 'None.\n';
+      }
+      
+      text += '\n';
+    });
+    
+    return text;
+  };
+
   const generatePreview = () => {
-    return `
-FINAL INSPECTION REPORT
+    return `PROTECTED A
+Information Technology Security Inspection Report
 
-Activity Number: ${mainForm.activityNumber || '[Not specified]'}
-Organization: ${mainForm.companyName || '[Not specified]'}
-Organization Number: ${mainForm.orgSiteNumber || '[Not specified]'}
-Address: ${mainForm.address || '[Not specified]'}
+Organization Name: ${mainForm.companyName || '[Company Name]'}
 
-Inspection Details:
-Date of Inspection: ${reportData.inspectionDate}
-Security Level: ${mainForm.securityLevel || '[Not specified]'}
-Inspection Class: ${mainForm.inspectionClass || '[Not specified]'}
-Inspection Type: ${mainForm.inspectionType || '[Not specified]'}
+Organization Number: ${mainForm.orgSiteNumber || '[Org Number]'}
 
-FINDINGS:
-${reportData.findings || '[No findings entered]'}
+Gov. Department: ${mainForm.clientDepartment || '[Department]'}
 
-RECOMMENDATIONS:
-${reportData.recommendations || '[No recommendations entered]'}
+Contract Number: ${mainForm.contractNumber || '[Contract Number]'}
 
-CONCLUSION:
-${reportData.conclusion || '[No conclusion entered]'}
+Award Date: [Award Date]
 
-Inspector: ${reportData.inspectorSignature || '[Not signed]'}
+Expiry Date: [Expiry Date]
+
+Activity Number: ${mainForm.activityNumber || '[Activity Number]'}
+
+# Attendees:
+
+| Name           | Position                                  |
+| -------------- | ----------------------------------------- |
+| ${mainForm.csoFullName || '[CSO Name]'} | Company Security Officer                  |
+| [ACSO Name]    | Alternate Company Security Officer        |
+| ${reportData.inspectorSignature || '[Inspector Name]'} | Information Technology Security Inspector |
+
+Date and Time: ${reportData.inspectionDate}
+
+Location: ${mainForm.address || '[Address]'}
+
+# Purpose:
+
+The purpose of the Information Technology Security (IT Sec) inspection was to determine if the company could process ${mainForm.securityLevel || '[Security Level]'} information in accordance with the Contract Security Program (CSP) and the contract Security Requirement Check List (SRCL) paragraph 11e, and with the contractual documentation provided by PWGSC.
+
+${reportData.customFindings || '[Custom findings section]'}
+
+${generateCorrectiveMeasuresText()}
+
+Contract Security Program
+
+Industrial Security Sector 1/5
+
+PROTECTED A
+
+Inspector: ${reportData.inspectorSignature || '[Digital Signature Required]'}
 Report Date: ${reportData.reportDate}
 
 This report is prepared in accordance with the Government Security Policy and related security directives.
@@ -119,12 +188,12 @@ This report is prepared in accordance with the Government Security Policy and re
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="inspector-signature">Inspector Signature</Label>
+                    <Label htmlFor="inspector-signature">Inspector Name</Label>
                     <Input
                       id="inspector-signature"
                       value={reportData.inspectorSignature}
                       onChange={(e) => setReportData({ ...reportData, inspectorSignature: e.target.value })}
-                      placeholder="Enter inspector name for signature"
+                      placeholder="Enter inspector name"
                     />
                   </div>
                 </div>
@@ -146,39 +215,29 @@ This report is prepared in accordance with the Government Security Policy and re
 
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="findings">Findings</Label>
+                  <Label htmlFor="custom-findings">Custom Findings Section</Label>
                   <Textarea
-                    id="findings"
-                    value={reportData.findings}
-                    onChange={(e) => setReportData({ ...reportData, findings: e.target.value })}
-                    placeholder="Document inspection findings, deficiencies, and observations..."
+                    id="custom-findings"
+                    value={reportData.customFindings}
+                    onChange={(e) => setReportData({ ...reportData, customFindings: e.target.value })}
+                    placeholder="Enter any additional findings or custom content for the report..."
                     rows={6}
                     className="resize-none"
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="recommendations">Recommendations</Label>
-                  <Textarea
-                    id="recommendations"
-                    value={reportData.recommendations}
-                    onChange={(e) => setReportData({ ...reportData, recommendations: e.target.value })}
-                    placeholder="Provide recommendations for improvement and compliance..."
-                    rows={4}
-                    className="resize-none"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="conclusion">Conclusion</Label>
-                  <Textarea
-                    id="conclusion"
-                    value={reportData.conclusion}
-                    onChange={(e) => setReportData({ ...reportData, conclusion: e.target.value })}
-                    placeholder="Summarize overall inspection results and final assessment..."
-                    rows={3}
-                    className="resize-none"
-                  />
+                <div className="bg-blue-50 rounded-lg p-4 space-y-2">
+                  <h4 className="font-medium text-blue-900 flex items-center space-x-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>Corrective Measures Integration</span>
+                  </h4>
+                  <p className="text-sm text-blue-800">
+                    Corrective measures from the Corrective Measures tab will be automatically organized by section in the final report.
+                  </p>
+                  <div className="text-xs text-blue-700">
+                    <p>Current measures: {correctiveMeasures.length}</p>
+                    <p>Completed: {correctiveMeasures.filter(m => m.completed).length}</p>
+                  </div>
                 </div>
               </div>
 
@@ -224,10 +283,20 @@ This report is prepared in accordance with the Government Security Policy and re
                 </Card>
               )}
 
-              <div className="pt-4 border-t">
+              <div className="pt-4 border-t space-y-4">
+                <div className="bg-yellow-50 rounded-lg p-4">
+                  <h4 className="font-medium text-yellow-900 mb-2">Digital Signature Requirements</h4>
+                  <p className="text-sm text-yellow-800 mb-3">
+                    For digital signature integration with Entrust Certificate Agent, additional backend setup would be required. 
+                    This would involve external application integration which isn't available in this web-based environment.
+                  </p>
+                  <p className="text-sm text-yellow-800">
+                    Current workflow: Generate report → Convert to PDF → Manual signature → Upload/distribute
+                  </p>
+                </div>
                 <Button className="w-full">
                   <FileText className="h-4 w-4 mr-2" />
-                  Generate Final Report (DOCX + PDF)
+                  Generate Final Report (Manual Signature Required)
                 </Button>
               </div>
             </TabsContent>
