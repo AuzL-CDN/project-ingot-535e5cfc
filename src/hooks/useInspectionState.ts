@@ -25,6 +25,8 @@ export interface MainFormData {
     fullName: string;
     email: string;
   }>;
+  language?: string;
+  uiLanguage?: string;
 }
 
 export interface ApprovalLetterData {

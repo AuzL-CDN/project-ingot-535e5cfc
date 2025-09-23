@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, FileText, Building, Hash, Calendar, User, Mail, Users, CheckCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Save, FileText, Building, Hash, Calendar, User, Mail, Users, CheckCircle, Globe } from 'lucide-react';
 import { MainFormData } from '@/hooks/useInspectionState';
 import { useToast } from '@/hooks/use-toast';
 import { AddressLookup } from '@/components/AddressLookup';
@@ -17,6 +19,9 @@ interface MainFormProps {
 
 export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActivity }: MainFormProps) => {
   const { toast } = useToast();
+  const [showLanguageDialog, setShowLanguageDialog] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [pendingInspectionClass, setPendingInspectionClass] = useState('');
 
   const handleBeginActivity = () => {
     saveActivity();
@@ -90,6 +95,57 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
     { value: '19F', label: '19F - Protected DoC' },
     { value: '19G', label: '19G - Secret+ DoC' }
   ];
+
+  const handleInspectionClassChange = (value: string) => {
+    setPendingInspectionClass(value);
+    setShowLanguageDialog(true);
+  };
+
+  const handleLanguageSelection = (language: string) => {
+    setSelectedLanguage(language);
+    if (language === 'french') {
+      // Show UI language confirmation dialog
+      toast({
+        title: "French Selected",
+        description: "Would you like to change the interface to French as well?",
+        action: (
+          <div className="flex space-x-2">
+            <Button size="sm" onClick={() => handleUILanguageChoice(true)}>
+              Yes
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => handleUILanguageChoice(false)}>
+              No
+            </Button>
+          </div>
+        ),
+      });
+    } else {
+      // English selected, proceed normally
+      updateMainForm({ inspectionClass: pendingInspectionClass as MainFormData['inspectionClass'] });
+      setShowLanguageDialog(false);
+    }
+  };
+
+  const handleUILanguageChoice = (changeTuiFrench: boolean) => {
+    updateMainForm({ 
+      inspectionClass: pendingInspectionClass as MainFormData['inspectionClass'],
+      language: selectedLanguage,
+      uiLanguage: changeTuiFrench ? 'french' : 'english'
+    });
+    setShowLanguageDialog(false);
+    
+    if (changeTuiFrench) {
+      toast({
+        title: "Langue française sélectionnée",
+        description: "L'interface sera traduite en français et utilisera les modèles français.",
+      });
+    } else {
+      toast({
+        title: "French Templates Selected",
+        description: "Interface will remain in English but French templates will be used for documents.",
+      });
+    }
+  };
 
   const generateRootFolder = () => {
     if (mainForm.activityNumber && mainForm.orgSiteNumber && mainForm.companyName) {
@@ -342,7 +398,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <Label htmlFor="inspection-class">Inspection Class</Label>
               <Select 
                 value={mainForm.inspectionClass}
-                onValueChange={(value) => updateMainForm({ inspectionClass: value as MainFormData['inspectionClass'] })}
+                onValueChange={handleInspectionClassChange}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select inspection class" />
@@ -373,6 +429,44 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
           </div>
         </CardContent>
       </Card>
+
+      {/* Language Selection Dialog */}
+      <Dialog open={showLanguageDialog} onOpenChange={setShowLanguageDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2">
+              <Globe className="h-5 w-5" />
+              <span>Select Inspection Language</span>
+            </DialogTitle>
+            <DialogDescription>
+              Choose the language for your inspection documents and templates.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Button
+                variant={selectedLanguage === 'english' ? 'default' : 'outline'}
+                onClick={() => handleLanguageSelection('english')}
+                className="h-16 flex flex-col space-y-1"
+              >
+                <span className="text-lg">🇨🇦</span>
+                <span>English</span>
+              </Button>
+              <Button
+                variant={selectedLanguage === 'french' ? 'default' : 'outline'}
+                onClick={() => handleLanguageSelection('french')}
+                className="h-16 flex flex-col space-y-1"
+              >
+                <span className="text-lg">🇫🇷</span>
+                <span>Français</span>
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground text-center">
+              This will determine the language used for all inspection documents and templates.
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

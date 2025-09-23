@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { FileText, Eye, Save, Calendar, Building, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { CorrectiveMeasure } from '@/hooks/useInspectionState';
@@ -22,8 +23,18 @@ export const FinalReportTab = ({ mainForm, correctiveMeasures, saveActivity }: F
     inspectionDate: new Date().toISOString().split('T')[0],
     inspectorSignature: '',
     reportDate: new Date().toISOString().split('T')[0],
-    customFindings: '',
-    enableDigitalSignature: false
+    supplierPurpose: '',
+    enableDigitalSignature: false,
+    hasTRA: '',
+    traComments: '',
+    // Green text input fields
+    itMediaInfo: '',
+    osInfo: '',
+    updateSchedule: '',
+    antivirusDetails: '',
+    itEquipmentList: '',
+    encryptionDetails: '',
+    backupPlan: ''
   });
   const { toast } = useToast();
 
@@ -66,7 +77,22 @@ export const FinalReportTab = ({ mainForm, correctiveMeasures, saveActivity }: F
     ];
     
     sections.forEach(section => {
-      text += `\n# ${section}\n\n# General Comments:\n\n[To be filled by user]\n\n# Corrective Measures:\n\n`;
+      text += `\n# ${section}\n\n# General Comments:\n\n`;
+      
+      // Add TRA-specific content
+      if (section === 'THREAT RISK ASSESSMENT (TRA)') {
+        if (reportData.hasTRA === 'yes') {
+          text += `The supplier did provide a copy of the TRA, it had a section which covered emanations (emissions). ${reportData.traComments || ''}\n\n`;
+        } else if (reportData.hasTRA === 'no') {
+          text += `The supplier did not provide a copy of the TRA, it is not a requirement at the PROTECTED A or B levels.\n\n`;
+        } else {
+          text += `[To be filled by user]\n\n`;
+        }
+      } else {
+        text += `[To be filled by user]\n\n`;
+      }
+      
+      text += `# Corrective Measures:\n\n`;
       
       if (grouped[section] && grouped[section].length > 0) {
         grouped[section].forEach((measure, index) => {
@@ -116,7 +142,7 @@ Location: ${mainForm.address || '[Location]'}
 
 The purpose of the Information Technology Security (IT Sec) inspection was to determine if the company could process ${mainForm.securityLevel || 'XXXXXXXXXXXXXX'} information in accordance with the Contract Security Program (CSP) and the contract Security Requirement Check List (SRCL) paragraph 11e, and with the contractual documentation provided by PWGSC.
 
-Supplier provides ${reportData.customFindings || 'XXXXXXXXXXXXXX'}
+Supplier provides ${reportData.supplierPurpose || 'XXXXXXXXXXXXXX'}
 
 # Contract Security Program
 
@@ -330,17 +356,137 @@ PROTECTED A
                 </div>
               </div>
 
-              <div className="space-y-4">
+                <div className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="custom-findings">Custom Findings Section</Label>
+                  <Label htmlFor="supplier-purpose">Supplier Purpose</Label>
                   <Textarea
-                    id="custom-findings"
-                    value={reportData.customFindings}
-                    onChange={(e) => setReportData({ ...reportData, customFindings: e.target.value })}
-                    placeholder="Enter any additional findings or custom content for the report..."
+                    id="supplier-purpose"
+                    value={reportData.supplierPurpose}
+                    onChange={(e) => setReportData({ ...reportData, supplierPurpose: e.target.value })}
+                    placeholder="Enter the supplier purpose details..."
                     rows={6}
                     className="resize-none"
                   />
+                </div>
+
+                {/* TRA Section */}
+                <div className="space-y-4 border-2 border-primary/20 rounded-lg p-4">
+                  <div className="space-y-3">
+                    <Label className="text-base font-medium">Threat Risk Assessment (TRA)</Label>
+                    <RadioGroup
+                      value={reportData.hasTRA}
+                      onValueChange={(value) => setReportData({ ...reportData, hasTRA: value })}
+                      className="flex space-x-6"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="yes" id="tra-yes" />
+                        <Label htmlFor="tra-yes">Yes</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="no" id="tra-no" />
+                        <Label htmlFor="tra-no">No</Label>
+                      </div>
+                    </RadioGroup>
+                    <p className="text-sm text-muted-foreground">Is there a TRA in place?</p>
+                  </div>
+
+                  {reportData.hasTRA === 'yes' && (
+                    <div className="space-y-2">
+                      <Label htmlFor="tra-comments">Additional TRA Comments</Label>
+                      <Textarea
+                        id="tra-comments"
+                        value={reportData.traComments}
+                        onChange={(e) => setReportData({ ...reportData, traComments: e.target.value })}
+                        placeholder="Enter any additional comments about the TRA..."
+                        rows={3}
+                        className="resize-none"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* User Input Fields for Green Text Sections */}
+                <div className="space-y-4 border-2 border-green-200 rounded-lg p-4">
+                  <h4 className="font-medium text-foreground flex items-center space-x-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Report Input Fields</span>
+                  </h4>
+                  <div className="text-sm text-muted-foreground mb-4">
+                    Complete these fields to populate the green text sections in the Final Report.
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-2">
+                      <Label>IT Media Information</Label>
+                      <Input
+                        value={reportData.itMediaInfo}
+                        onChange={(e) => setReportData({ ...reportData, itMediaInfo: e.target.value })}
+                        placeholder="e.g., USB, DVD, Hard Drive"
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">Describe media types used for information delivery/return</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>OS Information</Label>
+                      <Input
+                        value={reportData.osInfo}
+                        onChange={(e) => setReportData({ ...reportData, osInfo: e.target.value })}
+                        placeholder="e.g., Windows 11, macOS Ventura"
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">Operating system details for laptops/desktops</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Update Schedule</Label>
+                      <Input
+                        value={reportData.updateSchedule}
+                        onChange={(e) => setReportData({ ...reportData, updateSchedule: e.target.value })}
+                        placeholder="e.g., weekly, monthly, as needed"
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">How often updates and patches are applied</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Antivirus Details</Label>
+                      <Input
+                        value={reportData.antivirusDetails}
+                        onChange={(e) => setReportData({ ...reportData, antivirusDetails: e.target.value })}
+                        placeholder="e.g., Norton, McAfee, Windows Defender"
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">Antivirus solution name and version</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>IT Equipment List</Label>
+                      <Textarea
+                        value={reportData.itEquipmentList}
+                        onChange={(e) => setReportData({ ...reportData, itEquipmentList: e.target.value })}
+                        placeholder="List all IT equipment (laptops, printers, firewalls, routers, etc.)"
+                        rows={3}
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">Complete list of IT equipment used for the contract</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Encryption Details</Label>
+                      <Input
+                        value={reportData.encryptionDetails}
+                        onChange={(e) => setReportData({ ...reportData, encryptionDetails: e.target.value })}
+                        placeholder="e.g., AES-256, network segregation method"
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">Encryption standards and segregation methods</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Backup Plan</Label>
+                      <Input
+                        value={reportData.backupPlan}
+                        onChange={(e) => setReportData({ ...reportData, backupPlan: e.target.value })}
+                        placeholder="e.g., daily cloud backup, weekly local backup"
+                        className="text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground">Describe the backup and recovery plan</p>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="bg-blue-50 rounded-lg p-4 space-y-2">
