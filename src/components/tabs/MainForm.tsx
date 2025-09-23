@@ -9,6 +9,7 @@ import { Save, FileText, Building, Hash, Calendar, User, Mail, Users, CheckCircl
 import { MainFormData } from '@/hooks/useInspectionState';
 import { useToast } from '@/hooks/use-toast';
 import { AddressLookup } from '@/components/AddressLookup';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface MainFormProps {
   mainForm: MainFormData;
@@ -19,6 +20,7 @@ interface MainFormProps {
 
 export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActivity }: MainFormProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation(mainForm.uiLanguage);
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [pendingInspectionClass, setPendingInspectionClass] = useState('');
@@ -26,8 +28,8 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
   const handleBeginActivity = () => {
     saveActivity();
     toast({
-      title: "Activity Begun",
-      description: "Your inspection activity has been started and saved successfully.",
+      title: t('activityBegun'),
+      description: t('activityBegunDesc'),
     });
   };
 
@@ -35,16 +37,16 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
     saveActivity();
     completeActivity();
     toast({
-      title: "Activity Completed",
-      description: "Activity completed! Approval Letter tab is now available.",
+      title: t('activityCompleted'),
+      description: t('activityCompletedDesc'),
     });
   };
 
   const handleSave = () => {
     const activity = saveActivity();
     toast({
-      title: "Activity Saved",
-      description: `Activity ${activity.id} has been saved successfully.`,
+      title: t('activitySaved'),
+      description: `Activity ${activity.id} ${t('activitySavedDesc')}`,
     });
   };
 
@@ -111,10 +113,10 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
         action: (
           <div className="flex space-x-2">
             <Button size="sm" onClick={() => handleUILanguageChoice(true)}>
-              Yes
+              {t('yes')}
             </Button>
             <Button size="sm" variant="outline" onClick={() => handleUILanguageChoice(false)}>
-              No
+              {t('no')}
             </Button>
           </div>
         ),
@@ -160,10 +162,10 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <FileText className="h-5 w-5 text-primary" />
-            <span>Package Generator</span>
+            <span>{t('packageGenerator')}</span>
           </CardTitle>
           <CardDescription>
-            Enter core information that will auto-populate across all inspection documents.
+            {t('packageGeneratorDesc')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -172,7 +174,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <div className="space-y-2">
                 <Label htmlFor="activity-number" className="flex items-center space-x-2">
                   <Hash className="h-4 w-4" />
-                  <span>Activity Number</span>
+                  <span>{t('activityNumber')}</span>
                 </Label>
                 <Input
                   id="activity-number"
@@ -183,7 +185,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="org-site">Organization - Site Number</Label>
+                <Label htmlFor="org-site">{t('orgSiteNumber')}</Label>
                 <Input
                   id="org-site"
                   value={mainForm.orgSiteNumber}
@@ -195,18 +197,18 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <div className="space-y-2">
                 <Label htmlFor="company-name" className="flex items-center space-x-2">
                   <Building className="h-4 w-4" />
-                  <span>Company Name</span>
+                  <span>{t('companyName')}</span>
                 </Label>
                 <Input
                   id="company-name"
                   value={mainForm.companyName}
                   onChange={(e) => updateMainForm({ companyName: e.target.value })}
-                  placeholder="Enter company name"
+                  placeholder={t('enterCompanyName')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="client-department">Client Department</Label>
+                <Label htmlFor="client-department">{t('clientDepartment')}</Label>
                 <Input
                   id="client-department"
                   value={mainForm.clientDepartment}
@@ -219,13 +221,13 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <div className="space-y-2">
                 <Label htmlFor="cso-full-name" className="flex items-center space-x-2">
                   <User className="h-4 w-4" />
-                  <span>Full Name of CSO</span>
+                  <span>{t('csoFullName')}</span>
                 </Label>
                 <Input
                   id="cso-full-name"
                   value={mainForm.csoFullName}
                   onChange={(e) => updateMainForm({ csoFullName: e.target.value })}
-                  placeholder="Enter CSO's full name"
+                  placeholder={t('enterCSOName')}
                 />
               </div>
 
@@ -420,11 +422,11 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
           <div className="pt-4 border-t space-y-3">
             <Button onClick={handleBeginActivity} className="w-full" variant="outline">
               <Save className="h-4 w-4 mr-2" />
-              Begin Activity
+              {t('beginActivity')}
             </Button>
             <Button onClick={handleCompleteActivity} className="w-full">
               <CheckCircle className="h-4 w-4 mr-2" />
-              Complete Activity
+              {t('completeActivity')}
             </Button>
           </div>
         </CardContent>
@@ -436,10 +438,10 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2">
               <Globe className="h-5 w-5" />
-              <span>Select Inspection Language</span>
+              <span>{t('selectLanguage')}</span>
             </DialogTitle>
             <DialogDescription>
-              Choose the language for your inspection documents and templates.
+              {t('selectLanguageDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-4">
@@ -450,7 +452,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
                 className="h-16 flex flex-col space-y-1"
               >
                 <span className="text-lg">🇨🇦</span>
-                <span>English</span>
+                <span>{t('english')}</span>
               </Button>
               <Button
                 variant={selectedLanguage === 'french' ? 'default' : 'outline'}

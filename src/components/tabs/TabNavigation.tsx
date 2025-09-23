@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { TabId } from '../InspectionApp';
+import { useTranslation } from '@/hooks/useTranslation';
 import { 
   User, 
   FileText, 
@@ -21,11 +22,12 @@ interface TabNavigationProps {
   showInspectionCorrective: boolean;
   isInspectorSetup: boolean;
   isActivityCompleted: boolean;
+  uiLanguage?: string;
 }
 
 interface TabItem {
   id: TabId;
-  label: string;
+  labelKey: keyof typeof import('@/translations/translations').translations;
   icon: React.ComponentType<{ className?: string }>;
   isStatic?: boolean;
   requiresInspector?: boolean;
@@ -37,22 +39,24 @@ export const TabNavigation = ({
   showDocMemo, 
   showInspectionCorrective,
   isInspectorSetup,
-  isActivityCompleted 
+  isActivityCompleted,
+  uiLanguage
 }: TabNavigationProps) => {
+  const { t } = useTranslation(uiLanguage);
   
   const tabs: TabItem[] = [
-    { id: 'inspector', label: 'Inspector Information', icon: User, isStatic: true },
-    { id: 'main', label: 'Main', icon: FileText, requiresInspector: true },
-    { id: 'search', label: 'Search', icon: Search, isStatic: true, requiresInspector: true },
-    { id: 'emails', label: 'E-Mails', icon: Mail, isStatic: true, requiresInspector: true },
-    { id: 'doc', label: 'DoC', icon: FileCheck, requiresInspector: true },
-    { id: 'memorandum', label: 'Memorandum', icon: Mail, requiresInspector: true },
-    { id: 'inspection', label: 'Inspection', icon: ClipboardList, requiresInspector: true },
-    { id: 'corrective', label: 'Corrective Measures', icon: AlertTriangle, requiresInspector: true },
-    { id: 'documents', label: 'Supporting Documents', icon: FolderOpen, isStatic: true, requiresInspector: true },
-    { id: 'approval', label: 'Approval Letter', icon: CheckCircle, isStatic: true, requiresInspector: true },
-    { id: 'finalreport', label: 'Final Report', icon: BookOpen, isStatic: true, requiresInspector: true },
-    { id: 'status', label: 'Status', icon: Activity, isStatic: true, requiresInspector: true },
+    { id: 'inspector', labelKey: 'inspectorInfo', icon: User, isStatic: true },
+    { id: 'main', labelKey: 'mainTab', icon: FileText, requiresInspector: true },
+    { id: 'search', labelKey: 'searchTab', icon: Search, isStatic: true, requiresInspector: true },
+    { id: 'emails', labelKey: 'emailsTab', icon: Mail, isStatic: true, requiresInspector: true },
+    { id: 'doc', labelKey: 'docTab', icon: FileCheck, requiresInspector: true },
+    { id: 'memorandum', labelKey: 'memorandumTab', icon: Mail, requiresInspector: true },
+    { id: 'inspection', labelKey: 'inspectionTab', icon: ClipboardList, requiresInspector: true },
+    { id: 'corrective', labelKey: 'correctiveMeasuresTab', icon: AlertTriangle, requiresInspector: true },
+    { id: 'documents', labelKey: 'supportingDocsTab', icon: FolderOpen, isStatic: true, requiresInspector: true },
+    { id: 'approval', labelKey: 'approvalLetterTab', icon: CheckCircle, isStatic: true, requiresInspector: true },
+    { id: 'finalreport', labelKey: 'finalReportTab', icon: BookOpen, isStatic: true, requiresInspector: true },
+    { id: 'status', labelKey: 'statusTab', icon: Activity, isStatic: true, requiresInspector: true },
   ];
 
   const isTabVisible = (tab: TabItem) => {
@@ -102,7 +106,7 @@ export const TabNavigation = ({
                 aria-selected={isActive}
               >
                 <Icon className="h-4 w-4" />
-                <span>{tab.label}</span>
+                <span>{t(tab.labelKey)}</span>
               </button>
             );
           })}

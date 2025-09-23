@@ -94,14 +94,15 @@ export const InspectionApp = () => {
         </div>
       </div>
 
-      <TabNavigation 
-        activeTab={currentTab}
-        onTabChange={setActiveTab}
-        showDocMemo={showDocMemo}
-        showInspectionCorrective={showInspectionCorrective}
-        isInspectorSetup={isInspectorSetup}
-        isActivityCompleted={isActivityCompleted}
-      />
+        <TabNavigation
+          activeTab={currentTab}
+          onTabChange={setActiveTab}
+          showDocMemo={showDocMemo}
+          showInspectionCorrective={showInspectionCorrective}
+          isInspectorSetup={isInspectorSetup}
+          isActivityCompleted={isActivityCompleted}
+          uiLanguage={mainForm.uiLanguage}
+        />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         <div className="bg-card rounded-lg shadow-md overflow-hidden">
