@@ -13,6 +13,9 @@ import { InspectionTab } from './tabs/InspectionTab';
 import { CorrectiveMeasuresTab } from './tabs/CorrectiveMeasuresTab';
 import { SupportingDocuments } from './tabs/SupportingDocuments';
 import { FinalReportTab } from './tabs/FinalReportTab';
+import { DISISNotesTab } from './tabs/DISISNotesTab';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export type TabId = 
   | 'inspector' 
@@ -20,6 +23,7 @@ export type TabId =
   | 'search' 
   | 'approval' 
   | 'emails'
+  | 'disisnotes'
   | 'status' 
   | 'doc' 
   | 'memorandum' 
@@ -32,7 +36,8 @@ export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
   const inspectionState = useInspectionState();
 
-  const { mainForm, inspector, isActivityCompleted } = inspectionState;
+  const { mainForm, inspector, isActivityCompleted, globalState } = inspectionState;
+  const { t } = useTranslation(globalState.globalUILanguage === 'fr' ? 'french' : 'english');
 
   // Check if inspector profile is set up
   const isInspectorSetup = !!(inspector.name && inspector.initials && inspector.email);
@@ -56,6 +61,8 @@ export const InspectionApp = () => {
         return <ApprovalLetter {...inspectionState} />;
       case 'emails':
         return <EmailsTab {...inspectionState} />;
+      case 'disisnotes':
+        return <DISISNotesTab {...inspectionState} />;
       case 'status':
         return <StatusTab currentActivity={inspectionState.currentActivity} />;
       case 'doc':
@@ -81,15 +88,23 @@ export const InspectionApp = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Inspection Management System</h1>
-              <p className="text-muted-foreground">Professional inspection workflow and documentation</p>
+              <h1 className="text-2xl font-bold text-foreground">{t('inspectionManagementSystem')}</h1>
+              <p className="text-muted-foreground">{t('professionalInspectionWorkflow')}</p>
             </div>
-            {isInspectorSetup && (
-              <div className="text-right text-sm text-muted-foreground">
-                <p className="font-medium">{inspector.name} ({inspector.initials})</p>
-                <p>{inspector.email}</p>
-              </div>
-            )}
+            <div className="flex items-center space-x-4">
+              <LanguageSwitcher
+                globalUILanguage={globalState.globalUILanguage}
+                documentLanguage={globalState.documentLanguage}
+                onUILanguageChange={inspectionState.updateGlobalUILanguage}
+                onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
+              />
+              {isInspectorSetup && (
+                <div className="text-right text-sm text-muted-foreground">
+                  <p className="font-medium">{inspector.name} ({inspector.initials})</p>
+                  <p>{inspector.email}</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -101,7 +116,7 @@ export const InspectionApp = () => {
           showInspectionCorrective={showInspectionCorrective}
           isInspectorSetup={isInspectorSetup}
           isActivityCompleted={isActivityCompleted}
-          uiLanguage={mainForm.uiLanguage}
+          uiLanguage={globalState.globalUILanguage === 'fr' ? 'french' : 'english'}
         />
 
       <main className="max-w-7xl mx-auto px-4 py-6">

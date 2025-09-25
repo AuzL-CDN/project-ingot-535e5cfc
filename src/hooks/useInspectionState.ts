@@ -6,6 +6,18 @@ export interface InspectorProfile {
   email: string;
 }
 
+export interface DISISNote {
+  id: string;
+  date: string;
+  content: string;
+  timestamp: Date;
+}
+
+export interface GlobalState {
+  globalUILanguage: 'en' | 'fr';
+  documentLanguage: 'en' | 'fr';
+}
+
 export interface MainFormData {
   activityNumber: string;
   orgSiteNumber: string;
@@ -76,6 +88,13 @@ export interface ActivityRecord {
 }
 
 export const useInspectionState = () => {
+  const [globalState, setGlobalState] = useState<GlobalState>({
+    globalUILanguage: 'en',
+    documentLanguage: 'en',
+  });
+  
+  const [disisNotes, setDisisNotes] = useState<DISISNote[]>([]);
+  
   const [inspector, setInspector] = useState<InspectorProfile>({
     name: '',
     initials: '',
@@ -214,6 +233,33 @@ export const useInspectionState = () => {
     setIsActivityCompleted(true);
   };
 
+  const updateGlobalUILanguage = (language: 'en' | 'fr') => {
+    setGlobalState(prev => ({ ...prev, globalUILanguage: language }));
+  };
+
+  const updateDocumentLanguage = (language: 'en' | 'fr') => {
+    setGlobalState(prev => ({ ...prev, documentLanguage: language }));
+  };
+
+  const addDISISNote = (content: string) => {
+    const note: DISISNote = {
+      id: Date.now().toString(),
+      date: new Date().toISOString().split('T')[0].replace(/-/g, '.'),
+      content,
+      timestamp: new Date(),
+    };
+    setDisisNotes(prev => [...prev, note]);
+    return note;
+  };
+
+  const deleteDISISNote = (id: string) => {
+    setDisisNotes(prev => prev.filter(note => note.id !== id));
+  };
+
+  const getDISISNotesAsText = () => {
+    return disisNotes.map(note => `${note.date}: ${note.content}`).join('\n\n');
+  };
+
   return {
     inspector,
     mainForm,
@@ -221,6 +267,8 @@ export const useInspectionState = () => {
     correctiveMeasures,
     currentActivity,
     isActivityCompleted,
+    globalState,
+    disisNotes,
     updateInspector,
     updateMainForm,
     setApprovalLetter,
@@ -228,6 +276,11 @@ export const useInspectionState = () => {
     loadActivity,
     saveActivity,
     searchActivities,
-    completeActivity
+    completeActivity,
+    updateGlobalUILanguage,
+    updateDocumentLanguage,
+    addDISISNote,
+    deleteDISISNote,
+    getDISISNotesAsText
   };
 };

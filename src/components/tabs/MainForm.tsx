@@ -16,11 +16,12 @@ interface MainFormProps {
   updateMainForm: (updates: Partial<MainFormData>) => void;
   saveActivity: () => any;
   completeActivity: () => void;
+  globalState: { globalUILanguage: 'en' | 'fr' };
 }
 
-export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActivity }: MainFormProps) => {
+export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActivity, globalState }: MainFormProps) => {
   const { toast } = useToast();
-  const { t } = useTranslation(mainForm.uiLanguage);
+  const { t } = useTranslation(globalState.globalUILanguage === 'fr' ? 'french' : 'english');
   const [showLanguageDialog, setShowLanguageDialog] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [pendingInspectionClass, setPendingInspectionClass] = useState('');
@@ -235,7 +236,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <div className="space-y-2">
                 <Label htmlFor="cso-email" className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>CSO's E-mail Address</span>
+                  <span>{t('csoEmail')}</span>
                 </Label>
                 <Input
                   id="cso-email"
@@ -249,13 +250,13 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
 
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="contract-type">Contract Type</Label>
+                <Label htmlFor="contract-type">{t('contractType')}</Label>
                 <Select 
                   value={mainForm.contractType}
                   onValueChange={(value) => updateMainForm({ contractType: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select contract type" />
+                    <SelectValue placeholder={t('selectContractType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {contractTypes.map((type) => (
@@ -266,23 +267,23 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="contract-number">Contract Number</Label>
+                <Label htmlFor="contract-number">{t('contractNumber')}</Label>
                 <Input
                   id="contract-number"
                   value={mainForm.contractNumber}
                   onChange={(e) => updateMainForm({ contractNumber: e.target.value })}
-                  placeholder="Enter contract number"
+                  placeholder={t('enterContractNumber')}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="security-level">Security Level</Label>
+                <Label htmlFor="security-level">{t('securityLevel')}</Label>
                 <Select 
                   value={mainForm.securityLevel}
                   onValueChange={(value) => updateMainForm({ securityLevel: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select security level" />
+                    <SelectValue placeholder={t('selectSecurityLevel')} />
                   </SelectTrigger>
                   <SelectContent>
                     {securityLevels.map((level) => (
@@ -293,13 +294,13 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="inspection-type">Inspection Type</Label>
+                <Label htmlFor="inspection-type">{t('inspectionType')}</Label>
                 <Select 
                   value={mainForm.inspectionType}
                   onValueChange={(value) => updateMainForm({ inspectionType: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select inspection type" />
+                    <SelectValue placeholder={t('selectInspectionType')} />
                   </SelectTrigger>
                   <SelectContent>
                     {inspectionTypes.map((type) => (
@@ -313,14 +314,14 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <div className="space-y-2">
                 <Label htmlFor="number-acsos" className="flex items-center space-x-2">
                   <Users className="h-4 w-4" />
-                  <span>Number of ACSOs</span>
+                  <span>{t('numberOfACSOs')}</span>
                 </Label>
                 <Select 
                   value={mainForm.numberOfACSOs.toString()}
                   onValueChange={handleNumberOfACSOs}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select number of ACSOs" />
+                    <SelectValue placeholder={t('selectNumberACSOs')} />
                   </SelectTrigger>
                   <SelectContent>
                     {Array.from({ length: 11 }, (_, i) => (
@@ -333,7 +334,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
               <div className="space-y-2">
                 <Label htmlFor="date" className="flex items-center space-x-2">
                   <Calendar className="h-4 w-4" />
-                  <span>Date</span>
+                  <span>{t('date')}</span>
                 </Label>
                 <Input
                   id="date"
@@ -358,7 +359,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-foreground flex items-center space-x-2">
                 <Users className="h-4 w-4" />
-                <span>Assistant Chief Security Officers</span>
+                <span>{t('assistantCSOs')}</span>
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -369,17 +370,17 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
                     </CardHeader>
                     <CardContent className="space-y-3">
                       <div className="space-y-2">
-                        <Label htmlFor={`acso-name-${index}`}>Full Name of ACSO</Label>
+                        <Label htmlFor={`acso-name-${index}`}>{t('acsoFullName')}</Label>
                         <Input
                           id={`acso-name-${index}`}
                           value={acso.fullName}
                           onChange={(e) => updateACSO(index, 'fullName', e.target.value)}
-                          placeholder="Enter ACSO's full name"
+                          placeholder={t('enterACSORName')}
                         />
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor={`acso-email-${index}`}>ACSO E-mail Field</Label>
+                        <Label htmlFor={`acso-email-${index}`}>{t('acsoEmailField')}</Label>
                         <Input
                           id={`acso-email-${index}`}
                           type="email"
@@ -397,13 +398,13 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="inspection-class">Inspection Class</Label>
+              <Label htmlFor="inspection-class">{t('inspectionClass')}</Label>
               <Select 
                 value={mainForm.inspectionClass}
                 onValueChange={handleInspectionClassChange}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select inspection class" />
+                  <SelectValue placeholder={t('selectInspectionClass')} />
                 </SelectTrigger>
                 <SelectContent>
                   {inspectionClasses.map((cls) => (
@@ -415,7 +416,7 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
           </div>
 
           <div className="bg-muted/50 rounded-lg p-4">
-            <h4 className="font-medium text-foreground mb-2">Generated Folder Structure:</h4>
+            <h4 className="font-medium text-foreground mb-2">{t('generatedFolder')}</h4>
             <p className="text-sm font-mono text-muted-foreground">{generateRootFolder()}</p>
           </div>
 

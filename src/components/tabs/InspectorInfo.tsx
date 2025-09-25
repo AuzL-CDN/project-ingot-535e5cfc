@@ -5,20 +5,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Save, User, Mail, Tag } from 'lucide-react';
 import { InspectorProfile } from '@/hooks/useInspectionState';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface InspectorInfoProps {
   inspector: InspectorProfile;
   updateInspector: (updates: Partial<InspectorProfile>) => void;
+  globalState: { globalUILanguage: 'en' | 'fr' };
 }
 
-export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps) => {
+export const InspectorInfo = ({ inspector, updateInspector, globalState }: InspectorInfoProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation(globalState.globalUILanguage === 'fr' ? 'french' : 'english');
 
   const handleSave = () => {
     if (!inspector.name || !inspector.initials || !inspector.email) {
       toast({
-        title: "Validation Error",
-        description: "Please fill in all required fields.",
+        title: t('validationError'),
+        description: t('fillAllFields'),
         variant: "destructive",
       });
       return;
@@ -26,8 +29,8 @@ export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps
 
     // In real app, would create SharePoint folder: Documents/Inspectors/{Initials} - {Name}/
     toast({
-      title: "Profile Saved",
-      description: `Inspector profile saved. Folder created: Documents/Inspectors/${inspector.initials} - ${inspector.name}/`,
+      title: t('profileSaved'),
+      description: `${t('profileSavedDesc')} Documents/Inspectors/${inspector.initials} - ${inspector.name}/`,
     });
   };
 
@@ -40,10 +43,10 @@ export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <User className="h-5 w-5 text-primary" />
-              <span>Inspector Information</span>
+              <span>{t('inspectorInfo')}</span>
             </CardTitle>
             <CardDescription>
-              Set up your inspector profile. This information will be used across all inspection activities.
+              {t('inspectorSetupDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -51,13 +54,13 @@ export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps
               <div className="space-y-2">
                 <Label htmlFor="inspector-name" className="flex items-center space-x-2">
                   <User className="h-4 w-4" />
-                  <span>Inspector Name *</span>
+                  <span>{t('inspectorName')} *</span>
                 </Label>
                 <Input
                   id="inspector-name"
                   value={inspector.name}
                   onChange={(e) => updateInspector({ name: e.target.value })}
-                  placeholder="Enter your full name"
+                  placeholder={t('enterFullName')}
                   className="transition-smooth focus:shadow-glow"
                 />
               </div>
@@ -65,7 +68,7 @@ export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps
               <div className="space-y-2">
                 <Label htmlFor="inspector-initials" className="flex items-center space-x-2">
                   <Tag className="h-4 w-4" />
-                  <span>Inspector Initials *</span>
+                  <span>{t('inspectorInitials')} *</span>
                 </Label>
                 <Input
                   id="inspector-initials"
@@ -80,14 +83,14 @@ export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps
               <div className="space-y-2">
                 <Label htmlFor="inspector-email" className="flex items-center space-x-2">
                   <Mail className="h-4 w-4" />
-                  <span>Email Address *</span>
+                  <span>{t('emailAddress')} *</span>
                 </Label>
                 <Input
                   id="inspector-email"
                   type="email"
                   value={inspector.email}
                   onChange={(e) => updateInspector({ email: e.target.value })}
-                  placeholder="your.email@example.com"
+                  placeholder={t('enterEmail')}
                   className="transition-smooth focus:shadow-glow"
                 />
               </div>
@@ -100,23 +103,23 @@ export const InspectorInfo = ({ inspector, updateInspector }: InspectorInfoProps
                 disabled={!isComplete}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Save Inspector Profile
+                {t('saveInspectorProfile')}
               </Button>
               
               {isComplete && (
                 <p className="text-sm text-success text-center mt-3">
-                  ✓ Profile complete! You can now access all inspection features.
+                  ✓ {t('profileComplete')}
                 </p>
               )}
             </div>
 
             <div className="bg-muted/50 rounded-lg p-4 text-sm text-muted-foreground">
-              <p className="font-medium mb-2">What happens when you save:</p>
+              <p className="font-medium mb-2">{t('whatHappensWhenSave')}</p>
               <ul className="space-y-1 text-xs">
-                <li>• Your profile is stored for future sessions</li>
-                <li>• A dedicated folder is created: Documents/Inspectors/{inspector.initials} - {inspector.name}/</li>
-                <li>• Your initials will auto-populate in approval letters</li>
-                <li>• All inspection tabs become available</li>
+                <li>• {t('profileStored')}</li>
+                <li>• {t('folderCreated')} Documents/Inspectors/{inspector.initials} - {inspector.name}/</li>
+                <li>• {t('initialsAutoPopulate')}</li>
+                <li>• {t('allTabsAvailable')}</li>
               </ul>
             </div>
           </CardContent>
