@@ -15,8 +15,7 @@ import { CorrectiveMeasuresTab } from './tabs/CorrectiveMeasuresTab';
 import { SupportingDocuments } from './tabs/SupportingDocuments';
 import { FinalReportTab } from './tabs/FinalReportTab';
 import { DISISNotesTab } from './tabs/DISISNotesTab';
-import { AdminTab } from './tabs/AdminTab';
-import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { UserMenuDropdown } from '@/components/UserMenuDropdown';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from './auth/AuthProvider';
 
@@ -33,8 +32,7 @@ export type TabId =
   | 'inspection' 
   | 'corrective' 
   | 'documents'
-  | 'finalreport'
-  | 'admin';
+  | 'finalreport';
 
 export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
@@ -56,10 +54,6 @@ export const InspectionApp = () => {
     );
   }
 
-  // Redirect to auth if not authenticated and trying to access admin
-  if (!user && activeTab === 'admin') {
-    return <Navigate to="/auth" replace />;
-  }
 
   // Check if inspector profile is set up
   const isInspectorSetup = !!(inspector.name && inspector.initials && inspector.email);
@@ -99,8 +93,6 @@ export const InspectionApp = () => {
         return <SupportingDocuments {...inspectionState} />;
       case 'finalreport':
         return <FinalReportTab mainForm={mainForm} correctiveMeasures={inspectionState.correctiveMeasures} saveActivity={inspectionState.saveActivity} />;
-      case 'admin':
-        return <AdminTab />;
       default:
         return <MainForm {...inspectionState} />;
     }
@@ -116,17 +108,14 @@ export const InspectionApp = () => {
               <p className="text-muted-foreground">{t('professionalInspectionWorkflow')}</p>
             </div>
             <div className="flex items-center space-x-4">
-              <LanguageSwitcher
-                globalUILanguage={globalState.globalUILanguage}
-                documentLanguage={globalState.documentLanguage}
-                onUILanguageChange={inspectionState.updateGlobalUILanguage}
-                onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
-              />
               {isInspectorSetup && (
-                <div className="text-right text-sm text-muted-foreground">
-                  <p className="font-medium">{inspector.name} ({inspector.initials})</p>
-                  <p>{inspector.email}</p>
-                </div>
+                <UserMenuDropdown
+                  inspector={inspector}
+                  globalUILanguage={globalState.globalUILanguage}
+                  documentLanguage={globalState.documentLanguage}
+                  onUILanguageChange={inspectionState.updateGlobalUILanguage}
+                  onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
+                />
               )}
             </div>
           </div>
@@ -141,7 +130,6 @@ export const InspectionApp = () => {
           isInspectorSetup={isInspectorSetup}
           isActivityCompleted={isActivityCompleted}
           uiLanguage={globalState.globalUILanguage === 'fr' ? 'french' : 'english'}
-          isAuthenticated={!!user}
         />
 
       <main className="max-w-7xl mx-auto px-4 py-6">

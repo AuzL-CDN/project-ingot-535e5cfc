@@ -422,5 +422,41 @@ export const translations = {
   optional: {
     en: "optional",
     fr: "optionnel"
-  }
+  },
+  signOut: {
+    en: 'Sign Out',
+    fr: 'Se Déconnecter'
+  },
+  theme: {
+    en: 'Theme',
+    fr: 'Thème'
+  },
+  light: {
+    en: 'Light',
+    fr: 'Clair'
+  },
+  dark: {
+    en: 'Dark',
+    fr: 'Sombre'
+  },
+  system: {
+    en: 'System',
+    fr: 'Système'
+  },
+  language: {
+    en: 'Language',
+    fr: 'Langue'
+  },
+  interfaceLanguage: {
+    en: 'Interface Language',
+    fr: 'Langue de l\'interface'
+  },
+  adminFunctions: {
+    en: 'Admin Functions',
+    fr: 'Fonctions d\'administration'
+  },
+  adminPanel: {
+    en: 'Admin Panel',
+    fr: 'Panneau d\'administration'
+  },
 };

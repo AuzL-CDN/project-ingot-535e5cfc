@@ -23,8 +23,7 @@ interface TabNavigationProps {
   showInspectionCorrective: boolean;
   isInspectorSetup: boolean;
   isActivityCompleted: boolean;
-  uiLanguage?: string;
-  isAuthenticated?: boolean;
+  uiLanguage: string;
 }
 
 interface TabItem {
@@ -42,8 +41,7 @@ export const TabNavigation = ({
   showInspectionCorrective,
   isInspectorSetup,
   isActivityCompleted,
-  uiLanguage,
-  isAuthenticated = false
+  uiLanguage
 }: TabNavigationProps) => {
   const { t } = useTranslation(uiLanguage);
   
@@ -61,7 +59,6 @@ export const TabNavigation = ({
     { id: 'finalreport', labelKey: 'finalReportTab', icon: FileText, isStatic: true, requiresInspector: true },
     { id: 'disisnotes', labelKey: 'disisNotes', icon: BookOpen, isStatic: true, requiresInspector: true },
     { id: 'status', labelKey: 'statusTab', icon: Activity, isStatic: true, requiresInspector: true },
-    { id: 'admin', labelKey: 'adminTab', icon: Shield, isStatic: true },
   ];
 
   const isTabVisible = (tab: TabItem) => {
@@ -79,11 +76,6 @@ export const TabNavigation = ({
     
     if (tab.id === 'inspection' || tab.id === 'corrective') {
       return showInspectionCorrective;
-    }
-    
-    // Admin tab only shows if user is authenticated
-    if (tab.id === 'admin' && !isAuthenticated) {
-      return false;
     }
     
     return true;
