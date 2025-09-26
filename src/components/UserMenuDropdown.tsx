@@ -78,6 +78,14 @@ export function UserMenuDropdown({
             <span>{inspector.name}</span>
             {isDev && <Badge variant="secondary" className="text-xs">Dev</Badge>}
             {isAdmin && <Badge variant="default" className="text-xs">Admin</Badge>}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => window.location.reload()}
+              className="ml-2 h-6 px-2 text-xs"
+            >
+              Refresh
+            </Button>
           </DropdownMenuLabel>
           
           <DropdownMenuSeparator />

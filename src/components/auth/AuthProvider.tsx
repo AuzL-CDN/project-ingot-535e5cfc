@@ -62,6 +62,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchProfile = async (userId: string) => {
     try {
+      console.log('Fetching profile for user:', userId);
+      
       // Fetch user profile
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
@@ -74,6 +76,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
+      console.log('Profile data:', profileData);
       setProfile(profileData);
 
       // Fetch user roles
@@ -87,7 +90,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      setRoles(rolesData.map((r: UserRole) => r.role));
+      console.log('Roles data:', rolesData);
+      const userRoles = rolesData.map((r: UserRole) => r.role);
+      console.log('Setting roles:', userRoles);
+      setRoles(userRoles);
     } catch (error) {
       console.error('Error in fetchProfile:', error);
     }
