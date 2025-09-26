@@ -49,13 +49,14 @@ export const TabNavigation = ({
     { id: 'main', labelKey: 'mainTab', icon: FileText, requiresInspector: true },
     { id: 'search', labelKey: 'searchTab', icon: Search, isStatic: true, requiresInspector: true },
     { id: 'emails', labelKey: 'emailsTab', icon: Mail, isStatic: true, requiresInspector: true },
+    { id: 'disisnotes', labelKey: 'disisNotesTab', icon: BookOpen, isStatic: true, requiresInspector: true },
     { id: 'doc', labelKey: 'docTab', icon: FileCheck, requiresInspector: true },
     { id: 'memorandum', labelKey: 'memorandumTab', icon: Mail, requiresInspector: true },
     { id: 'inspection', labelKey: 'inspectionTab', icon: ClipboardList, requiresInspector: true },
     { id: 'corrective', labelKey: 'correctiveMeasuresTab', icon: AlertTriangle, requiresInspector: true },
     { id: 'documents', labelKey: 'supportingDocsTab', icon: FolderOpen, isStatic: true, requiresInspector: true },
     { id: 'approval', labelKey: 'approvalLetterTab', icon: CheckCircle, isStatic: true, requiresInspector: true },
-    { id: 'finalreport', labelKey: 'finalReportTab', icon: BookOpen, isStatic: true, requiresInspector: true },
+    { id: 'finalreport', labelKey: 'finalReportTab', icon: FileText, isStatic: true, requiresInspector: true },
     { id: 'status', labelKey: 'statusTab', icon: Activity, isStatic: true, requiresInspector: true },
   ];
 
