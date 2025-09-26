@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Navigate } from 'react-router-dom';
 import { useInspectionState } from '@/hooks/useInspectionState';
 import { TabNavigation } from './tabs/TabNavigation';
 import { InspectorInfo } from './tabs/InspectorInfo';
@@ -14,9 +15,10 @@ import { CorrectiveMeasuresTab } from './tabs/CorrectiveMeasuresTab';
 import { SupportingDocuments } from './tabs/SupportingDocuments';
 import { FinalReportTab } from './tabs/FinalReportTab';
 import { DISISNotesTab } from './tabs/DISISNotesTab';
+import { AdminTab } from './tabs/AdminTab';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from '@/hooks/useTranslation';
-import { DataImportUtility } from './DataImportUtility';
+import { useAuth } from './auth/AuthProvider';
 
 export type TabId = 
   | 'inspector' 
@@ -31,14 +33,33 @@ export type TabId =
   | 'inspection' 
   | 'corrective' 
   | 'documents'
-  | 'finalreport';
+  | 'finalreport'
+  | 'admin';
 
 export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
   const inspectionState = useInspectionState();
+  const { user, loading } = useAuth();
 
   const { mainForm, inspector, isActivityCompleted, globalState } = inspectionState;
   const { t } = useTranslation(globalState.globalUILanguage === 'fr' ? 'french' : 'english');
+
+  // Show loading while checking authentication
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to auth if not authenticated and trying to access admin
+  if (!user && activeTab === 'admin') {
+    return <Navigate to="/auth" replace />;
+  }
 
   // Check if inspector profile is set up
   const isInspectorSetup = !!(inspector.name && inspector.initials && inspector.email);
@@ -78,6 +99,8 @@ export const InspectionApp = () => {
         return <SupportingDocuments {...inspectionState} />;
       case 'finalreport':
         return <FinalReportTab mainForm={mainForm} correctiveMeasures={inspectionState.correctiveMeasures} saveActivity={inspectionState.saveActivity} />;
+      case 'admin':
+        return <AdminTab />;
       default:
         return <MainForm {...inspectionState} />;
     }
@@ -118,16 +141,10 @@ export const InspectionApp = () => {
           isInspectorSetup={isInspectorSetup}
           isActivityCompleted={isActivityCompleted}
           uiLanguage={globalState.globalUILanguage === 'fr' ? 'french' : 'english'}
+          isAuthenticated={!!user}
         />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Show import utility for admin/setup purposes */}
-        {!isInspectorSetup && activeTab === 'inspector' && (
-          <div className="mb-6">
-            <DataImportUtility />
-          </div>
-        )}
-        
         <div className="bg-card rounded-lg shadow-md overflow-hidden">
           {renderActiveTab()}
         </div>

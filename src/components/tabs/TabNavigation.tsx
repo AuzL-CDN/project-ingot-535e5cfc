@@ -12,7 +12,8 @@ import {
   ClipboardList, 
   AlertTriangle, 
   FolderOpen,
-  BookOpen 
+  BookOpen,
+  Shield
 } from 'lucide-react';
 
 interface TabNavigationProps {
@@ -23,6 +24,7 @@ interface TabNavigationProps {
   isInspectorSetup: boolean;
   isActivityCompleted: boolean;
   uiLanguage?: string;
+  isAuthenticated?: boolean;
 }
 
 interface TabItem {
@@ -40,7 +42,8 @@ export const TabNavigation = ({
   showInspectionCorrective,
   isInspectorSetup,
   isActivityCompleted,
-  uiLanguage
+  uiLanguage,
+  isAuthenticated = false
 }: TabNavigationProps) => {
   const { t } = useTranslation(uiLanguage);
   
@@ -56,8 +59,9 @@ export const TabNavigation = ({
     { id: 'documents', labelKey: 'supportingDocsTab', icon: FolderOpen, isStatic: true, requiresInspector: true },
     { id: 'approval', labelKey: 'approvalLetterTab', icon: CheckCircle, isStatic: true, requiresInspector: true },
     { id: 'finalreport', labelKey: 'finalReportTab', icon: FileText, isStatic: true, requiresInspector: true },
-    { id: 'disisnotes', labelKey: 'disisNotesTab', icon: BookOpen, isStatic: true, requiresInspector: true },
+    { id: 'disisnotes', labelKey: 'disisNotes', icon: BookOpen, isStatic: true, requiresInspector: true },
     { id: 'status', labelKey: 'statusTab', icon: Activity, isStatic: true, requiresInspector: true },
+    { id: 'admin', labelKey: 'adminTab', icon: Shield, isStatic: true },
   ];
 
   const isTabVisible = (tab: TabItem) => {
@@ -75,6 +79,11 @@ export const TabNavigation = ({
     
     if (tab.id === 'inspection' || tab.id === 'corrective') {
       return showInspectionCorrective;
+    }
+    
+    // Admin tab only shows if user is authenticated
+    if (tab.id === 'admin' && !isAuthenticated) {
+      return false;
     }
     
     return true;

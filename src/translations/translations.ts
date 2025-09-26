@@ -244,9 +244,10 @@ export const translations = {
     en: "Doc",
     fr: "Doc"
   },
-  disisNotesTab: {
-    en: "DISIS Notes",
-    fr: "Notes DISIS"
+  // Translation keys for admin tab
+  adminTab: {
+    en: "Admin",
+    fr: "Admin"
   },
   
   // Common buttons and actions
