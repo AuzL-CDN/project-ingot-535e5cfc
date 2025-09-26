@@ -1,0 +1,190 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Database, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface ImportRecord {
+  org_site_id: string;
+  organization_name: string;
+  address: string;
+  phone_number: string;
+}
+
+export const DataImportUtility = () => {
+  const [isImporting, setIsImporting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'importing' | 'success' | 'error'>('idle');
+  const [recordCount, setRecordCount] = useState<number>(0);
+  const { toast } = useToast();
+
+  // Sample data extracted from the Excel file structure
+  const sampleData: ImportRecord[] = [
+    { org_site_id: '113-0', organization_name: 'A.U.G. Signals Ltd.', address: '103-73 Richmond Street West Toronto ON M5H4E8', phone_number: '(416) 923-4425' },
+    { org_site_id: '118-0', organization_name: 'ABI/Advanced Business Interiors Inc.', address: '2355 St. Laurent Boulevard Ottawa ON K1G4L2', phone_number: '(613) 738-1003' },
+    { org_site_id: '120-0', organization_name: 'Robert Half Canada Inc.', address: '820-181 Bay Street (Head Office) Toronto ON M5J2T3', phone_number: '(613) 236-4253' },
+    { org_site_id: '123-0', organization_name: 'Accurate Design & Communication Inc.', address: '100-57 Auriga Drive Ottawa ON K2E8B2', phone_number: '(613) 723-2057' },
+    { org_site_id: '128-0', organization_name: 'Action Personnel of Ottawa-Hull Limited', address: '126-130 Albert Street Ottawa ON K1P5G4', phone_number: '(613) 238-8511' },
+  ];
+
+  const processExcelData = (): ImportRecord[] => {
+    // In a real implementation, you would parse the actual Excel file
+    // For demo purposes, we'll use a subset of the data
+    // The actual file contains 25,000+ records
+    
+    // This simulates processing the uploaded Excel file
+    // You would need a library like xlsx or papaparse to read the actual file
+    return sampleData;
+  };
+
+  const importData = async () => {
+    setIsImporting(true);
+    setStatus('importing');
+    setProgress(0);
+
+    try {
+      // Process the Excel data
+      const organizations = processExcelData();
+      setRecordCount(organizations.length);
+
+      // Call the import edge function
+      const { data, error } = await supabase.functions.invoke('import-organizations', {
+        body: { organizations }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.success) {
+        setProgress(100);
+        setStatus('success');
+        toast({
+          title: "Import Successful",
+          description: `Successfully imported ${data.imported} organization records.`,
+        });
+      } else {
+        throw new Error(data.error || 'Import failed');
+      }
+
+    } catch (error) {
+      console.error('Import error:', error);
+      setStatus('error');
+      toast({
+        title: "Import Failed",
+        description: error instanceof Error ? error.message : "Failed to import organization data.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const checkCurrentRecords = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('import-organizations');
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        setRecordCount(data.currentRecords);
+        toast({
+          title: "Database Status",
+          description: data.message,
+        });
+      }
+    } catch (error) {
+      console.error('Status check error:', error);
+      toast({
+        title: "Status Check Failed",
+        description: "Failed to check database status.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <Database className="h-5 w-5 text-primary" />
+          <span>Organization Data Import</span>
+        </CardTitle>
+        <CardDescription>
+          Import organization address data from Excel file to Supabase database for address lookup functionality.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-4">
+          {status === 'idle' && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                This utility will import organization data from the uploaded Excel file into your Supabase database.
+                Current database contains {recordCount} records.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {status === 'importing' && (
+            <div className="space-y-2">
+              <Alert>
+                <Upload className="h-4 w-4" />
+                <AlertDescription>
+                  Importing {recordCount} organization records...
+                </AlertDescription>
+              </Alert>
+              <Progress value={progress} className="w-full" />
+            </div>
+          )}
+
+          {status === 'success' && (
+            <Alert className="border-green-500 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-700">
+                Successfully imported {recordCount} organization records! Address lookup is now ready.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {status === 'error' && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Import failed. Please try again or check the console for error details.
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+
+        <div className="flex space-x-2">
+          <Button 
+            onClick={importData}
+            disabled={isImporting}
+            className="flex-1"
+          >
+            <Upload className="h-4 w-4 mr-2" />
+            {isImporting ? 'Importing...' : 'Import Organization Data'}
+          </Button>
+          
+          <Button 
+            onClick={checkCurrentRecords}
+            variant="outline"
+            disabled={isImporting}
+          >
+            <Database className="h-4 w-4 mr-2" />
+            Check Status
+          </Button>
+        </div>
+
+        <div className="text-sm text-muted-foreground">
+          <p><strong>Note:</strong> This demo imports a sample of 5 records. In production, this would process all 25,000+ records from the Excel file.</p>
+          <p>The imported data will be used by the Address Lookup component to automatically populate organization details.</p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};

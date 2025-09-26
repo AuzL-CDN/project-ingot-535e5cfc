@@ -16,6 +16,7 @@ import { FinalReportTab } from './tabs/FinalReportTab';
 import { DISISNotesTab } from './tabs/DISISNotesTab';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useTranslation } from '@/hooks/useTranslation';
+import { DataImportUtility } from './DataImportUtility';
 
 export type TabId = 
   | 'inspector' 
@@ -120,6 +121,13 @@ export const InspectionApp = () => {
         />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Show import utility for admin/setup purposes */}
+        {!isInspectorSetup && activeTab === 'inspector' && (
+          <div className="mb-6">
+            <DataImportUtility />
+          </div>
+        )}
+        
         <div className="bg-card rounded-lg shadow-md overflow-hidden">
           {renderActiveTab()}
         </div>

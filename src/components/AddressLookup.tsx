@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Search, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { orgDirectory } from '@/data/orgDirectory';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddressLookupProps {
   orgSiteNumber: string;
@@ -28,7 +28,7 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
   const [updateAddress, setUpdateAddress] = useState('');
   const { toast } = useToast();
 
-  const performLookup = () => {
+  const performLookup = async () => {
     if (!orgSiteNumber.trim()) {
       toast({
         title: "Organization - Site Number Required",
@@ -40,13 +40,22 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
 
     setIsLooking(true);
     
-    // Simulate API call delay
-    setTimeout(() => {
-      const found = orgDirectory.find(org => org.orgSiteNumber === orgSiteNumber.trim());
+    try {
+      // Query Supabase for organization data
+      const { data: organizations, error } = await supabase
+        .from('organizations')
+        .select('*')
+        .eq('org_site_id', orgSiteNumber.trim())
+        .limit(1);
       
-      if (found) {
+      if (error) {
+        throw error;
+      }
+      
+      if (organizations && organizations.length > 0) {
+        const found = organizations[0];
         setFoundAddress(found.address);
-        setFoundCompany(found.companyName);
+        setFoundCompany(found.organization_name);
         setShowVerifyDialog(true);
       } else {
         toast({
@@ -55,9 +64,16 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
           variant: "destructive"
         });
       }
-      
+    } catch (error) {
+      console.error('Lookup error:', error);
+      toast({
+        title: "Lookup Error",
+        description: "Failed to lookup organization details. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
       setIsLooking(false);
-    }, 1000);
+    }
   };
 
   const handleItMatches = () => {
