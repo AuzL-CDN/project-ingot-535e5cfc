@@ -40,15 +40,6 @@ export function UserMenuDropdown({
 }: UserMenuDropdownProps) {
   const { user, isAdmin, isDev, signOut } = useAuth();
   
-  // Debug logging
-  console.log('UserMenuDropdown Debug:', {
-    user: !!user,
-    isAdmin,
-    isDev,
-    userEmail: user?.email,
-    inspectorName: inspector.name
-  });
-  
   // Safe theme hook usage with fallback
   let theme: 'light' | 'dark' | 'system' = 'system';
   let setTheme: (theme: 'light' | 'dark' | 'system') => void = () => {};
@@ -172,12 +163,6 @@ export function UserMenuDropdown({
               </DropdownMenuItem>
             </>
           )}
-
-          {/* Debug: Show admin status */}
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-            Debug: Admin={isAdmin ? 'Yes' : 'No'}, User={!!user ? 'Yes' : 'No'}
-          </DropdownMenuLabel>
 
           <DropdownMenuSeparator />
           
