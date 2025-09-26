@@ -59,6 +59,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Derived state
   const isAdmin = roles.includes('admin');
   const isModerator = roles.includes('moderator') || isAdmin;
+  const isDev = roles.includes('moderator') || isAdmin;
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -90,9 +91,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      console.log('Roles data:', rolesData);
+      console.log('✅ Roles data:', rolesData);
       const userRoles = rolesData.map((r: UserRole) => r.role);
-      console.log('Setting roles:', userRoles);
+      console.log('🎯 Setting roles:', userRoles);
+      console.log('🔍 Will be admin?', userRoles.includes('admin'));
+      console.log('🔍 Will be dev?', userRoles.includes('moderator') || userRoles.includes('admin'));
       setRoles(userRoles);
     } catch (error) {
       console.error('Error in fetchProfile:', error);
@@ -203,7 +206,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     signUp,
     signOut,
     refreshProfile,
-    isDev: isDevelopment,
+    isDev,
     isM365: isM365Environment,
   };
 
