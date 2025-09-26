@@ -62,7 +62,7 @@ export const InspectionApp = () => {
       case 'emails':
         return <EmailsTab {...inspectionState} />;
       case 'disisnotes':
-        return <DISISNotesTab {...inspectionState} />;
+        return <DISISNotesTab {...inspectionState} globalUILanguage={globalState.globalUILanguage} />;
       case 'status':
         return <StatusTab currentActivity={inspectionState.currentActivity} />;
       case 'doc':
