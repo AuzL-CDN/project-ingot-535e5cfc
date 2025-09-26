@@ -17,8 +17,6 @@ interface AddressLookupProps {
   onCompanyUpdate?: (companyName: string) => void;
 }
 
-// Organization directory loaded from ORGDirectory.xlsx
-
 export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, onCompanyUpdate }: AddressLookupProps) => {
   const [isLooking, setIsLooking] = useState(false);
   const [showVerifyDialog, setShowVerifyDialog] = useState(false);
@@ -94,7 +92,7 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
     setShowUpdateDialog(true);
   };
 
-  const handleUpdateAddress = () => {
+  const handleUpdateAddress = async () => {
     if (!updateAddress.trim()) {
       toast({
         title: "Address Required",
@@ -104,17 +102,38 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
       return;
     }
 
-    // In real implementation, this would update the SharePoint OrgDirectory list
-    onAddressUpdate(updateAddress);
-    if (onCompanyUpdate && foundCompany) {
-      onCompanyUpdate(foundCompany);
+    try {
+      // Update the Supabase organizations table with the new address
+      const { error } = await supabase
+        .from('organizations')
+        .update({ 
+          address: updateAddress.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('org_site_id', orgSiteNumber.trim());
+
+      if (error) {
+        throw error;
+      }
+
+      onAddressUpdate(updateAddress);
+      if (onCompanyUpdate && foundCompany) {
+        onCompanyUpdate(foundCompany);
+      }
+      setShowUpdateDialog(false);
+      
+      toast({
+        title: "Address Updated",
+        description: "The organization directory has been updated with the new address.",
+      });
+    } catch (error) {
+      console.error('Update error:', error);
+      toast({
+        title: "Update Error",
+        description: "Failed to update the organization directory. Please try again.",
+        variant: "destructive"
+      });
     }
-    setShowUpdateDialog(false);
-    
-    toast({
-      title: "Address Updated",
-      description: "The organization directory has been updated with the new address and company details populated.",
-    });
   };
 
   return (
@@ -136,6 +155,7 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
               disabled={isLooking || !orgSiteNumber.trim()}
               size="sm"
               className="flex-shrink-0"
+              data-address-lookup-trigger
             >
               <Search className="h-4 w-4 mr-2" />
               {isLooking ? 'Looking up...' : 'Lookup Address'}

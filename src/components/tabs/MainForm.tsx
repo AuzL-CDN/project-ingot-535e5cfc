@@ -191,6 +191,16 @@ export const MainForm = ({ mainForm, updateMainForm, saveActivity, completeActiv
                   id="org-site"
                   value={mainForm.orgSiteNumber}
                   onChange={(e) => updateMainForm({ orgSiteNumber: e.target.value })}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      // Trigger address lookup
+                      const addressLookup = document.querySelector('[data-address-lookup-trigger]') as HTMLButtonElement;
+                      if (addressLookup) {
+                        addressLookup.click();
+                      }
+                    }
+                  }}
                   placeholder="e.g., 123-00"
                 />
               </div>
