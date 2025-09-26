@@ -39,7 +39,19 @@ export function UserMenuDropdown({
   onDocumentLanguageChange 
 }: UserMenuDropdownProps) {
   const { user, isAdmin, isDev, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
+  
+  // Safe theme hook usage with fallback
+  let theme: 'light' | 'dark' | 'system' = 'system';
+  let setTheme: (theme: 'light' | 'dark' | 'system') => void = () => {};
+  
+  try {
+    const themeContext = useTheme();
+    theme = themeContext.theme;
+    setTheme = themeContext.setTheme;
+  } catch (error) {
+    console.warn('ThemeProvider not found, using default theme');
+  }
+  
   const { t } = useTranslation(globalUILanguage === 'fr' ? 'french' : 'english');
   const [showAdminDialog, setShowAdminDialog] = useState(false);
 
