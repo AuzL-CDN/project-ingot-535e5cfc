@@ -3,6 +3,46 @@
 ## Overview
 This folder contains Word template files with content controls that integrate with the Project INGOT application. Each template uses specific content control names that map to the application data.
 
+## 🎨 Content Automation Color-Coding System
+
+All document content is categorized using a color-coding system to indicate automation levels:
+
+### **⚫ BLACK - Static Content**
+- **Description**: Fixed text that never changes (headers, instructions, legal disclaimers)
+- **Automation**: No automation needed
+- **Examples**: "PROTECTED A", "Information Technology Security Inspection Report", legal disclaimers
+- **Template Action**: Leave as regular text
+
+### **🟢 GREEN - Dynamic Fields** 
+- **Description**: Data pulled from database/forms automatically
+- **Automation**: Full automation via content controls
+- **Examples**: Organization name, inspector name, dates, contract numbers
+- **Template Action**: Replace with content controls (e.g., `{OrganizationName}`)
+
+### **🔵 BLUE - Conditional Sections**
+- **Description**: Content that appears/disappears based on business rules
+- **Automation**: Logic-based automation
+- **Examples**: CSC-specific sections, security level variations, client-specific content
+- **Template Action**: Use conditional content controls or section controls
+
+### **🟠 ORANGE - Repeating Elements**
+- **Description**: Lists or sections that repeat based on data
+- **Automation**: Template iteration/loops
+- **Examples**: CC recipient lists, corrective measures, personnel tables, checklist items
+- **Template Action**: Use repeating section content controls
+
+### **🔴 RED - User Input Required**
+- **Description**: Content requiring manual inspector input or decision
+- **Automation**: Assisted input with templates/suggestions
+- **Examples**: Inspection comments, recommendations, specific findings
+- **Template Action**: Rich text content controls with placeholder guidance
+
+### **🟣 PURPLE - Auto-calculated**
+- **Description**: Derived or computed values
+- **Automation**: Calculated fields
+- **Examples**: Days between dates, completion percentages, summary statistics
+- **Template Action**: Formula-based content controls
+
 ## Template Files Required
 
 ### 1. ApprovalLetter.docx
