@@ -86,7 +86,7 @@ export const InspectionApp = () => {
       case 'memorandum':
         return showDocMemo ? <MemorandumTab {...inspectionState} /> : <MainForm {...inspectionState} />;
       case 'inspection':
-        return showInspectionCorrective ? <InspectionTab {...inspectionState} /> : <MainForm {...inspectionState} />;
+        return showInspectionCorrective ? <InspectionTab mainForm={mainForm} onFinalReportUpdate={(updates) => console.log('Final report updates:', updates)} /> : <MainForm {...inspectionState} />;
       case 'corrective':
         return showInspectionCorrective ? <CorrectiveMeasuresTab {...inspectionState} /> : <MainForm {...inspectionState} />;
       case 'documents':
