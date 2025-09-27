@@ -40,14 +40,6 @@ export function UserMenuDropdown({
 }: UserMenuDropdownProps) {
   const { user, isAdmin, isDev, signOut } = useAuth();
   
-  // Debug logging
-  console.log('🎯 UserMenuDropdown render:', {
-    user: user?.email,
-    isAdmin,
-    isDev,
-    inspector: inspector.email
-  });
-  
   // Safe theme hook usage with fallback
   let theme: 'light' | 'dark' | 'system' = 'system';
   let setTheme: (theme: 'light' | 'dark' | 'system') => void = () => {};
@@ -68,7 +60,6 @@ export function UserMenuDropdown({
   };
 
   const handleRefresh = async () => {
-    console.log('🔄 Manual refresh triggered');
     window.location.reload();
   };
 
