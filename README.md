@@ -49,12 +49,12 @@
 - **Shadcn/ui**: Accessible component library built on Radix UI primitives
 
 ### Backend & Infrastructure
-- **Supabase**: Full-stack backend platform
-  - **Authentication**: Secure user management with JWT tokens
-  - **Database**: PostgreSQL with Row-Level Security (RLS)
-  - **Storage**: Encrypted file storage with CDN delivery
-  - **Edge Functions**: Serverless functions for complex processing
-  - **Real-time**: Live data synchronization across clients
+- **SharePoint Online**: M365-based backend platform
+  - **Authentication**: Azure AD with MSAL for secure user management
+  - **Database**: SharePoint Lists for structured data storage
+  - **Storage**: SharePoint Document Library with version control
+  - **Serverless Functions**: Power Automate flows for document generation and automation
+  - **Integration**: Microsoft Graph API for M365 services
 
 ### File Management & Processing
 - **React Dropzone**: Drag-and-drop file uploads
@@ -62,17 +62,18 @@
 - **Upload Limits**: 25MB per file, multiple file support
 - **Auto-Processing**: Image embedding and document linking in reports
 
-### Database Schema
-```sql
--- Core Tables
-organizations: Company/site information with public read access
-profiles: User profile management with RLS policies
-user_roles: Role-based access control (admin/user)
+### SharePoint Lists Schema
+```
+-- Core Lists
+Inspectors: Inspector profile management with name, initials, email, folder path
+Activities: Complete inspection data including org info, contract details, security level, dates
+CorrectiveMeasures: Tracked corrective actions linked to activities
+ApprovalCCs: CC recipients for approval letters
+RunLog: Audit trail of all system actions and document generation
 
--- Storage Buckets
-document-templates: Word template storage
-inspection-files: Uploaded supporting documents  
-generated-reports: System-generated outputs
+-- Document Library Structure
+Templates/: Word template storage with content controls
+Inspectors/[initials]/: Individual inspector folders for generated documents
 ```
 
 ---
@@ -121,16 +122,24 @@ npm --version     # Should show v9.0.0+
 
 ### Environment Configuration
 ```bash
-# Pre-configured Environment Variables
-VITE_SUPABASE_URL=https://ejctzcsegswfrkwbywte.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=[configured]
-VITE_SUPABASE_PROJECT_ID=ejctzcsegswfrkwbywte
+# Azure AD Configuration
+VITE_AZURE_TENANT_ID=[your-tenant-id]
+VITE_AZURE_CLIENT_ID=[your-client-id]
+
+# SharePoint Configuration
+VITE_SHAREPOINT_SITE_URL=https://[tenant].sharepoint.com/sites/ProjectINGOT
+
+# Power Automate Flow URLs
+VITE_FLOW_CREATE_FOLDER=[flow-url]
+VITE_FLOW_GENERATE_DOC=[flow-url]
+VITE_FLOW_UPLOAD_DOC=[flow-url]
 
 # Optional Production Variables
 VITE_APP_VERSION=2.5.0
 VITE_ENVIRONMENT=production
-VITE_SENTRY_DSN=[for error tracking]
 ```
+
+> **Important**: Copy `.env.example` to `.env.local` and fill in your values. See [SharePoint Deployment Guide](docs/SharePoint-Deployment-Guide-NonTechnical.md) for details.
 
 ---
 
@@ -226,27 +235,28 @@ npm run lint
 ## 🔐 Security & Authentication
 
 ### Authentication System
-- **Provider**: Supabase Authentication with email/password
-- **Session Management**: JWT tokens with automatic refresh
-- **Profile System**: Automatic profile creation and management
-- **Role-Based Access**: Admin and user roles with appropriate permissions
+- **Provider**: Azure AD with Microsoft Authentication Library (MSAL)
+- **Session Management**: OAuth 2.0 tokens with automatic refresh
+- **Profile System**: Integration with M365 user profiles
+- **Role-Based Access**: SharePoint permissions and Azure AD groups
 
 ### Data Security Features
-```sql
+```
 -- Security Implementation
-Row-Level Security (RLS): Database-level access control
-Encryption at Rest: AES-256 for all stored data
+SharePoint Permissions: List and folder-level access control
+Encryption at Rest: Microsoft's enterprise-grade encryption
 Encryption in Transit: TLS 1.3 for all communications
-Input Validation: Client and server-side validation
-SQL Injection Protection: Parameterized queries only
-File Upload Security: Type validation and size limits
+Input Validation: Client-side validation with Azure AD authentication
+Secure API Access: Microsoft Graph API with OAuth 2.0
+File Upload Security: SharePoint's built-in virus scanning and type validation
 ```
 
 ### Compliance & Standards
 - **Web Standards**: HTML5, CSS3, ECMAScript 2022, WCAG 2.1 AA
-- **Security Standards**: OWASP Top 10 protection, CSP implementation
+- **Security Standards**: OWASP Top 10 protection, Microsoft security baseline
 - **Government Standards**: Security clearance requirements, document classification handling
-- **Privacy Compliance**: GDPR, CCPA ready with data sovereignty support
+- **Privacy Compliance**: GDPR, CCPA ready with Microsoft 365 compliance features
+- **Microsoft Compliance**: Adheres to M365 security and compliance standards
 
 ---
 
@@ -359,30 +369,37 @@ flowchart LR
 
 ## 🔧 Integration & API Requirements
 
-### Microsoft 365 Integration (Optional)
+### Microsoft 365 Integration (Required)
 ```
 Microsoft Graph API: v1.0 for M365 services
-SharePoint Online: Required for template storage and collaboration
-Power Automate: Premium license recommended for workflow automation
-Azure AD: For Single Sign-On (SSO) integration
-Exchange Online: For email template and notification services
+SharePoint Online: Required for data storage, document library, and collaboration
+Power Automate: Required for document generation and automation workflows
+Azure AD: Required for authentication and Single Sign-On (SSO)
+MSAL (Microsoft Authentication Library): Client-side authentication
 ```
 
-### External Service Integration
-- **SMTP Services**: Email notification delivery with authentication
-- **Document Services**: PDF generation and Word document processing
-- **Storage Services**: Additional cloud storage integration capabilities
-- **Authentication Providers**: Support for enterprise SSO solutions
+### SharePoint Lists API
+- **List Operations**: Create, read, update, delete inspection data
+- **File Operations**: Upload, download, and manage documents
+- **Folder Management**: Automatic folder creation and organization
+- **Permissions**: SharePoint-based access control
 
-### API Endpoints & Functionality
+### Power Automate Flows
+```typescript
+// Required Flows
+Create Inspector Folder: Automated folder structure creation
+Generate Document: Word template population and document creation
+Upload Supporting Documents: File upload and organization automation
+```
+
+### Microsoft Graph Endpoints
 ```typescript
 // Core API Categories
-Authentication: User login, registration, profile management
-Inspections: CRUD operations for inspection data and workflows
-Documents: Template processing, generation, and file management
-Organizations: Company data lookup and management
-Reports: Final report generation and export capabilities
-Files: Upload, storage, and retrieval with security controls
+Authentication: Azure AD OAuth 2.0 authentication
+SharePoint Lists: CRUD operations via Microsoft Graph
+Documents: SharePoint Document Library operations
+Files: Upload, download, and file management
+Users: Azure AD user profile access
 ```
 
 ---
@@ -395,10 +412,11 @@ Files: Upload, storage, and retrieval with security controls
 ```bash
 # Issue: Login failures or session timeouts
 # Solutions:
-1. Verify Supabase credentials in environment variables
-2. Clear browser cache and cookies
-3. Check internet connectivity and firewall settings
-4. Validate user account status in Supabase dashboard
+1. Verify Azure AD credentials in environment variables (VITE_AZURE_TENANT_ID, VITE_AZURE_CLIENT_ID)
+2. Check Azure AD App Registration permissions and admin consent
+3. Clear browser cache and cookies
+4. Validate redirect URI matches deployment URL
+5. Check internet connectivity and firewall settings
 ```
 
 #### File Upload Issues
@@ -408,7 +426,9 @@ Files: Upload, storage, and retrieval with security controls
 1. Check file size limits (25MB maximum per file)
 2. Verify supported file formats (images, PDF, Office docs)
 3. Ensure stable internet connection during uploads
-4. Validate storage bucket permissions in Supabase
+4. Validate SharePoint folder permissions
+5. Check Power Automate flow status (Upload Supporting Documents)
+6. Verify VITE_FLOW_UPLOAD_DOC environment variable is configured
 ```
 
 #### Template Generation Errors
@@ -416,9 +436,12 @@ Files: Upload, storage, and retrieval with security controls
 # Issue: Document generation failures
 # Solutions:
 1. Validate Word template content controls and naming
-2. Check field mapping configuration and data completeness
-3. Verify template file accessibility and permissions
-4. Test with minimal data set to isolate issues
+2. Verify templates are uploaded to SharePoint Templates folder
+3. Check Power Automate flow status (Generate Document)
+4. Verify VITE_FLOW_GENERATE_DOC environment variable is configured
+5. Check field mapping configuration and data completeness
+6. Test with minimal data set to isolate issues
+7. Review Power Automate run history for specific errors
 ```
 
 #### Performance Issues
@@ -433,15 +456,19 @@ Files: Upload, storage, and retrieval with security controls
 
 ### Debug Tools & Monitoring
 - **Browser Developer Tools**: Console errors, network monitoring, performance analysis
-- **Supabase Dashboard**: Database queries, real-time monitoring, user management
+- **Power Automate**: Flow run history, error details, and troubleshooting
+- **SharePoint Admin Center**: List management, permissions, storage monitoring
+- **Azure AD Portal**: Authentication logs, app registration status
+- **Microsoft Graph Explorer**: API testing and debugging
 - **Application Logging**: Built-in error tracking and performance metrics
-- **File Upload Monitoring**: Progress tracking and error reporting systems
 
 ### Support Resources
 - **Built-in Documentation**: Contextual help available throughout application
-- **Template Configuration**: Comprehensive Word template setup guides
-- **System Requirements**: Detailed technical specifications and prerequisites
-- **Integration Guides**: Step-by-step M365 and SharePoint setup instructions
+- **Deployment Guides**: [Non-technical](docs/SharePoint-Deployment-Guide-NonTechnical.md) and [Technical](docs/SharePoint-Technical-Migration-Guide.md) guides
+- **Template Configuration**: [Word template setup guide](docs/word-templates/README-Templates.md)
+- **System Requirements**: [Detailed specifications](docs/SYSTEM-REQUIREMENTS.md)
+- **M365 Integration**: [Complete implementation guide](docs/M365-Implementation-Guide.md)
+- **GitHub Workflow**: [Version control and CI/CD guide](docs/GitHub-Deployment-Workflow.md)
 
 ---
 

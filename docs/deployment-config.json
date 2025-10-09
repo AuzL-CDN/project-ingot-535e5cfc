@@ -139,14 +139,46 @@
   
   "environment": {
     "required": [
-      "REACT_APP_SHAREPOINT_SITE_URL",
-      "REACT_APP_TENANT_ID", 
-      "REACT_APP_CLIENT_ID",
-      "REACT_APP_POWER_AUTOMATE_BASE_URL"
+      "VITE_AZURE_TENANT_ID",
+      "VITE_AZURE_CLIENT_ID",
+      "VITE_SHAREPOINT_SITE_URL",
+      "VITE_FLOW_CREATE_FOLDER",
+      "VITE_FLOW_GENERATE_DOC",
+      "VITE_FLOW_UPLOAD_DOC"
     ],
     "optional": [
-      "REACT_APP_ENVIRONMENT",
-      "REACT_APP_API_VERSION"
+      "VITE_APP_VERSION",
+      "VITE_ENVIRONMENT"
+    ]
+  },
+  
+  "github": {
+    "integration": {
+      "repository": "https://github.com/[your-org]/project-ingot",
+      "branch": "main",
+      "cicd": "GitHub Actions",
+      "deploymentTarget": "Azure Static Web Apps"
+    },
+    "secrets": [
+      "AZURE_STATIC_WEB_APPS_API_TOKEN",
+      "VITE_AZURE_TENANT_ID",
+      "VITE_AZURE_CLIENT_ID",
+      "VITE_SHAREPOINT_SITE_URL",
+      "VITE_FLOW_CREATE_FOLDER",
+      "VITE_FLOW_GENERATE_DOC",
+      "VITE_FLOW_UPLOAD_DOC"
+    ]
+  },
+  
+  "migration": {
+    "status": "Complete",
+    "from": "Supabase",
+    "to": "SharePoint Online",
+    "migratedComponents": [
+      "Authentication (Supabase Auth → Azure AD/MSAL)",
+      "Database (PostgreSQL → SharePoint Lists)",
+      "Storage (Supabase Storage → SharePoint Document Library)",
+      "Functions (Edge Functions → Power Automate Flows)"
     ]
   }
 }
