@@ -5,7 +5,6 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Database, Upload, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import * as XLSX from 'xlsx';
 
 interface ImportRecord {
@@ -112,42 +111,8 @@ export const DataImportUtility = () => {
       setStatus('importing');
       setProgress(50);
 
-      // Import in chunks to handle large datasets
-      const chunkSize = 500; // Import 500 records per batch
-      let importedCount = 0;
-      
-      for (let i = 0; i < organizations.length; i += chunkSize) {
-        const chunk = organizations.slice(i, i + chunkSize);
-        
-        const { data, error } = await supabase.functions.invoke('import-organizations', {
-          body: { organizations: chunk }
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        if (!data.success) {
-          throw new Error(data.error || 'Import batch failed');
-        }
-
-        importedCount += data.imported;
-        
-        // Update progress
-        const progressPercent = 50 + ((importedCount / organizations.length) * 50);
-        setProgress(Math.min(100, progressPercent));
-        
-        console.log(`Imported batch ${Math.floor(i / chunkSize) + 1}: ${data.imported} records (Total: ${importedCount}/${organizations.length})`);
-      }
-
-      setProgress(100);
-      setStatus('success');
-      setRecordCount(importedCount);
-      
-      toast({
-        title: "Import Successful",
-        description: `Successfully imported ${importedCount} organization records from Excel file.`,
-      });
+      // Import removed - will be replaced with SharePoint integration
+      throw new Error('Import functionality not available. Awaiting SharePoint integration.');
 
     } catch (error) {
       console.error('Import error:', error);
@@ -164,17 +129,13 @@ export const DataImportUtility = () => {
 
   const checkCurrentRecords = async () => {
     try {
-      const { data, error } = await supabase.functions.invoke('import-organizations');
-      
-      if (error) throw error;
-      
-      if (data.success) {
-        setRecordCount(data.currentRecords);
-        toast({
-          title: "Database Status",
-          description: data.message,
-        });
-      }
+      // Database check removed - will be replaced with SharePoint integration
+      setRecordCount(0);
+      toast({
+        title: "Not Available",
+        description: "Database status check not available. Awaiting SharePoint integration.",
+        variant: "destructive"
+      });
     } catch (error) {
       console.error('Status check error:', error);
       toast({

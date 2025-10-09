@@ -8,7 +8,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Search, AlertCircle, CheckCircle, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface AddressLookupProps {
   orgSiteNumber: string;
@@ -39,29 +38,12 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
     setIsLooking(true);
     
     try {
-      // Query Supabase for organization data
-      const { data: organizations, error } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('org_site_id', orgSiteNumber.trim())
-        .limit(1);
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (organizations && organizations.length > 0) {
-        const found = organizations[0];
-        setFoundAddress(found.address);
-        setFoundCompany(found.organization_name);
-        setShowVerifyDialog(true);
-      } else {
-        toast({
-          title: "Organization Not Found",
-          description: `No organization found with Site Number: ${orgSiteNumber}`,
-          variant: "destructive"
-        });
-      }
+      // Database lookup removed - will be replaced with SharePoint integration
+      toast({
+        title: "Not Available",
+        description: "Organization lookup not available. Awaiting SharePoint integration.",
+        variant: "destructive"
+      });
     } catch (error) {
       console.error('Lookup error:', error);
       toast({
@@ -103,29 +85,14 @@ export const AddressLookup = ({ orgSiteNumber, currentAddress, onAddressUpdate, 
     }
 
     try {
-      // Update the Supabase organizations table with the new address
-      const { error } = await supabase
-        .from('organizations')
-        .update({ 
-          address: updateAddress.trim(),
-          updated_at: new Date().toISOString()
-        })
-        .eq('org_site_id', orgSiteNumber.trim());
-
-      if (error) {
-        throw error;
-      }
-
-      onAddressUpdate(updateAddress);
-      if (onCompanyUpdate && foundCompany) {
-        onCompanyUpdate(foundCompany);
-      }
-      setShowUpdateDialog(false);
-      
+      // Database update removed - will be replaced with SharePoint integration
       toast({
-        title: "Address Updated",
-        description: "The organization directory has been updated with the new address.",
+        title: "Not Available",
+        description: "Address update not available. Awaiting SharePoint integration.",
+        variant: "destructive"
       });
+
+      setShowUpdateDialog(false);
     } catch (error) {
       console.error('Update error:', error);
       toast({

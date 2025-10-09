@@ -1,4 +1,0 @@
-project_id = "ejctzcsegswfrkwbywte"
-
-[functions.import-organizations]
-verify_jwt = false

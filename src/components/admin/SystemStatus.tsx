@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface SystemMetrics {
   totalUsers: number;
@@ -62,42 +61,24 @@ export const SystemStatus = () => {
     try {
       setLoading(true);
       
-      // Fetch user count
-      const { count: userCount, error: userError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      // Fetch organization count
-      const { count: orgCount, error: orgError } = await supabase
-        .from('organizations')
-        .select('*', { count: 'exact', head: true });
-
-      // Check database connectivity
-      const dbStartTime = Date.now();
-      const { data: dbTest, error: dbError } = await supabase
-        .from('profiles')
-        .select('id')
-        .limit(1);
-      const dbLatency = Date.now() - dbStartTime;
-
-      // Update metrics
+      // Metrics removed - will be replaced with SharePoint integration
       setMetrics({
-        totalUsers: userCount || 0,
-        totalOrganizations: orgCount || 0,
-        totalActivities: 0, // This would be fetched from activities table if it exists
-        databaseStatus: dbError ? 'error' : dbLatency > 1000 ? 'warning' : 'healthy',
-        authStatus: 'healthy', // Assume healthy if we can make requests
-        storageUsage: Math.random() * 100, // Mock storage usage
-        lastBackup: new Date(Date.now() - Math.random() * 86400000).toISOString()
+        totalUsers: 0,
+        totalOrganizations: 0,
+        totalActivities: 0,
+        databaseStatus: 'error',
+        authStatus: 'error',
+        storageUsage: 0,
+        lastBackup: new Date().toISOString()
       });
 
       // Update health checks
       setHealthChecks([
         {
           service: 'Database',
-          status: dbError ? 'error' : dbLatency > 1000 ? 'warning' : 'healthy',
-          latency: dbLatency,
-          message: dbError ? `Error: ${dbError.message}` : `Responsive (${dbLatency}ms)`,
+          status: 'error',
+          latency: 0,
+          message: 'Database not available - awaiting SharePoint integration',
           icon: Database
         },
         {

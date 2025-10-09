@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Users, UserPlus, Shield, Settings, AlertCircle, Crown, Eye, Trash2 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   id: string;
@@ -38,31 +37,8 @@ export const UserManagement = () => {
     try {
       setLoading(true);
       
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (profilesError) {
-        throw profilesError;
-      }
-
-      // Fetch roles separately
-      const { data: roles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('user_id, role');
-
-      if (rolesError) {
-        throw rolesError;
-      }
-
-      // Combine profiles with roles
-      const usersWithRoles = profiles?.map(profile => ({
-        ...profile,
-        roles: roles?.filter(role => role.user_id === profile.user_id).map(r => ({ role: r.role })) || []
-      })) || [];
-
-      setUsers(usersWithRoles);
+      // User management removed - will be replaced with SharePoint integration
+      setUsers([]);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
@@ -83,31 +59,12 @@ export const UserManagement = () => {
 
   const handleRoleChange = async (userId: string, newRole: AppRole) => {
     try {
-      // Remove existing roles for this user
-      await supabase
-        .from('user_roles')
-        .delete()
-        .eq('user_id', userId);
-
-      // Add new role
-      const { error } = await supabase
-        .from('user_roles')
-        .insert({
-          user_id: userId,
-          role: newRole
-        });
-
-      if (error) {
-        throw error;
-      }
-
+      // Role management removed - will be replaced with SharePoint integration
       toast({
-        title: "Role Updated",
-        description: `User role changed to ${newRole}`,
+        title: "Not Available",
+        description: "User role management not available. Awaiting SharePoint integration.",
+        variant: "destructive"
       });
-
-      // Refresh the user list
-      await fetchUsers();
       setShowRoleDialog(false);
       setSelectedUser(null);
     } catch (error) {
