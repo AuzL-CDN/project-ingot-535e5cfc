@@ -13,7 +13,8 @@ import {
   AlertTriangle, 
   FolderOpen,
   BookOpen,
-  Shield
+  Shield,
+  ExternalLink
 } from 'lucide-react';
 
 interface TabNavigationProps {
@@ -58,6 +59,7 @@ export const TabNavigation = ({
     { id: 'approval', labelKey: 'approvalLetterTab', icon: CheckCircle, isStatic: true, requiresInspector: true },
     { id: 'finalreport', labelKey: 'finalReportTab', icon: FileText, isStatic: true, requiresInspector: true },
     { id: 'disisnotes', labelKey: 'disisNotes', icon: BookOpen, isStatic: true, requiresInspector: true },
+    { id: 'resources', labelKey: 'resourcesTab', icon: ExternalLink, isStatic: true, requiresInspector: true },
     { id: 'status', labelKey: 'statusTab', icon: Activity, isStatic: true, requiresInspector: true },
   ];
 

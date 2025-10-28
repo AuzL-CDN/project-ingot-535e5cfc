@@ -244,6 +244,10 @@ export const translations = {
     en: "Doc",
     fr: "Doc"
   },
+  resourcesTab: {
+    en: "Resources",
+    fr: "Ressources"
+  },
   // Translation keys for admin tab
   adminTab: {
     en: "Admin",

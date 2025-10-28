@@ -15,6 +15,7 @@ import { CorrectiveMeasuresTab } from './tabs/CorrectiveMeasuresTab';
 import { SupportingDocuments } from './tabs/SupportingDocuments';
 import { FinalReportTab } from './tabs/FinalReportTab';
 import { DISISNotesTab } from './tabs/DISISNotesTab';
+import { ResourcesTab } from './tabs/ResourcesTab';
 import { UserMenuDropdown } from '@/components/UserMenuDropdown';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from './auth/AuthProvider';
@@ -32,7 +33,8 @@ export type TabId =
   | 'inspection' 
   | 'corrective' 
   | 'documents'
-  | 'finalreport';
+  | 'finalreport'
+  | 'resources';
 
 export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
@@ -93,6 +95,8 @@ export const InspectionApp = () => {
         return <SupportingDocuments {...inspectionState} />;
       case 'finalreport':
         return <FinalReportTab mainForm={mainForm} correctiveMeasures={inspectionState.correctiveMeasures} saveActivity={inspectionState.saveActivity} />;
+      case 'resources':
+        return <ResourcesTab />;
       default:
         return <MainForm {...inspectionState} />;
     }
