@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { TabId } from '../InspectionApp';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useAuth } from '../auth/AuthProvider';
 import { 
   User, 
   FileText, 
@@ -45,6 +46,7 @@ export const TabNavigation = ({
   uiLanguage
 }: TabNavigationProps) => {
   const { t } = useTranslation(uiLanguage);
+  const { isAdmin, isDev } = useAuth();
   
   const tabs: TabItem[] = [
     { id: 'inspector', labelKey: 'inspectorInfo', icon: User, isStatic: true },
@@ -61,9 +63,15 @@ export const TabNavigation = ({
     { id: 'disisnotes', labelKey: 'disisNotes', icon: BookOpen, isStatic: true, requiresInspector: true },
     { id: 'resources', labelKey: 'resourcesTab', icon: ExternalLink, isStatic: true, requiresInspector: true },
     { id: 'status', labelKey: 'statusTab', icon: Activity, isStatic: true, requiresInspector: true },
+    { id: 'admin', labelKey: 'adminTab', icon: Shield, isStatic: true },
   ];
 
   const isTabVisible = (tab: TabItem) => {
+    // Admin tab visible only to admins or in dev mode
+    if (tab.id === 'admin') {
+      return isAdmin || isDev;
+    }
+
     if (!isInspectorSetup && tab.requiresInspector) {
       return false;
     }
