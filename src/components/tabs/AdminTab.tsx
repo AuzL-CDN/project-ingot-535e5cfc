@@ -12,7 +12,8 @@ import {
   Settings, 
   AlertCircle,
   LogOut,
-  Crown
+  Crown,
+  AlertTriangle
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { UserManagement } from '../admin/UserManagement';
@@ -77,6 +78,17 @@ export const AdminTab = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* Dev Mode Security Warning */}
+      {isDev && (
+        <Alert variant="destructive" className="border-orange-500 bg-orange-50 dark:bg-orange-950">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Development Mode Active:</strong> Admin access is enabled on localhost for testing only. 
+            This is NOT secure for production. Implement proper authentication before deploying.
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* Admin Header */}
       <Card>
         <CardHeader>

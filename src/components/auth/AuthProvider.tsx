@@ -32,19 +32,35 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  // Stub implementation - will be replaced with SharePoint auth
+  // DEV MODE: Enable admin access on localhost only
+  const isDevMode = import.meta.env.DEV && 
+    (typeof window !== 'undefined' && 
+     (window.location.hostname === 'localhost' || 
+      window.location.hostname === '127.0.0.1'));
+
   const value: AuthContextType = {
-    user: null,
+    user: isDevMode ? { 
+      id: 'dev-user', 
+      email: 'dev@localhost',
+      app_metadata: {},
+      user_metadata: {},
+      aud: 'authenticated',
+      created_at: new Date().toISOString()
+    } : null,
     session: null,
-    profile: null,
-    roles: [],
-    isAdmin: false,
+    profile: isDevMode ? {
+      id: 'dev-user',
+      display_name: 'Dev Admin',
+      email: 'dev@localhost'
+    } : null,
+    roles: isDevMode ? ['admin'] : [],
+    isAdmin: isDevMode,
     isModerator: false,
-    isDev: false,
+    isDev: isDevMode,
     isM365: false,
     loading: false,
-    signIn: async () => ({ error: { message: 'Auth not configured' } }),
-    signUp: async () => ({ error: { message: 'Auth not configured' } }),
+    signIn: async () => ({ error: { message: 'Auth not configured - Dev mode active' } }),
+    signUp: async () => ({ error: { message: 'Auth not configured - Dev mode active' } }),
     signOut: async () => {},
     refreshProfile: async () => {},
   };
