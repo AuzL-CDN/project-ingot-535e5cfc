@@ -1,531 +1,1140 @@
 # Project INGOT - Inspection Management System
-## Comprehensive Application Documentation & Requirements
+## Comprehensive Deployment & Administration Guide
 
 ### 🔍 Project Overview
 
 **Project INGOT** is a comprehensive Inspection Management System designed for government security inspectors to streamline inspection processes, automate document generation, and ensure compliance with security protocols. The system supports multiple inspection types and integrates with Microsoft 365 environments.
 
-### 🌟 Key Features & Capabilities
+---
 
-#### Core Inspection Workflows
-- **1F & 1G Inspections**: Protected and Classified security inspections with intelligent checklists
-- **19F & 19G Inspections**: Document and Memorandum-based workflows  
-- **Final Report Generation**: Automated report creation from checklist responses
-- **Document Management**: Template-based document automation with color-coding
-- **Compliance Tracking**: Corrective measures and status monitoring
+## 🚀 Production Deployment Guide
 
-#### Advanced Checklist System *(Latest Feature)*
-- **1F - Protected Checklist**: Preliminary questions, IT infrastructure, threat assessment, personnel security
-- **1G - Classified Checklist**: Enhanced security controls, system location mapping, classified-specific requirements
-- **Intelligent Analysis Engine**: Automated Final Report population from checklist responses
-- **Smart File Integration**: Images auto-embed, documents become clickable links
-- **Progress Tracking**: Real-time completion status with conditional logic
-- **Confidence Scoring**: AI-powered analysis with reliability metrics
+### Prerequisites
 
-#### Document Automation Framework
-**Color-Coding System for Template Automation:**
-- **⚫ BLACK**: Static content (headers, labels) - Direct copy, no processing
-- **🟢 GREEN**: Dynamic content - Data lookup from forms/database
-- **🔵 BLUE**: Conditional content - Business logic application
-- **🟠 ORANGE**: Repeating content - Loop generation for lists/tables  
-- **🔴 RED**: User input required - Manual entry fields
-- **🟣 PURPLE**: Auto-calculated - Formula execution and computed values
+Before deploying Project INGOT, ensure you have:
 
-#### Multi-Language Support
-- **UI Languages**: English/French interface switching
-- **Document Languages**: Separate language control for generated documents
-- **Translation System**: Comprehensive translation management
-- **Context-Aware**: Language settings persist across sessions
+- **Node.js**: v18.0.0 or higher
+- **npm**: v9.0.0 or higher
+- **Git**: v2.28.0 or higher
+- **Microsoft 365 Tenant**: With Global Administrator access
+- **Azure AD**: Admin access for app registrations
+- **SharePoint Online**: Site collection administrator access
 
 ---
 
-## 🏗️ System Architecture & Technology Stack
+## 📦 Building from Source Code
 
-### Frontend Technologies
-- **React 18.3.1+**: Modern component-based UI framework
-- **TypeScript 5.0+**: Type-safe development and enhanced IDE support
-- **Vite 5.0+**: Fast build tool with hot module replacement
-- **Tailwind CSS 3.0+**: Utility-first CSS framework with custom design system
-- **Shadcn/ui**: Accessible component library built on Radix UI primitives
-
-### Backend & Infrastructure
-- **SharePoint Online**: M365-based backend platform
-  - **Authentication**: Azure AD with MSAL for secure user management
-  - **Database**: SharePoint Lists for structured data storage
-  - **Storage**: SharePoint Document Library with version control
-  - **Serverless Functions**: Power Automate flows for document generation and automation
-  - **Integration**: Microsoft Graph API for M365 services
-
-### File Management & Processing
-- **React Dropzone**: Drag-and-drop file uploads
-- **File Support**: Images (JPEG, PNG, GIF, WebP), Documents (PDF, DOC, DOCX, XLS, XLSX)
-- **Upload Limits**: 25MB per file, multiple file support
-- **Auto-Processing**: Image embedding and document linking in reports
-
-### SharePoint Lists Schema
-```
--- Core Lists
-Inspectors: Inspector profile management with name, initials, email, folder path
-Activities: Complete inspection data including org info, contract details, security level, dates
-CorrectiveMeasures: Tracked corrective actions linked to activities
-ApprovalCCs: CC recipients for approval letters
-RunLog: Audit trail of all system actions and document generation
-
--- Document Library Structure
-Templates/: Word template storage with content controls
-Inspectors/[initials]/: Individual inspector folders for generated documents
-```
-
----
-
-## 🚀 Getting Started & Requirements
-
-### System Requirements
-
-#### Production Environment
-- **CPU**: 2+ cores, 2.4GHz or higher
-- **RAM**: 4GB minimum, 8GB recommended
-- **Storage**: 10GB available space minimum
-- **Network**: Stable internet connection (minimum 10 Mbps)
-
-#### Browser Support (Latest Versions)
-- ✅ **Google Chrome** 90+ (Recommended)
-- ✅ **Mozilla Firefox** 88+
-- ✅ **Microsoft Edge** 90+
-- ✅ **Safari** 14+ (macOS only)
-
-#### Development Prerequisites
-```bash
-Node.js: v18.0.0 or higher
-npm: v9.0.0 or higher
-Git: v2.28.0 or higher
-Code Editor: VS Code, WebStorm, or similar
-```
-
-### Quick Setup & Installation
+### Step 1: Clone and Install Dependencies
 
 ```bash
 # Clone the repository
 git clone <YOUR_GIT_URL>
-cd <YOUR_PROJECT_NAME>
+cd project-ingot
 
-# Install dependencies
+# Install all dependencies
 npm install
-
-# Start development server
-npm run dev
 
 # Verify installations
 node --version    # Should show v18.0.0+
 npm --version     # Should show v9.0.0+
 ```
 
-### Environment Configuration
+### Step 2: Build Production Bundle
+
 ```bash
-# Azure AD Configuration
-VITE_AZURE_TENANT_ID=[your-tenant-id]
-VITE_AZURE_CLIENT_ID=[your-client-id]
-
-# SharePoint Configuration
-VITE_SHAREPOINT_SITE_URL=https://[tenant].sharepoint.com/sites/ProjectINGOT
-
-# Power Automate Flow URLs
-VITE_FLOW_CREATE_FOLDER=[flow-url]
-VITE_FLOW_GENERATE_DOC=[flow-url]
-VITE_FLOW_UPLOAD_DOC=[flow-url]
-
-# Optional Production Variables
-VITE_APP_VERSION=2.5.0
-VITE_ENVIRONMENT=production
-```
-
-> **Important**: Copy `.env.example` to `.env.local` and fill in your values. See [SharePoint Deployment Guide](docs/SharePoint-Deployment-Guide-NonTechnical.md) for details.
-
----
-
-## 👥 User Workflow & Application Features
-
-### Multi-Tab Inspection Interface
-1. **Inspector Info**: Profile setup (name, initials, email) and configuration
-2. **Main Form**: Company details, contract information, organization lookup
-3. **Search**: Activity management and historical inspection lookup
-4. **Approval Letter**: Automated approval document generation
-5. **Emails**: Communication templates and notification management
-6. **DISIS Notes**: Integrated note-taking with date stamping
-7. **Status**: Progress tracking and workflow monitoring
-8. **Document/Memorandum**: 19F/19G specific workflows
-9. **Inspection**: 1F/1G checklist workflows *(Enhanced in v2.5.0)*
-10. **Corrective Measures**: Issue tracking and resolution management
-11. **Supporting Documents**: File upload and organization
-12. **Final Report**: Comprehensive report generation with automation
-
-### Standard Inspection Process
-1. **Setup Phase**: Inspector profile configuration and credentials
-2. **Information Gathering**: Main form completion with auto-population
-3. **Checklist Execution**: 
-   - Select appropriate checklist type (1F Protected / 1G Classified)
-   - Complete sections with conditional logic and file uploads
-   - System tracks progress and validates completeness
-4. **Intelligent Analysis**: Automated response processing and finding generation
-5. **Report Generation**: Auto-populated Final Report with manual override capability
-6. **Document Production**: Export professional documents and communications
-7. **Workflow Completion**: Status tracking and activity archival
-
-### Advanced File Integration
-- **Smart Upload System**: Drag-and-drop with progress indicators and validation
-- **Automatic Processing**: Images embed directly in Final Reports
-- **Document Linking**: Files become interactive references with click-to-open
-- **Format Support**: Comprehensive file type support with security scanning
-- **Organization**: Files categorized by checklist section and question type
-
----
-
-## 🔧 Development & Deployment
-
-### Development Commands
-```bash
-# Development server with hot reload
-npm run dev
-
-# Type checking and validation
-npm run type-check
-
-# Production build generation
+# Run production build
 npm run build
 
-# Preview production build locally
+# This creates an optimized production build in the /dist folder
+# Output includes:
+# - Minified JavaScript bundles
+# - Optimized CSS files
+# - Static assets (images, fonts)
+# - HTML entry point (index.html)
+```
+
+### Step 3: Verify Build Output
+
+```bash
+# Preview the production build locally
 npm run preview
 
-# Code quality and linting
-npm run lint
+# The application will be available at http://localhost:4173
+# Test all critical features before deployment:
+# ✓ Authentication flow
+# ✓ Tab navigation
+# ✓ Form submissions
+# ✓ File uploads
+# ✓ Document generation
 ```
 
-### Deployment Options
+---
 
-#### Recommended Hosting Platforms
-- **Vercel**: Automatic deployments with GitHub integration, serverless functions
-- **Netlify**: Static site hosting with form handling and edge functions
-- **AWS Amplify**: Full-stack deployment with CI/CD pipeline
-- **Azure Static Web Apps**: Azure integration with custom domains
-- **Lovable Platform**: One-click deployment via Share → Publish
+## 🔄 Migrating from Supabase to Microsoft 365 Authentication
 
-#### Production Deployment Checklist
+### Overview
+
+Project INGOT was initially built with Supabase for rapid prototyping. For production deployment in government environments, you must replace Supabase authentication with Microsoft 365 Azure AD authentication.
+
+---
+
+### PHASE 1: Remove Supabase Dependencies
+
+#### Step 1.1: Uninstall Supabase Packages
+
 ```bash
-# Pre-deployment Verification
-1. Run npm run build successfully
-2. Verify environment variables are configured
-3. Test database connectivity and permissions
-4. Validate SSL/HTTPS configuration  
-5. Check file upload and storage functionality
-6. Verify authentication and user management
-7. Test document generation and templates
-8. Validate cross-browser compatibility
+# Remove Supabase client library
+npm uninstall @supabase/supabase-js
+
+# Remove Supabase-related packages
+npm uninstall @tanstack/react-query  # If only used for Supabase
 ```
 
-### Performance & Scalability Targets
-- **Page Load Time**: < 3 seconds initial load
-- **Navigation Speed**: < 1 second subsequent pages
-- **File Upload**: Support for 25MB files with progress tracking
-- **Concurrent Users**: 100+ simultaneous active sessions
-- **Database Performance**: < 500ms average query response
-- **Uptime Target**: 99.9% availability with monitoring
+#### Step 1.2: Delete Supabase Files
+
+```bash
+# Remove integration files
+rm -rf src/integrations/supabase/
+
+# Remove Supabase configuration
+rm -rf supabase/
+
+# Remove environment variables
+# Edit .env and remove:
+# - VITE_SUPABASE_PROJECT_ID
+# - VITE_SUPABASE_PUBLISHABLE_KEY
+# - VITE_SUPABASE_URL
+```
+
+#### Step 1.3: Remove Supabase Code References
+
+Files to modify:
+- `src/components/auth/AuthProvider.tsx` - Remove Supabase imports and logic
+- `src/App.tsx` - Remove Supabase client initialization
+- Any components importing from `@/integrations/supabase/client`
 
 ---
 
-## 🔐 Security & Authentication
+### PHASE 2: Configure Azure AD Application
 
-### Authentication System
-- **Provider**: Azure AD with Microsoft Authentication Library (MSAL)
-- **Session Management**: OAuth 2.0 tokens with automatic refresh
-- **Profile System**: Integration with M365 user profiles
-- **Role-Based Access**: SharePoint permissions and Azure AD groups
+#### Step 2.1: Create Azure AD App Registration
 
-### Data Security Features
+1. **Navigate to Azure Portal**
+   - Go to https://portal.azure.com
+   - Sign in with Global Administrator account
+
+2. **Register New Application**
+   ```
+   Azure Active Directory → App registrations → New registration
+   
+   Name: Project INGOT - Inspection Management System
+   Supported account types: Accounts in this organizational directory only
+   Redirect URI: 
+     - Type: Single-page application (SPA)
+     - URI: https://your-domain.com (production URL)
+     - Add: http://localhost:5173 (for local development)
+   ```
+
+3. **Record Application Details**
+   ```
+   Application (client) ID: [SAVE THIS - You'll need it]
+   Directory (tenant) ID: [SAVE THIS - You'll need it]
+   ```
+
+#### Step 2.2: Configure API Permissions
+
+Required Microsoft Graph API Permissions:
+
 ```
--- Security Implementation
-SharePoint Permissions: List and folder-level access control
-Encryption at Rest: Microsoft's enterprise-grade encryption
-Encryption in Transit: TLS 1.3 for all communications
-Input Validation: Client-side validation with Azure AD authentication
-Secure API Access: Microsoft Graph API with OAuth 2.0
-File Upload Security: SharePoint's built-in virus scanning and type validation
+1. Navigate to: API permissions → Add a permission → Microsoft Graph
+
+2. Add Delegated Permissions:
+   ✓ User.Read                    - Read user profile
+   ✓ User.ReadBasic.All           - Read all users' basic profiles
+   ✓ Sites.ReadWrite.All          - Read and write to SharePoint sites
+   ✓ Files.ReadWrite.All          - Read and write files
+   ✓ offline_access               - Maintain access to data
+   ✓ openid                       - OpenID Connect sign-in
+   ✓ profile                      - View users' basic profile
+   ✓ email                        - View users' email address
+
+3. Grant Admin Consent:
+   - Click "Grant admin consent for [Your Organization]"
+   - Click "Yes" to confirm
+   - All permissions should show "Granted for [Your Organization]"
 ```
 
-### Compliance & Standards
-- **Web Standards**: HTML5, CSS3, ECMAScript 2022, WCAG 2.1 AA
-- **Security Standards**: OWASP Top 10 protection, Microsoft security baseline
-- **Government Standards**: Security clearance requirements, document classification handling
-- **Privacy Compliance**: GDPR, CCPA ready with Microsoft 365 compliance features
-- **Microsoft Compliance**: Adheres to M365 security and compliance standards
+#### Step 2.3: Configure Authentication Settings
+
+```
+1. Navigate to: Authentication
+
+2. Platform configurations:
+   - Single-page application: https://your-domain.com
+   - Add additional redirect URIs as needed
+
+3. Implicit grant and hybrid flows:
+   ☑ Access tokens (used for implicit flows)
+   ☑ ID tokens (used for implicit and hybrid flows)
+
+4. Supported account types:
+   ○ Accounts in this organizational directory only
+
+5. Allow public client flows: No
+```
 
 ---
 
-## 📋 Template System & Document Automation
+### PHASE 3: Configure SharePoint Online
 
-### Word Template Integration
-Located in `docs/word-templates/`:
+#### Step 3.1: Create SharePoint Site Collection
+
+```bash
+1. Navigate to SharePoint Admin Center
+   https://[tenant]-admin.sharepoint.com
+
+2. Create Site Collection:
+   Sites → Active sites → Create
+
+   Template: Team site
+   Site name: Project INGOT
+   Site address: /sites/ProjectINGOT
+   Primary administrator: [Your admin account]
+   Additional owners:
+     - austin.larocque@tpsgc-pwgsc.gc.ca
+     - james.grace@tpsgc-pwgsc.gc.ca
 ```
-ApprovalLetter.docx          # Standard approval letters
-CSC_ApprovalLetter.docx      # CSC-specific approvals
-Checklist_Protected.docx     # 1F checklist template  
-Checklist_Classified.docx    # 1G checklist template
-FinalReport.docx             # Comprehensive report template
-Memorandum.docx              # Official memoranda
-README-Templates.md          # Configuration guide
+
+#### Step 3.2: Create SharePoint Lists
+
+Execute these PowerShell commands or create manually:
+
+```powershell
+# Connect to SharePoint Online
+Connect-PnPOnline -Url "https://[tenant].sharepoint.com/sites/ProjectINGOT" -Interactive
+
+# Create Inspectors List
+$inspectorsList = New-PnPList -Title "Inspectors" -Template GenericList
+Add-PnPField -List "Inspectors" -DisplayName "Inspector Name" -InternalName "InspectorName" -Type Text -Required
+Add-PnPField -List "Inspectors" -DisplayName "Initials" -InternalName "Initials" -Type Text -Required
+Add-PnPField -List "Inspectors" -DisplayName "Email" -InternalName "Email" -Type Text -Required
+Add-PnPField -List "Inspectors" -DisplayName "User ID" -InternalName "UserID" -Type Text -Required
+Add-PnPField -List "Inspectors" -DisplayName "Folder Path" -InternalName "FolderPath" -Type Text
+
+# Create Activities List
+$activitiesList = New-PnPList -Title "Activities" -Template GenericList
+Add-PnPField -List "Activities" -DisplayName "Activity Number" -InternalName "ActivityNumber" -Type Text -Required
+Add-PnPField -List "Activities" -DisplayName "Organization Site ID" -InternalName "OrgSiteID" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Company Name" -InternalName "CompanyName" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Client Department" -InternalName "ClientDepartment" -Type Text
+Add-PnPField -List "Activities" -DisplayName "CSO Name" -InternalName "CSOName" -Type Text
+Add-PnPField -List "Activities" -DisplayName "CSO Email" -InternalName "CSOEmail" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Contract Type" -InternalName "ContractType" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Contract Number" -InternalName "ContractNumber" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Security Level" -InternalName "SecurityLevel" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Inspection Type" -InternalName "InspectionType" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Inspection Class" -InternalName "InspectionClass" -Type Text
+Add-PnPField -List "Activities" -DisplayName "Date" -InternalName "InspectionDate" -Type DateTime
+Add-PnPField -List "Activities" -DisplayName "Status" -InternalName "Status" -Type Choice -Choices "Not Started","In Progress","Completed"
+Add-PnPField -List "Activities" -DisplayName "Inspector ID" -InternalName "InspectorID" -Type Text
+
+# Create User Roles List
+$userRolesList = New-PnPList -Title "UserRoles" -Template GenericList
+Add-PnPField -List "UserRoles" -DisplayName "User ID" -InternalName "UserID" -Type Text -Required
+Add-PnPField -List "UserRoles" -DisplayName "Email" -InternalName "Email" -Type Text -Required
+Add-PnPField -List "UserRoles" -DisplayName "Role" -InternalName "Role" -Type Choice -Choices "admin","moderator","user","m365" -Required
+
+# Create CorrectiveMeasures List
+$correctiveMeasuresList = New-PnPList -Title "CorrectiveMeasures" -Template GenericList
+Add-PnPField -List "CorrectiveMeasures" -DisplayName "Activity Number" -InternalName "ActivityNumber" -Type Text -Required
+Add-PnPField -List "CorrectiveMeasures" -DisplayName "Measure Description" -InternalName "MeasureDescription" -Type Note
+Add-PnPField -List "CorrectiveMeasures" -DisplayName "Status" -InternalName "Status" -Type Choice -Choices "Open","In Progress","Completed"
+Add-PnPField -List "CorrectiveMeasures" -DisplayName "Due Date" -InternalName "DueDate" -Type DateTime
+
+# Create RunLog List (Audit Trail)
+$runLogList = New-PnPList -Title "RunLog" -Template GenericList
+Add-PnPField -List "RunLog" -DisplayName "Action" -InternalName "Action" -Type Text -Required
+Add-PnPField -List "RunLog" -DisplayName "User ID" -InternalName "UserID" -Type Text
+Add-PnPField -List "RunLog" -DisplayName "Details" -InternalName "Details" -Type Note
+Add-PnPField -List "RunLog" -DisplayName "Timestamp" -InternalName "Timestamp" -Type DateTime -Required
+
+Write-Host "SharePoint Lists created successfully!" -ForegroundColor Green
 ```
 
-### Content Control Configuration
-Templates use Microsoft Word content controls with naming conventions:
-- `{field_name}` for simple text replacement
-- `{section_repeat}` for repeating content blocks
-- `{conditional_field}` for conditional content display
-- Color-coded visual indicators for automation levels
+#### Step 3.3: Create Document Library Structure
 
-### Automation Processing Workflow
-```mermaid
-flowchart LR
-    A[Template Load] --> B[Parse Content Controls]
-    B --> C[Categorize by Color Code]
-    C --> D[Process Dynamic Data]
-    C --> E[Apply Business Logic]  
-    C --> F[Generate Repeating Content]
-    C --> G[Collect User Input]
-    C --> H[Calculate Auto Fields]
-    D --> I[Merge Results]
-    E --> I
-    F --> I
-    G --> I
-    H --> I
-    I --> J[Generate Final Document]
+```powershell
+# Create Document Library
+New-PnPList -Title "Documents" -Template DocumentLibrary
+
+# Create folder structure
+Add-PnPFolder -Name "Templates" -Folder "Documents"
+Add-PnPFolder -Name "Inspectors" -Folder "Documents"
+Add-PnPFolder -Name "Generated" -Folder "Documents"
+
+Write-Host "Document Library structure created!" -ForegroundColor Green
+```
+
+#### Step 3.4: Upload Word Templates
+
+```powershell
+# Upload templates from local docs/word-templates/ folder
+$templateFiles = @(
+    "ApprovalLetter.docx",
+    "CSC_ApprovalLetter.docx",
+    "Checklist_Protected.docx",
+    "Checklist_Classified.docx",
+    "FinalReport.docx",
+    "Memorandum.docx"
+)
+
+foreach ($file in $templateFiles) {
+    Add-PnPFile -Path "./docs/word-templates/$file" -Folder "Documents/Templates"
+    Write-Host "Uploaded: $file" -ForegroundColor Cyan
+}
+
+Write-Host "All templates uploaded successfully!" -ForegroundColor Green
 ```
 
 ---
 
-## 🎯 Current Version: 2.5.0 - Advanced Checklist System
+### PHASE 4: Configure Mandatory Administrators
 
-### ✨ Latest Release Features (September 2025)
-- **🆕 Intelligent Checklist System**: Complete 1F/1G workflows with automated analysis
-- **🤖 Smart Analysis Engine**: AI-powered Final Report generation from checklist responses
-- **📎 Enhanced File Integration**: Automatic image embedding and document linking
-- **📊 Real-time Progress Tracking**: Dynamic completion status with conditional logic
-- **🔄 Workflow Automation**: Seamless integration between checklists and final reports
-- **📱 Responsive Design**: Optimized for desktop and tablet usage
+#### Step 4.1: Add System Administrators via PowerShell
 
-### 🛠️ Technical Improvements
-- **React Dropzone Integration**: Enhanced file upload with drag-and-drop support
-- **TypeScript Interfaces**: Comprehensive type safety for checklist data structures
-- **Analysis Engine**: Confidence scoring and automated content generation
-- **Performance Optimization**: Improved loading times and resource management
-- **Error Handling**: Enhanced error tracking and user feedback systems
+```powershell
+# Connect to SharePoint List
+Connect-PnPOnline -Url "https://[tenant].sharepoint.com/sites/ProjectINGOT" -Interactive
+
+# Get User IDs from Azure AD
+$austinUser = Get-PnPUser | Where-Object { $_.Email -eq "austin.larocque@tpsgc-pwgsc.gc.ca" }
+$jamesUser = Get-PnPUser | Where-Object { $_.Email -eq "james.grace@tpsgc-pwgsc.gc.ca" }
+
+# Add Austin Larocque as Admin
+Add-PnPListItem -List "UserRoles" -Values @{
+    "UserID" = $austinUser.Id
+    "Email" = "austin.larocque@tpsgc-pwgsc.gc.ca"
+    "Role" = "admin"
+}
+
+# Add James Grace as Admin
+Add-PnPListItem -List "UserRoles" -Values @{
+    "UserID" = $jamesUser.Id
+    "Email" = "james.grace@tpsgc-pwgsc.gc.ca"
+    "Role" = "admin"
+}
+
+Write-Host "Mandatory administrators configured successfully!" -ForegroundColor Green
+Write-Host "Admins: Austin Larocque, James Grace" -ForegroundColor Yellow
+```
+
+#### Step 4.2: Verify Admin Access
+
+```powershell
+# Verify admin roles
+$admins = Get-PnPListItem -List "UserRoles" -Query "<View><Query><Where><Eq><FieldRef Name='Role'/><Value Type='Choice'>admin</Value></Eq></Where></Query></View>"
+
+Write-Host "Current System Administrators:" -ForegroundColor Cyan
+foreach ($admin in $admins) {
+    Write-Host "  - $($admin['Email']) (UserID: $($admin['UserID']))" -ForegroundColor Green
+}
+```
 
 ---
 
-## 📊 Version History & Changelog
+### PHASE 5: Install and Configure MSAL
 
-### Version 2.5.0 (Current) - Advanced Checklist System
-**🚀 Major Feature Release**
-- ✅ 1F (Protected) and 1G (Classified) checklist sub-tabs under Inspection
-- ✅ Intelligent Analysis Engine with automated Final Report population  
-- ✅ Advanced file upload system with drag-and-drop support
-- ✅ Smart image embedding and document linking in reports
-- ✅ Progress tracking with real-time completion status
-- ✅ Conditional logic for dynamic question flows
-- ✅ React Dropzone integration for file management
-- ✅ Comprehensive analysis engine with confidence scoring
+#### Step 5.1: Install Microsoft Authentication Library
 
-### Version 2.4.0 - Document Automation Framework  
-**📄 Automation Enhancement**
-- ✅ Content automation color-coding system implementation
-- ✅ Template field mapping with visual indicators
-- ✅ Enhanced approval letter generation capabilities
-- ✅ ContentAutomationService with business logic engine
-- ✅ Multi-language template support
-- ✅ Word template integration with content controls
+```bash
+# Install MSAL React and Browser packages
+npm install @azure/msal-react @azure/msal-browser
 
-### Version 2.3.0 - Core Infrastructure & Multi-Tab Workflow
-**🔧 Foundation Release**
-- ✅ Complete Supabase integration (Auth, Database, Storage)
-- ✅ Multi-tab inspection workflow implementation
-- ✅ Inspector profile management system
-- ✅ Main form with organization lookup functionality
-- ✅ Search and activity management capabilities
-- ✅ DISIS notes integration with date stamping
-- ✅ Supporting documents management system
-- ✅ Corrective measures tracking and resolution
-- ✅ Multi-language support (EN/FR) with context switching
-- ✅ Responsive design with Tailwind CSS and accessibility compliance
-
-### Planned Features (Roadmap)
-- 🔄 **PDF Form Integration**: Fillable PDF support for complex checklist sections
-- 🔄 **Enhanced AI Analysis**: Advanced document parsing and intelligent content extraction
-- 🔄 **Mobile Application**: React Native companion app for field inspections
-- 🔄 **Advanced Reporting**: Business intelligence dashboard and analytics
-- 🔄 **Workflow Automation**: Enhanced Power Automate and M365 integration
-- 🔄 **Audit Trail System**: Comprehensive change tracking and version control
-- 🔄 **Batch Processing**: Multi-inspection management and bulk operations
-- 🔄 **Advanced Search**: Full-text search across all inspection data and documents
-
----
-
-## 🔧 Integration & API Requirements
-
-### Microsoft 365 Integration (Required)
-```
-Microsoft Graph API: v1.0 for M365 services
-SharePoint Online: Required for data storage, document library, and collaboration
-Power Automate: Required for document generation and automation workflows
-Azure AD: Required for authentication and Single Sign-On (SSO)
-MSAL (Microsoft Authentication Library): Client-side authentication
+# Install Microsoft Graph Client (optional but recommended)
+npm install @microsoft/microsoft-graph-client
 ```
 
-### SharePoint Lists API
-- **List Operations**: Create, read, update, delete inspection data
-- **File Operations**: Upload, download, and manage documents
-- **Folder Management**: Automatic folder creation and organization
-- **Permissions**: SharePoint-based access control
+#### Step 5.2: Create MSAL Configuration File
 
-### Power Automate Flows
+Create `src/config/authConfig.ts`:
+
 ```typescript
-// Required Flows
-Create Inspector Folder: Automated folder structure creation
-Generate Document: Word template population and document creation
-Upload Supporting Documents: File upload and organization automation
+import { Configuration, LogLevel } from "@azure/msal-browser";
+
+export const msalConfig: Configuration = {
+  auth: {
+    clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
+    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
+    redirectUri: window.location.origin,
+    postLogoutRedirectUri: window.location.origin,
+  },
+  cache: {
+    cacheLocation: "localStorage",
+    storeAuthStateInCookie: false,
+  },
+  system: {
+    loggerOptions: {
+      loggerCallback: (level, message, containsPii) => {
+        if (containsPii) return;
+        switch (level) {
+          case LogLevel.Error:
+            console.error(message);
+            return;
+          case LogLevel.Info:
+            console.info(message);
+            return;
+          case LogLevel.Verbose:
+            console.debug(message);
+            return;
+          case LogLevel.Warning:
+            console.warn(message);
+            return;
+        }
+      },
+    },
+  },
+};
+
+export const loginRequest = {
+  scopes: [
+    "User.Read",
+    "User.ReadBasic.All",
+    "Sites.ReadWrite.All",
+    "Files.ReadWrite.All",
+  ],
+};
+
+export const graphConfig = {
+  graphMeEndpoint: "https://graph.microsoft.com/v1.0/me",
+  graphUsersEndpoint: "https://graph.microsoft.com/v1.0/users",
+};
 ```
 
-### Microsoft Graph Endpoints
+#### Step 5.3: Update AuthProvider Component
+
+Replace `src/components/auth/AuthProvider.tsx`:
+
 ```typescript
-// Core API Categories
-Authentication: Azure AD OAuth 2.0 authentication
-SharePoint Lists: CRUD operations via Microsoft Graph
-Documents: SharePoint Document Library operations
-Files: Upload, download, and file management
-Users: Azure AD user profile access
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useMsal, useIsAuthenticated } from '@azure/msal-react';
+import { InteractionStatus } from '@azure/msal-browser';
+import { loginRequest } from '@/config/authConfig';
+
+interface Profile {
+  id: string;
+  display_name: string | null;
+  email: string;
+}
+
+interface AuthContextType {
+  user: any | null;
+  profile: Profile | null;
+  roles: string[];
+  isAdmin: boolean;
+  isModerator: boolean;
+  isDev: boolean;
+  isM365: boolean;
+  loading: boolean;
+  signIn: () => Promise<void>;
+  signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const { instance, accounts, inProgress } = useMsal();
+  const isAuthenticated = useIsAuthenticated();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const user = accounts[0] || null;
+
+  // Fetch user roles from SharePoint UserRoles list
+  const fetchUserRoles = async (userId: string) => {
+    try {
+      const siteUrl = import.meta.env.VITE_SHAREPOINT_SITE_URL;
+      const response = await fetch(
+        `${siteUrl}/_api/web/lists/getbytitle('UserRoles')/items?$filter=UserID eq '${userId}'`,
+        {
+          headers: {
+            'Accept': 'application/json;odata=verbose',
+            'Authorization': `Bearer ${accounts[0]?.idToken}`,
+          },
+        }
+      );
+      
+      const data = await response.json();
+      return data.d.results.map((item: any) => item.Role);
+    } catch (error) {
+      console.error('Error fetching user roles:', error);
+      return ['user']; // Default role
+    }
+  };
+
+  // Fetch user profile
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    try {
+      const userRoles = await fetchUserRoles(user.localAccountId);
+      setRoles(userRoles);
+
+      setProfile({
+        id: user.localAccountId,
+        display_name: user.name || null,
+        email: user.username,
+      });
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile();
+    }
+  };
+
+  const signIn = async () => {
+    try {
+      await instance.loginPopup(loginRequest);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      await instance.logoutPopup();
+      setProfile(null);
+      setRoles([]);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && user && inProgress === InteractionStatus.None) {
+      fetchProfile();
+    }
+    setLoading(inProgress !== InteractionStatus.None);
+  }, [isAuthenticated, user, inProgress]);
+
+  // Development mode override (localhost only)
+  const isDev = window.location.hostname === 'localhost';
+  const isAdmin = isDev || roles.includes('admin');
+  const isModerator = roles.includes('moderator');
+  const isM365 = roles.includes('m365');
+
+  const value: AuthContextType = {
+    user,
+    profile,
+    roles,
+    isAdmin,
+    isModerator,
+    isDev,
+    isM365,
+    loading,
+    signIn,
+    signOut,
+    refreshProfile,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+```
+
+#### Step 5.4: Update Main Application Entry Point
+
+Update `src/main.tsx`:
+
+```typescript
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { MsalProvider } from '@azure/msal-react';
+import { PublicClientApplication } from '@azure/msal-browser';
+import { msalConfig } from './config/authConfig';
+import App from './App';
+import './index.css';
+
+const msalInstance = new PublicClientApplication(msalConfig);
+
+// Initialize MSAL
+await msalInstance.initialize();
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <MsalProvider instance={msalInstance}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </MsalProvider>
+  </React.StrictMode>
+);
 ```
 
 ---
 
-## 🛠️ Troubleshooting & Support
+### PHASE 6: Environment Configuration
 
-### Common Issues & Solutions
+#### Step 6.1: Create Production Environment File
 
-#### Authentication Problems
+Create `.env.production`:
+
 ```bash
-# Issue: Login failures or session timeouts
-# Solutions:
-1. Verify Azure AD credentials in environment variables (VITE_AZURE_TENANT_ID, VITE_AZURE_CLIENT_ID)
-2. Check Azure AD App Registration permissions and admin consent
-3. Clear browser cache and cookies
-4. Validate redirect URI matches deployment URL
-5. Check internet connectivity and firewall settings
+# Azure AD Configuration
+VITE_AZURE_TENANT_ID=your-tenant-id-here
+VITE_AZURE_CLIENT_ID=your-client-id-here
+
+# SharePoint Configuration
+VITE_SHAREPOINT_SITE_URL=https://yourtenant.sharepoint.com/sites/ProjectINGOT
+
+# Application Configuration
+VITE_APP_VERSION=2.5.0
+VITE_ENVIRONMENT=production
+
+# Power Automate Flow URLs (Configure these after creating flows)
+VITE_FLOW_CREATE_FOLDER=https://prod-xx.westus.logic.azure.com:443/workflows/xxx
+VITE_FLOW_GENERATE_DOC=https://prod-xx.westus.logic.azure.com:443/workflows/xxx
+VITE_FLOW_UPLOAD_DOC=https://prod-xx.westus.logic.azure.com:443/workflows/xxx
 ```
 
-#### File Upload Issues
-```bash  
-# Issue: Upload failures or processing errors
-# Solutions:
-1. Check file size limits (25MB maximum per file)
-2. Verify supported file formats (images, PDF, Office docs)
-3. Ensure stable internet connection during uploads
-4. Validate SharePoint folder permissions
-5. Check Power Automate flow status (Upload Supporting Documents)
-6. Verify VITE_FLOW_UPLOAD_DOC environment variable is configured
-```
+#### Step 6.2: Security Hardening
 
-#### Template Generation Errors
 ```bash
-# Issue: Document generation failures
-# Solutions:
-1. Validate Word template content controls and naming
-2. Verify templates are uploaded to SharePoint Templates folder
-3. Check Power Automate flow status (Generate Document)
-4. Verify VITE_FLOW_GENERATE_DOC environment variable is configured
-5. Check field mapping configuration and data completeness
-6. Test with minimal data set to isolate issues
-7. Review Power Automate run history for specific errors
+# Never commit .env files to version control
+echo ".env*" >> .gitignore
+echo "!.env.example" >> .gitignore
+
+# Create .env.example for documentation
+cat > .env.example << EOF
+# Azure AD Configuration
+VITE_AZURE_TENANT_ID=
+VITE_AZURE_CLIENT_ID=
+
+# SharePoint Configuration
+VITE_SHAREPOINT_SITE_URL=
+
+# Application Configuration
+VITE_APP_VERSION=2.5.0
+VITE_ENVIRONMENT=production
+
+# Power Automate Flow URLs
+VITE_FLOW_CREATE_FOLDER=
+VITE_FLOW_GENERATE_DOC=
+VITE_FLOW_UPLOAD_DOC=
+EOF
 ```
-
-#### Performance Issues
-```bash
-# Issue: Slow loading or poor responsiveness  
-# Solutions:
-1. Clear browser cache and restart application
-2. Check network connectivity and latency
-3. Optimize uploaded image file sizes
-4. Monitor system resources and browser memory usage
-```
-
-### Debug Tools & Monitoring
-- **Browser Developer Tools**: Console errors, network monitoring, performance analysis
-- **Power Automate**: Flow run history, error details, and troubleshooting
-- **SharePoint Admin Center**: List management, permissions, storage monitoring
-- **Azure AD Portal**: Authentication logs, app registration status
-- **Microsoft Graph Explorer**: API testing and debugging
-- **Application Logging**: Built-in error tracking and performance metrics
-
-### Support Resources
-- **Built-in Documentation**: Contextual help available throughout application
-- **Deployment Guides**: [Non-technical](docs/SharePoint-Deployment-Guide-NonTechnical.md) and [Technical](docs/SharePoint-Technical-Migration-Guide.md) guides
-- **Template Configuration**: [Word template setup guide](docs/word-templates/README-Templates.md)
-- **System Requirements**: [Detailed specifications](docs/SYSTEM-REQUIREMENTS.md)
-- **M365 Integration**: [Complete implementation guide](docs/M365-Implementation-Guide.md)
-- **GitHub Workflow**: [Version control and CI/CD guide](docs/GitHub-Deployment-Workflow.md)
 
 ---
 
-## ⚙️ Maintenance & Operations
+### PHASE 7: Create Power Automate Flows
 
-### Regular Maintenance Tasks
-```bash
-# Weekly Maintenance
-- Security updates for all dependencies
-- Database performance monitoring and optimization
-- Backup verification and recovery testing
-- Error log review and issue resolution
+#### Flow 1: Create Inspector Folder
 
-# Monthly Maintenance
-- Full system health check and performance review
-- Capacity planning assessment and resource monitoring
-- Security audit and access control review
-- User feedback analysis and feature planning
+```
+Trigger: HTTP Request
+  Method: POST
+  Body Schema: {
+    "inspectorInitials": "string",
+    "inspectorName": "string"
+  }
 
-# Quarterly Maintenance
-- Major dependency updates with comprehensive testing
-- Infrastructure review and optimization
-- Business continuity and disaster recovery testing
-- Comprehensive user access and permissions audit
+Action 1: Create Folder
+  Site Address: [Your SharePoint Site]
+  Folder Path: /Documents/Inspectors/@{triggerBody()?['inspectorInitials']}
+
+Action 2: Create Subfolders
+  - Supporting Documents
+  - Generated Reports
+  - Checklists
+
+Action 3: Respond to HTTP
+  Status Code: 200
+  Body: {"success": true, "folderPath": "@{outputs('Create_Folder')?['Path']}"}
 ```
 
-### Monitoring & Analytics
-- **Application Performance**: Real-time monitoring with alerting
-- **User Analytics**: Usage patterns and feature adoption tracking
-- **Error Tracking**: Comprehensive error logging and analysis
-- **Security Monitoring**: Access patterns and threat detection
+#### Flow 2: Generate Document from Template
+
+```
+Trigger: HTTP Request
+  Method: POST
+  Body Schema: {
+    "templateName": "string",
+    "activityNumber": "string",
+    "fieldData": {}
+  }
+
+Action 1: Get File Content (Template)
+  Site Address: [Your SharePoint Site]
+  File: /Documents/Templates/@{triggerBody()?['templateName']}
+
+Action 2: Populate Word Template
+  Use: Word Online Connector
+  Template File: @{outputs('Get_File_Content')}
+  Field Mappings: @{triggerBody()?['fieldData']}
+
+Action 3: Create File (Generated Document)
+  Site Address: [Your SharePoint Site]
+  Folder Path: /Documents/Generated/@{triggerBody()?['activityNumber']}
+  File Name: @{triggerBody()?['templateName']}_Generated_@{utcNow()}.docx
+  File Content: @{outputs('Populate_Word_Template')?['body']}
+
+Action 4: Respond to HTTP
+  Status Code: 200
+  Body: {"success": true, "documentUrl": "@{outputs('Create_File')?['Path']}"}
+```
+
+#### Flow 3: Upload Supporting Document
+
+```
+Trigger: HTTP Request
+  Method: POST
+  Body Schema: {
+    "activityNumber": "string",
+    "fileName": "string",
+    "fileContent": "string (base64)"
+  }
+
+Action 1: Create File
+  Site Address: [Your SharePoint Site]
+  Folder Path: /Documents/Inspectors/@{triggerBody()?['inspectorInitials']}/Supporting Documents
+  File Name: @{triggerBody()?['fileName']}
+  File Content: @{base64ToBinary(triggerBody()?['fileContent'])}
+
+Action 2: Respond to HTTP
+  Status Code: 200
+  Body: {"success": true, "fileUrl": "@{outputs('Create_File')?['Path']}"}
+```
+
+#### Save Flow URLs
+
+After creating each flow:
+1. Copy the HTTP POST URL
+2. Add to `.env.production` file
+3. Update environment configuration
 
 ---
 
-## 📞 Project Information & Support
+## 🌐 Deployment to Production
 
-### Project Links & Resources
-- **Lovable Project**: [Edit in Lovable](https://lovable.dev/projects/5de0c8ea-9941-4472-a148-fe7ccc971f11)
-- **Live Demo**: Available through Lovable Share → Publish
-- **Documentation**: Complete guides available in application
-- **Templates**: Word templates with configuration instructions
-- **Support**: Built-in contextual help and troubleshooting guides
+### Option 1: Azure Static Web Apps (Recommended for M365)
 
-### Custom Domain Setup
-Navigate to Project > Settings > Domains and click Connect Domain.
-Read more: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+# Install Azure Static Web Apps CLI
+npm install -g @azure/static-web-apps-cli
 
-### Development & Contribution
-Changes made via Lovable automatically commit to the repository.
-Local development changes push to both GitHub and Lovable.
-Bidirectional sync ensures consistency across all development environments.
+# Login to Azure
+az login
+
+# Create Static Web App
+az staticwebapp create \
+  --name project-ingot \
+  --resource-group YourResourceGroup \
+  --source /dist \
+  --location "West US 2" \
+  --branch main \
+  --app-location "/" \
+  --api-location "" \
+  --output-location "dist"
+
+# Deploy
+swa deploy --env production
+```
+
+### Option 2: Azure App Service
+
+```bash
+# Create App Service Plan
+az appservice plan create \
+  --name project-ingot-plan \
+  --resource-group YourResourceGroup \
+  --sku B1 \
+  --is-linux
+
+# Create Web App
+az webapp create \
+  --name project-ingot \
+  --resource-group YourResourceGroup \
+  --plan project-ingot-plan \
+  --runtime "NODE|18-lts"
+
+# Deploy build
+az webapp deployment source config-zip \
+  --resource-group YourResourceGroup \
+  --name project-ingot \
+  --src ./dist.zip
+
+# Configure environment variables
+az webapp config appsettings set \
+  --resource-group YourResourceGroup \
+  --name project-ingot \
+  --settings \
+    VITE_AZURE_TENANT_ID=$VITE_AZURE_TENANT_ID \
+    VITE_AZURE_CLIENT_ID=$VITE_AZURE_CLIENT_ID \
+    VITE_SHAREPOINT_SITE_URL=$VITE_SHAREPOINT_SITE_URL
+```
+
+### Option 3: Netlify
+
+```bash
+# Install Netlify CLI
+npm install -g netlify-cli
+
+# Login to Netlify
+netlify login
+
+# Initialize site
+netlify init
+
+# Deploy
+netlify deploy --prod --dir=dist
+
+# Set environment variables via Netlify dashboard
+# Site settings → Environment variables → Add variables
+```
+
+### Option 4: Vercel
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Login to Vercel
+vercel login
+
+# Deploy
+vercel --prod
+
+# Set environment variables
+vercel env add VITE_AZURE_TENANT_ID
+vercel env add VITE_AZURE_CLIENT_ID
+vercel env add VITE_SHAREPOINT_SITE_URL
+```
 
 ---
 
-**Last Updated**: September 27, 2025  
-**Current Version**: 2.5.0  
-**Status**: Production Ready  
-**Next Release**: Q4 2025 (PDF Integration & Enhanced AI Features)
+## ✅ Post-Deployment Verification
 
-*This documentation represents the complete feature set and capabilities of Project INGOT as of the current release. All requirements, setup procedures, and troubleshooting information are included for successful deployment and operation.*
+### Critical Testing Checklist
+
+```bash
+# 1. Authentication Flow
+☐ Navigate to production URL
+☐ Click "Sign In" button
+☐ Microsoft login popup appears
+☐ Successful authentication redirects to dashboard
+☐ User profile loads correctly
+
+# 2. Admin Access
+☐ Login as austin.larocque@tpsgc-pwgsc.gc.ca
+☐ Verify Admin tab is visible
+☐ Test user management functions
+☐ Login as james.grace@tpsgc-pwgsc.gc.ca
+☐ Verify Admin tab is visible
+☐ Confirm admin permissions are working
+
+# 3. Core Functionality
+☐ Inspector profile creation
+☐ Activity creation and management
+☐ Organization search and lookup
+☐ File upload to SharePoint
+☐ Document generation from templates
+☐ Email template generation
+☐ Final report creation
+
+# 4. Integration Tests
+☐ SharePoint list read/write operations
+☐ Document library access
+☐ Power Automate flow triggers
+☐ Microsoft Graph API calls
+☐ Template population and download
+
+# 5. Performance Tests
+☐ Page load time < 3 seconds
+☐ File upload for 10MB+ files
+☐ Concurrent user testing (10+ users)
+☐ Network latency handling
+☐ Browser compatibility (Chrome, Edge, Firefox)
+
+# 6. Security Validation
+☐ HTTPS enforcement
+☐ Authentication token expiration handling
+☐ Role-based access control
+☐ Admin-only functions are restricted
+☐ SharePoint permissions are correct
+☐ No sensitive data in browser console
+```
+
+---
+
+## 👥 Mandatory System Administrators
+
+### Primary Administrators
+
+**Austin Larocque**
+- Email: austin.larocque@tpsgc-pwgsc.gc.ca
+- Role: System Administrator
+- Permissions: Full admin access, user management, system configuration
+- Responsibilities: Primary system administration, technical support
+
+**James Grace**
+- Email: james.grace@tpsgc-pwgsc.gc.ca
+- Role: System Administrator
+- Permissions: Full admin access, user management, system configuration
+- Responsibilities: Secondary system administration, backup support
+
+### Admin Capabilities
+
+Administrators have access to:
+- **User Management**: Add, edit, remove users and assign roles
+- **System Configuration**: Modify application settings and parameters
+- **Data Import/Export**: Import organization data, export reports
+- **System Status**: Monitor application health and performance
+- **Role Assignment**: Grant admin, moderator, or user roles
+- **Audit Logs**: View system activity and usage logs
+
+---
+
+## 🔒 Security Best Practices
+
+### Production Security Checklist
+
+```bash
+# 1. Azure AD Security
+☐ Multi-factor authentication (MFA) enabled for all users
+☐ Conditional access policies configured
+☐ Admin accounts use privileged identity management (PIM)
+☐ Regular access reviews conducted
+
+# 2. SharePoint Security
+☐ External sharing disabled or restricted
+☐ Document library permissions properly configured
+☐ Sensitive data protected with encryption
+☐ Version history enabled for audit trail
+
+# 3. Application Security
+☐ HTTPS enforced (no HTTP access)
+☐ Content Security Policy (CSP) headers configured
+☐ Environment variables never exposed in client code
+☐ Regular security updates applied
+
+# 4. Network Security
+☐ Azure Front Door or CDN configured
+☐ DDoS protection enabled
+☐ IP restrictions for admin functions (optional)
+☐ Rate limiting configured
+
+# 5. Compliance
+☐ Privacy policy published and accessible
+☐ Data retention policies defined
+☐ User consent mechanisms implemented
+☐ GDPR/compliance requirements met
+```
+
+---
+
+## 📊 Monitoring and Maintenance
+
+### Application Monitoring
+
+```bash
+# Recommended Monitoring Tools
+
+1. Azure Application Insights
+   - Real-time performance monitoring
+   - Error tracking and diagnostics
+   - User behavior analytics
+   - Custom telemetry and metrics
+
+2. SharePoint Admin Center
+   - Storage usage monitoring
+   - User activity reports
+   - Site health dashboard
+
+3. Azure AD Sign-in Logs
+   - Authentication success/failure rates
+   - Suspicious login detection
+   - User access patterns
+```
+
+### Maintenance Schedule
+
+```
+Daily:
+☐ Review error logs in Application Insights
+☐ Check authentication success rates
+☐ Monitor API performance metrics
+
+Weekly:
+☐ Review user activity reports
+☐ Check SharePoint storage usage
+☐ Validate backup integrity
+☐ Review security alerts
+
+Monthly:
+☐ Update npm dependencies (security patches)
+☐ Review and rotate access credentials
+☐ Conduct admin access review
+☐ Test disaster recovery procedures
+☐ Review Power Automate flow runs
+
+Quarterly:
+☐ Full security audit
+☐ Performance optimization review
+☐ User feedback collection and analysis
+☐ Feature roadmap planning
+```
+
+---
+
+## 🆘 Troubleshooting Guide
+
+### Common Issues and Solutions
+
+#### Authentication Errors
+
+```bash
+# Issue: "AADSTS50058: Silent sign-in failed"
+Solution:
+1. Clear browser cache and cookies
+2. Check Azure AD app registration redirect URIs
+3. Verify clientId and tenantId in configuration
+4. Test in incognito/private browsing mode
+
+# Issue: "Access token expired"
+Solution:
+1. Implement token refresh logic in AuthProvider
+2. Use MSAL's acquireTokenSilent method
+3. Add token refresh on 401 responses
+```
+
+#### SharePoint Access Issues
+
+```bash
+# Issue: "Access denied to SharePoint list"
+Solution:
+1. Verify Azure AD app has Sites.ReadWrite.All permission
+2. Check admin consent was granted
+3. Validate user has appropriate SharePoint permissions
+4. Review list-level permissions in SharePoint
+
+# Issue: "List or item not found"
+Solution:
+1. Confirm SharePoint lists were created correctly
+2. Verify list names match exactly (case-sensitive)
+3. Check site URL is correct in environment variables
+4. Test API endpoint with Postman or similar tool
+```
+
+#### Power Automate Flow Errors
+
+```bash
+# Issue: "Flow trigger failed"
+Solution:
+1. Check flow URL is correct in .env file
+2. Verify flow is turned ON in Power Automate
+3. Review flow run history for error details
+4. Test flow manually with sample data
+5. Check authentication and permissions
+
+# Issue: "Document generation failed"
+Solution:
+1. Verify template exists in SharePoint Templates folder
+2. Check template content controls are properly named
+3. Validate field data matches template structure
+4. Review Word Online connector settings
+5. Test with minimal data to isolate issue
+```
+
+---
+
+## 📞 Support and Contact
+
+### Technical Support
+
+**Primary Contact:**
+- Austin Larocque
+- Email: austin.larocque@tpsgc-pwgsc.gc.ca
+- Role: Lead System Administrator
+
+**Secondary Contact:**
+- James Grace  
+- Email: james.grace@tpsgc-pwgsc.gc.ca
+- Role: System Administrator
+
+### Emergency Procedures
+
+**Critical System Failure:**
+1. Contact both system administrators immediately
+2. Document error messages and screenshots
+3. Check Azure status page: https://status.azure.com
+4. Review Application Insights for error details
+5. If necessary, revert to last known good deployment
+
+**Security Incident:**
+1. Contact IT Security team immediately
+2. Notify system administrators
+3. Document incident details
+4. Preserve logs and evidence
+5. Follow organizational security incident response procedures
+
+---
+
+## 📚 Additional Resources
+
+### Documentation
+
+- [Application Documentation](docs/APPLICATION-DOCUMENTATION.md)
+- [SharePoint Technical Migration Guide](docs/SharePoint-Technical-Migration-Guide.md)
+- [SharePoint Deployment Guide - Non-Technical](docs/SharePoint-Deployment-Guide-NonTechnical.md)
+- [M365 Implementation Guide](docs/M365-Implementation-Guide.md)
+- [Migration Verification Checklist](docs/Migration-Verification-Checklist.md)
+- [Quick Start Checklist](docs/Quick-Start-Checklist.md)
+
+### Microsoft Resources
+
+- [Azure AD Documentation](https://docs.microsoft.com/azure/active-directory/)
+- [MSAL.js Documentation](https://docs.microsoft.com/azure/active-directory/develop/msal-overview)
+- [Microsoft Graph API](https://docs.microsoft.com/graph/)
+- [SharePoint Online](https://docs.microsoft.com/sharepoint/)
+- [Power Automate](https://docs.microsoft.com/power-automate/)
+
+---
+
+## 📝 Version Information
+
+**Current Version:** 2.5.0  
+**Last Updated:** 2025-01-28  
+**Compatibility:** Microsoft 365, Azure AD, SharePoint Online  
+**Mandatory Admins:** Austin Larocque, James Grace
+
+---
+
+## ⚖️ License and Compliance
+
+**Copyright © 2025 - Public Services and Procurement Canada (PSPC)**  
+**Project INGOT - Inspection Management System**
+
+This application is developed for internal use within the Government of Canada. All rights reserved.
+
+**Compliance:**
+- Government of Canada Security Standards
+- Privacy Act compliance
+- WCAG 2.1 AA accessibility standards
+- Official Languages Act (bilingual support)
+
+---
+
+**END OF DEPLOYMENT GUIDE**
