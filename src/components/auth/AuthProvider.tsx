@@ -1,10 +1,19 @@
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
+import { User, Session } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
 
-// Stub auth context for SharePoint migration
+interface Profile {
+  id: string;
+  display_name: string | null;
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface AuthContextType {
-  user: any | null;
-  session: any | null;
-  profile: any | null;
+  user: User | null;
+  session: Session | null;
+  profile: Profile | null;
   roles: string[];
   isAdmin: boolean;
   isModerator: boolean;
@@ -32,37 +41,179 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
   // DEV MODE: Enable admin access on localhost only
   const isDevMode = import.meta.env.DEV && 
     (typeof window !== 'undefined' && 
      (window.location.hostname === 'localhost' || 
       window.location.hostname === '127.0.0.1'));
 
-  const value: AuthContextType = {
-    user: isDevMode ? { 
+  const fetchUserRoles = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId);
+      
+      if (error) throw error;
+      return data?.map(r => r.role) || [];
+    } catch (error) {
+      console.error('Error fetching user roles:', error);
+      return [];
+    }
+  };
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (!user) return;
+    const [userProfile, userRoles] = await Promise.all([
+      fetchProfile(user.id),
+      fetchUserRoles(user.id)
+    ]);
+    setProfile(userProfile);
+    setRoles(userRoles);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          setTimeout(async () => {
+            const [userProfile, userRoles] = await Promise.all([
+              fetchProfile(session.user.id),
+              fetchUserRoles(session.user.id)
+            ]);
+            setProfile(userProfile);
+            setRoles(userRoles);
+            setLoading(false);
+          }, 0);
+        } else {
+          setProfile(null);
+          setRoles([]);
+          setLoading(false);
+        }
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        Promise.all([
+          fetchProfile(session.user.id),
+          fetchUserRoles(session.user.id)
+        ]).then(([userProfile, userRoles]) => {
+          setProfile(userProfile);
+          setRoles(userRoles);
+          setLoading(false);
+        });
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    return { error };
+  };
+
+  const signUp = async (email: string, password: string, displayName: string) => {
+    const redirectUrl = `${window.location.origin}/`;
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: redirectUrl,
+        data: {
+          display_name: displayName,
+        },
+      },
+    });
+    return { error };
+  };
+
+  const signOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSession(null);
+    setProfile(null);
+    setRoles([]);
+  };
+
+  // In dev mode, override with mock admin user
+  const value: AuthContextType = isDevMode ? {
+    user: { 
       id: 'dev-user', 
       email: 'dev@localhost',
       app_metadata: {},
       user_metadata: {},
       aud: 'authenticated',
       created_at: new Date().toISOString()
-    } : null,
+    } as User,
     session: null,
-    profile: isDevMode ? {
+    profile: {
       id: 'dev-user',
       display_name: 'Dev Admin',
-      email: 'dev@localhost'
-    } : null,
-    roles: isDevMode ? ['admin'] : [],
-    isAdmin: isDevMode,
+      email: 'dev@localhost',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    },
+    roles: ['admin'],
+    isAdmin: true,
     isModerator: false,
-    isDev: isDevMode,
+    isDev: true,
     isM365: false,
     loading: false,
-    signIn: async () => ({ error: { message: 'Auth not configured - Dev mode active' } }),
-    signUp: async () => ({ error: { message: 'Auth not configured - Dev mode active' } }),
-    signOut: async () => {},
-    refreshProfile: async () => {},
+    signIn,
+    signUp,
+    signOut,
+    refreshProfile,
+  } : {
+    user,
+    session,
+    profile,
+    roles,
+    isAdmin: roles.includes('admin'),
+    isModerator: roles.includes('moderator'),
+    isDev: false,
+    isM365: false,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    refreshProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
