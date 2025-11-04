@@ -55,31 +55,55 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const fetchUserRoles = async (userId: string) => {
     try {
+      console.log('[AuthProvider] Fetching roles for user:', userId);
       const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
       
-      if (error) throw error;
-      return data?.map(r => r.role) || [];
+      if (error) {
+        console.error('[AuthProvider] Error fetching roles:', error);
+        throw error;
+      }
+      
+      const roles = data?.map(r => r.role) || [];
+      console.log('[AuthProvider] Loaded roles:', roles);
+      return roles;
     } catch (error) {
-      console.error('Error fetching user roles:', error);
+      console.error('[AuthProvider] Failed to fetch user roles:', error);
       return [];
     }
   };
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      console.log('[AuthProvider] Fetching profile for user:', userId);
+      
+      // First try to find by user_id (auth.users reference)
+      let { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
-        .single();
+        .eq('user_id', userId)
+        .maybeSingle();
       
-      if (error) throw error;
+      // Fallback: try by id if not found
+      if (!data && !error) {
+        ({ data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle());
+      }
+      
+      if (error) {
+        console.error('[AuthProvider] Error fetching profile:', error);
+        throw error;
+      }
+      
+      console.log('[AuthProvider] Loaded profile:', data?.display_name);
       return data;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('[AuthProvider] Failed to fetch profile:', error);
       return null;
     }
   };
@@ -95,21 +119,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        console.log('[AuthProvider] Auth state changed:', event, session?.user?.email);
+        
+        if (!mounted) return;
+        
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Defer async operations to prevent blocking
           setTimeout(async () => {
+            if (!mounted) return;
+            
             const [userProfile, userRoles] = await Promise.all([
               fetchProfile(session.user.id),
               fetchUserRoles(session.user.id)
             ]);
-            setProfile(userProfile);
-            setRoles(userRoles);
-            setLoading(false);
+            
+            if (mounted) {
+              setProfile(userProfile);
+              setRoles(userRoles);
+              setLoading(false);
+              
+              console.log('[AuthProvider] Auth context ready:', {
+                email: session.user.email,
+                roles: userRoles,
+                isAdmin: userRoles.includes('admin')
+              });
+            }
           }, 0);
         } else {
           setProfile(null);
@@ -121,6 +163,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
+      console.log('[AuthProvider] Initial session check:', session?.user?.email);
+      
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -129,16 +175,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           fetchProfile(session.user.id),
           fetchUserRoles(session.user.id)
         ]).then(([userProfile, userRoles]) => {
-          setProfile(userProfile);
-          setRoles(userRoles);
-          setLoading(false);
+          if (mounted) {
+            setProfile(userProfile);
+            setRoles(userRoles);
+            setLoading(false);
+            
+            console.log('[AuthProvider] Initial auth context ready:', {
+              email: session.user.email,
+              roles: userRoles,
+              isAdmin: userRoles.includes('admin')
+            });
+          }
+        }).catch(error => {
+          console.error('[AuthProvider] Failed to load user data:', error);
+          if (mounted) {
+            setLoading(false);
+          }
         });
       } else {
         setLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
