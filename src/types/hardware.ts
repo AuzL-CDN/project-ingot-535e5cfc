@@ -1,5 +1,12 @@
 export type HardwareType = 'desktop' | 'laptop' | 'server' | 'network' | 'storage' | 'mobile' | 'other';
 
+export interface SecurityFeatureDetail {
+  category: string;
+  product: string;
+  customProduct?: string;
+  version?: string;
+}
+
 export interface HardwareItem {
   id: string;
   type: HardwareType;
@@ -11,7 +18,7 @@ export interface HardwareItem {
   ram?: string;
   storage?: string;
   assignedTo?: string;
-  securityFeatures: string[];
+  securityFeatures: SecurityFeatureDetail[];
   notes?: string;
   addedAt: Date;
 }
