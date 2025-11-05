@@ -3,10 +3,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckSquare, FileText, AlertCircle, Clock } from 'lucide-react';
+import { CheckSquare, FileText, AlertCircle } from 'lucide-react';
 import { ChecklistSection } from './ChecklistSection';
 import { ChecklistAnalyzer } from './ChecklistAnalyzer';
+import { DocumentImporter } from './DocumentImporter';
+import { HardwareManager } from '@/components/hardware/HardwareManager';
 import type { ChecklistType, ChecklistData, ChecklistResponse, ChecklistAnalysis } from '@/types/checklist';
+import type { HardwareData } from '@/types/hardware';
 import { getChecklistSections } from '@/types/checklist';
 
 interface ChecklistManagerProps {
@@ -21,6 +24,7 @@ export const ChecklistManager = ({
   onFinalReportUpdate 
 }: ChecklistManagerProps) => {
   const [activeChecklist, setActiveChecklist] = useState<ChecklistType>('1F');
+  const [activeTab, setActiveTab] = useState<'1F' | '1G' | 'hardware'>('1F');
   const [checklistData, setChecklistData] = useState<Record<ChecklistType, ChecklistData>>({
     '1F': {
       type: '1F',
@@ -36,6 +40,10 @@ export const ChecklistManager = ({
       completionStatus: [],
       lastUpdated: new Date()
     }
+  });
+
+  const [hardwareData, setHardwareData] = useState<HardwareData>({
+    items: []
   });
 
   const [analysisResults, setAnalysisResults] = useState<Record<ChecklistType, ChecklistAnalysis[]>>({
@@ -54,6 +62,20 @@ export const ChecklistManager = ({
         responses: {
           ...prev[activeChecklist].responses,
           [questionId]: response
+        },
+        lastUpdated: new Date()
+      }
+    }));
+  }, [activeChecklist]);
+
+  const handleDocumentImport = useCallback((responses: Record<string, ChecklistResponse>) => {
+    setChecklistData(prev => ({
+      ...prev,
+      [activeChecklist]: {
+        ...prev[activeChecklist],
+        responses: {
+          ...prev[activeChecklist].responses,
+          ...responses
         },
         lastUpdated: new Date()
       }
@@ -151,8 +173,13 @@ export const ChecklistManager = ({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeChecklist} onValueChange={setActiveChecklist as any}>
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs value={activeTab} onValueChange={(value: any) => {
+            setActiveTab(value);
+            if (value === '1F' || value === '1G') {
+              setActiveChecklist(value);
+            }
+          }}>
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="1F" className="flex items-center space-x-2">
                 <span>1F - Protected</span>
                 <Badge variant="outline" className="ml-2">
@@ -165,21 +192,33 @@ export const ChecklistManager = ({
                   {progress1G}%
                 </Badge>
               </TabsTrigger>
+              <TabsTrigger value="hardware">
+                Hardware
+              </TabsTrigger>
             </TabsList>
 
             <div className="mt-6 mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium">Overall Progress</span>
-                <span className="text-sm text-muted-foreground">
-                  {Object.keys(checklistData[activeChecklist].responses).length} / {
-                    currentSections.reduce((acc, section) => acc + section.questions.length, 0)
-                  } completed
-                </span>
-              </div>
-              <Progress value={calculateProgress(currentSections)} className="h-2" />
+              {(activeTab === '1F' || activeTab === '1G') && (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">Overall Progress</span>
+                    <span className="text-sm text-muted-foreground">
+                      {Object.keys(checklistData[activeChecklist].responses).length} / {
+                        currentSections.reduce((acc, section) => acc + section.questions.length, 0)
+                      } completed
+                    </span>
+                  </div>
+                  <Progress value={calculateProgress(currentSections)} className="h-2" />
+                </>
+              )}
             </div>
 
             <TabsContent value="1F" className="space-y-6">
+              <DocumentImporter 
+                checklistType="1F"
+                onImport={handleDocumentImport}
+              />
+              
               <div className="grid gap-6">
                 {getChecklistSections('1F').map(section => (
                   <ChecklistSection
@@ -195,6 +234,11 @@ export const ChecklistManager = ({
             </TabsContent>
 
             <TabsContent value="1G" className="space-y-6">
+              <DocumentImporter 
+                checklistType="1G"
+                onImport={handleDocumentImport}
+              />
+              
               <div className="grid gap-6">
                 {getChecklistSections('1G').map(section => (
                   <ChecklistSection
@@ -207,6 +251,13 @@ export const ChecklistManager = ({
                   />
                 ))}
               </div>
+            </TabsContent>
+
+            <TabsContent value="hardware">
+              <HardwareManager 
+                data={hardwareData}
+                onUpdate={setHardwareData}
+              />
             </TabsContent>
           </Tabs>
 
