@@ -17,12 +17,14 @@ interface ChecklistManagerProps {
   mainForm: any;
   onAnalysisComplete: (analysis: ChecklistAnalysis[]) => void;
   onFinalReportUpdate: (updates: any) => void;
+  onChecklistFileUpload?: (file: File) => void;
 }
 
 export const ChecklistManager = ({ 
   mainForm, 
   onAnalysisComplete, 
-  onFinalReportUpdate 
+  onFinalReportUpdate,
+  onChecklistFileUpload 
 }: ChecklistManagerProps) => {
   const [activeChecklist, setActiveChecklist] = useState<ChecklistType>('1F');
   const [activeTab, setActiveTab] = useState<'1F' | '1G' | 'hardware' | 'security'>('1F');
@@ -225,6 +227,7 @@ export const ChecklistManager = ({
               <DocumentImporter 
                 checklistType="1F"
                 onImport={handleDocumentImport}
+                onFileUpload={onChecklistFileUpload}
               />
               
               <div className="grid gap-6">
@@ -245,6 +248,7 @@ export const ChecklistManager = ({
               <DocumentImporter 
                 checklistType="1G"
                 onImport={handleDocumentImport}
+                onFileUpload={onChecklistFileUpload}
               />
               
               <div className="grid gap-6">

@@ -40,6 +40,7 @@ export type TabId =
 
 export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
+  const [checklistFiles, setChecklistFiles] = useState<File[]>([]);
   const inspectionState = useInspectionState();
   const { user, loading } = useAuth();
 
@@ -69,6 +70,10 @@ export const InspectionApp = () => {
   // If inspector not set up, force to inspector tab
   const currentTab = !isInspectorSetup && activeTab !== 'inspector' ? 'inspector' : activeTab;
 
+  const handleChecklistFileUpload = (file: File) => {
+    setChecklistFiles(prev => [...prev, file]);
+  };
+
   const renderActiveTab = () => {
     switch (currentTab) {
       case 'inspector':
@@ -90,11 +95,11 @@ export const InspectionApp = () => {
       case 'memorandum':
         return showDocMemo ? <MemorandumTab {...inspectionState} /> : <MainForm {...inspectionState} />;
       case 'inspection':
-        return showInspectionCorrective ? <InspectionTab mainForm={mainForm} onFinalReportUpdate={(updates) => console.log('Final report updates:', updates)} /> : <MainForm {...inspectionState} />;
+        return showInspectionCorrective ? <InspectionTab mainForm={mainForm} onFinalReportUpdate={(updates) => console.log('Final report updates:', updates)} onChecklistFileUpload={handleChecklistFileUpload} /> : <MainForm {...inspectionState} />;
       case 'corrective':
         return showInspectionCorrective ? <CorrectiveMeasuresTab {...inspectionState} /> : <MainForm {...inspectionState} />;
       case 'documents':
-        return <SupportingDocuments {...inspectionState} />;
+        return <SupportingDocuments {...inspectionState} checklistFiles={checklistFiles} />;
       case 'finalreport':
         return <FinalReportTab mainForm={mainForm} correctiveMeasures={inspectionState.correctiveMeasures} saveActivity={inspectionState.saveActivity} />;
       case 'resources':

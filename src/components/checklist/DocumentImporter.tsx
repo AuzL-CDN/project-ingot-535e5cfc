@@ -15,9 +15,10 @@ import type { ParsedChecklistData, ParsedResponse } from '@/types/documentParsin
 interface DocumentImporterProps {
   checklistType: ChecklistType;
   onImport: (responses: Record<string, ChecklistResponse>) => void;
+  onFileUpload?: (file: File) => void;
 }
 
-export const DocumentImporter = ({ checklistType, onImport }: DocumentImporterProps) => {
+export const DocumentImporter = ({ checklistType, onImport, onFileUpload }: DocumentImporterProps) => {
   const [parsedData, setParsedData] = useState<ParsedChecklistData | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [editedResponses, setEditedResponses] = useState<Record<string, string>>({});
@@ -39,6 +40,11 @@ export const DocumentImporter = ({ checklistType, onImport }: DocumentImporterPr
           initial[response.questionId] = response.value;
         });
         setEditedResponses(initial);
+        
+        // Save file to Main Files category in Supporting Documents
+        if (onFileUpload) {
+          onFileUpload(file);
+        }
         
         toast.success(`Found ${result.data.responses.length} responses in document`);
       } else {

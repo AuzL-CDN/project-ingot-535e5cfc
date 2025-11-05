@@ -5,9 +5,10 @@ import type { ChecklistAnalysis } from '@/types/checklist';
 interface InspectionTabProps {
   mainForm: any;
   onFinalReportUpdate?: (updates: any) => void;
+  onChecklistFileUpload?: (file: File) => void;
 }
 
-export const InspectionTab = ({ mainForm, onFinalReportUpdate }: InspectionTabProps) => {
+export const InspectionTab = ({ mainForm, onFinalReportUpdate, onChecklistFileUpload }: InspectionTabProps) => {
   const [analysisResults, setAnalysisResults] = useState<ChecklistAnalysis[]>([]);
 
   const handleAnalysisComplete = (analysis: ChecklistAnalysis[]) => {
@@ -29,6 +30,7 @@ export const InspectionTab = ({ mainForm, onFinalReportUpdate }: InspectionTabPr
         mainForm={mainForm}
         onAnalysisComplete={handleAnalysisComplete}
         onFinalReportUpdate={handleFinalReportUpdate}
+        onChecklistFileUpload={onChecklistFileUpload}
       />
       
       {analysisResults.length > 0 && (

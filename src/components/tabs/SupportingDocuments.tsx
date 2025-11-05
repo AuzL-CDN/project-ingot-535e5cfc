@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -18,11 +18,35 @@ interface FileUpload {
 
 interface SupportingDocumentsProps {
   currentActivity: string;
+  checklistFiles?: File[];
 }
 
-export const SupportingDocuments = ({ currentActivity }: SupportingDocumentsProps) => {
+export const SupportingDocuments = ({ currentActivity, checklistFiles = [] }: SupportingDocumentsProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [dragOver, setDragOver] = useState<string | null>(null);
+
+  // Auto-import checklist files to Main Files category
+  useEffect(() => {
+    if (checklistFiles.length > 0 && currentActivity) {
+      checklistFiles.forEach((file) => {
+        // Check if file already exists
+        const exists = uploadedFiles.some(uf => uf.name === file.name && uf.category === 'main');
+        if (!exists) {
+          const fileUpload: FileUpload = {
+            id: `checklist-${Date.now()}-${Math.random()}`,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            category: 'main',
+            uploadDate: new Date().toISOString(),
+            status: 'completed',
+            progress: 100
+          };
+          setUploadedFiles(prev => [...prev, fileUpload]);
+        }
+      });
+    }
+  }, [checklistFiles, currentActivity]);
 
   const fileCategories = [
     {
