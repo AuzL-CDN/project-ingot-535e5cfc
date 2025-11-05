@@ -18,7 +18,6 @@ export interface HardwareItem {
   ram?: string;
   storage?: string;
   assignedTo?: string;
-  securityFeatures: SecurityFeatureDetail[];
   notes?: string;
   addedAt: Date;
 }

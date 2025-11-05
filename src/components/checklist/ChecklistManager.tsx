@@ -8,8 +8,9 @@ import { ChecklistSection } from './ChecklistSection';
 import { ChecklistAnalyzer } from './ChecklistAnalyzer';
 import { DocumentImporter } from './DocumentImporter';
 import { HardwareManager } from '@/components/hardware/HardwareManager';
+import { SecurityFeaturesManager } from '@/components/hardware/SecurityFeaturesManager';
 import type { ChecklistType, ChecklistData, ChecklistResponse, ChecklistAnalysis } from '@/types/checklist';
-import type { HardwareData } from '@/types/hardware';
+import type { HardwareData, SecurityFeatureDetail } from '@/types/hardware';
 import { getChecklistSections } from '@/types/checklist';
 
 interface ChecklistManagerProps {
@@ -24,7 +25,7 @@ export const ChecklistManager = ({
   onFinalReportUpdate 
 }: ChecklistManagerProps) => {
   const [activeChecklist, setActiveChecklist] = useState<ChecklistType>('1F');
-  const [activeTab, setActiveTab] = useState<'1F' | '1G' | 'hardware'>('1F');
+  const [activeTab, setActiveTab] = useState<'1F' | '1G' | 'hardware' | 'security'>('1F');
   const [checklistData, setChecklistData] = useState<Record<ChecklistType, ChecklistData>>({
     '1F': {
       type: '1F',
@@ -44,6 +45,10 @@ export const ChecklistManager = ({
 
   const [hardwareData, setHardwareData] = useState<HardwareData>({
     items: []
+  });
+
+  const [securityFeaturesData, setSecurityFeaturesData] = useState<{ features: SecurityFeatureDetail[] }>({
+    features: []
   });
 
   const [analysisResults, setAnalysisResults] = useState<Record<ChecklistType, ChecklistAnalysis[]>>({
@@ -179,7 +184,7 @@ export const ChecklistManager = ({
               setActiveChecklist(value);
             }
           }}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="1F" className="flex items-center space-x-2">
                 <span>1F - Protected</span>
                 <Badge variant="outline" className="ml-2">
@@ -194,6 +199,9 @@ export const ChecklistManager = ({
               </TabsTrigger>
               <TabsTrigger value="hardware">
                 Hardware
+              </TabsTrigger>
+              <TabsTrigger value="security">
+                Security Features
               </TabsTrigger>
             </TabsList>
 
@@ -257,6 +265,13 @@ export const ChecklistManager = ({
               <HardwareManager 
                 data={hardwareData}
                 onUpdate={setHardwareData}
+              />
+            </TabsContent>
+
+            <TabsContent value="security">
+              <SecurityFeaturesManager 
+                data={securityFeaturesData}
+                onUpdate={setSecurityFeaturesData}
               />
             </TabsContent>
           </Tabs>

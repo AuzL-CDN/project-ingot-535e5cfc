@@ -8,8 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Trash2, Edit2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
-import type { HardwareItem, HardwareType, HardwareData, SecurityFeatureDetail } from '@/types/hardware';
-import { SECURITY_PRODUCTS, SECURITY_CATEGORIES } from '@/config/securityProducts';
+import type { HardwareItem, HardwareType, HardwareData } from '@/types/hardware';
 
 interface HardwareManagerProps {
   data: HardwareData;
@@ -20,8 +19,7 @@ export const HardwareManager = ({ data, onUpdate }: HardwareManagerProps) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<HardwareItem>>({
-    type: 'desktop',
-    securityFeatures: []
+    type: 'desktop'
   });
 
   const handleSubmit = () => {
@@ -41,7 +39,6 @@ export const HardwareManager = ({ data, onUpdate }: HardwareManagerProps) => {
       ram: formData.ram,
       storage: formData.storage,
       assignedTo: formData.assignedTo,
-      securityFeatures: formData.securityFeatures || [],
       notes: formData.notes,
       addedAt: editingId ? (data.items.find(i => i.id === editingId)?.addedAt || new Date()) : new Date()
     };
@@ -75,50 +72,11 @@ export const HardwareManager = ({ data, onUpdate }: HardwareManagerProps) => {
   };
 
   const resetForm = () => {
-    setFormData({ type: 'desktop', securityFeatures: [] });
+    setFormData({ type: 'desktop' });
     setIsAdding(false);
     setEditingId(null);
   };
 
-  const addSecurityFeature = (category: string) => {
-    const current = formData.securityFeatures || [];
-    const newFeature: SecurityFeatureDetail = {
-      category,
-      product: '',
-      customProduct: undefined,
-      version: undefined
-    };
-    setFormData({
-      ...formData,
-      securityFeatures: [...current, newFeature]
-    });
-  };
-
-  const updateSecurityFeature = (index: number, updates: Partial<SecurityFeatureDetail>) => {
-    const current = [...(formData.securityFeatures || [])];
-    current[index] = { ...current[index], ...updates };
-    setFormData({
-      ...formData,
-      securityFeatures: current
-    });
-  };
-
-  const removeSecurityFeature = (index: number) => {
-    const current = formData.securityFeatures || [];
-    setFormData({
-      ...formData,
-      securityFeatures: current.filter((_, i) => i !== index)
-    });
-  };
-
-  const getSelectedCategories = () => {
-    return (formData.securityFeatures || []).map(f => f.category);
-  };
-
-  const getAvailableCategories = () => {
-    const selected = getSelectedCategories();
-    return SECURITY_CATEGORIES.filter(cat => !selected.includes(cat));
-  };
 
   return (
     <div className="space-y-6">
@@ -256,90 +214,6 @@ export const HardwareManager = ({ data, onUpdate }: HardwareManagerProps) => {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label>Security Features</Label>
-                    {getAvailableCategories().length > 0 && (
-                      <Select onValueChange={addSecurityFeature}>
-                        <SelectTrigger className="w-[200px]">
-                          <SelectValue placeholder="+ Add Feature" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getAvailableCategories().map(category => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </div>
-
-                  {(formData.securityFeatures || []).length > 0 ? (
-                    <div className="space-y-3">
-                      {formData.securityFeatures?.map((feature, index) => (
-                        <Card key={index} className="p-4">
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <Badge variant="outline">{feature.category}</Badge>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => removeSecurityFeature(index)}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-xs">Product *</Label>
-                              <Select
-                                value={feature.product}
-                                onValueChange={(value) => updateSecurityFeature(index, { product: value })}
-                              >
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select product..." />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {SECURITY_PRODUCTS[feature.category as keyof typeof SECURITY_PRODUCTS]?.map(product => (
-                                    <SelectItem key={product} value={product}>
-                                      {product}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-
-                            {feature.product === 'Other' && (
-                              <div className="space-y-2">
-                                <Label className="text-xs">Specify Product *</Label>
-                                <Input
-                                  value={feature.customProduct || ''}
-                                  onChange={(e) => updateSecurityFeature(index, { customProduct: e.target.value })}
-                                  placeholder="Enter product name..."
-                                />
-                              </div>
-                            )}
-
-                            <div className="space-y-2">
-                              <Label className="text-xs">Version (Optional)</Label>
-                              <Input
-                                value={feature.version || ''}
-                                onChange={(e) => updateSecurityFeature(index, { version: e.target.value })}
-                                placeholder="e.g., 10.7.0, 2023.1"
-                              />
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">
-                      No security features added. Click "+ Add Feature" to add one.
-                    </p>
-                  )}
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -414,27 +288,6 @@ export const HardwareManager = ({ data, onUpdate }: HardwareManagerProps) => {
                             </div>
                           )}
                         </div>
-
-                        {item.securityFeatures.length > 0 && (
-                          <div>
-                            <span className="text-sm text-muted-foreground">Security Features:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {item.securityFeatures.map((feature, idx) => {
-                                const displayProduct = feature.product === 'Other' 
-                                  ? feature.customProduct 
-                                  : feature.product;
-                                const displayText = feature.version 
-                                  ? `${feature.category}: ${displayProduct} v${feature.version}`
-                                  : `${feature.category}: ${displayProduct}`;
-                                return (
-                                  <Badge key={idx} variant="secondary" className="text-xs">
-                                    {displayText}
-                                  </Badge>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        )}
 
                         {item.notes && (
                           <div className="text-sm">
