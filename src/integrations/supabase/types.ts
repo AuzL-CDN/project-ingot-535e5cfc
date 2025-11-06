@@ -14,6 +14,86 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          activity_number: string
+          company_name: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          inspection_class: string
+          is_completed: boolean
+          org_site_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activity_number: string
+          company_name: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          inspection_class: string
+          is_completed?: boolean
+          org_site_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activity_number?: string
+          company_name?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          inspection_class?: string
+          is_completed?: boolean
+          org_site_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      activity_deadlines: {
+        Row: {
+          activity_id: string
+          business_days_allocated: number
+          created_at: string
+          deadline_type: string
+          due_date: string
+          id: string
+          start_date: string
+          status: string
+        }
+        Insert: {
+          activity_id: string
+          business_days_allocated: number
+          created_at?: string
+          deadline_type: string
+          due_date: string
+          id?: string
+          start_date: string
+          status?: string
+        }
+        Update: {
+          activity_id?: string
+          business_days_allocated?: number
+          created_at?: string
+          deadline_type?: string
+          due_date?: string
+          id?: string
+          start_date?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_deadlines_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string

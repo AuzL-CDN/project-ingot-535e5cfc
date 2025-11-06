@@ -18,6 +18,7 @@ import { DISISNotesTab } from './tabs/DISISNotesTab';
 import { ResourcesTab } from './tabs/ResourcesTab';
 import { AdminTab } from './tabs/AdminTab';
 import { UserMenuDropdown } from '@/components/UserMenuDropdown';
+import { NotificationHeader } from '@/components/NotificationHeader';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from './auth/AuthProvider';
 
@@ -121,14 +122,26 @@ export const InspectionApp = () => {
               <p className="text-muted-foreground">{t('professionalInspectionWorkflow')}</p>
             </div>
             <div className="flex items-center space-x-4">
-              {isInspectorSetup && (
-                <UserMenuDropdown
-                  inspector={inspector}
-                  globalUILanguage={globalState.globalUILanguage}
-                  documentLanguage={globalState.documentLanguage}
-                  onUILanguageChange={inspectionState.updateGlobalUILanguage}
-                  onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
-                />
+              {isInspectorSetup && user && (
+                <>
+                  <NotificationHeader 
+                    onViewActivity={(activityNumber) => {
+                      // Load the activity
+                      const activities = inspectionState.searchActivities(activityNumber);
+                      if (activities.length > 0) {
+                        inspectionState.loadActivity(activities[0]);
+                        setActiveTab('main');
+                      }
+                    }}
+                  />
+                  <UserMenuDropdown
+                    inspector={inspector}
+                    globalUILanguage={globalState.globalUILanguage}
+                    documentLanguage={globalState.documentLanguage}
+                    onUILanguageChange={inspectionState.updateGlobalUILanguage}
+                    onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
+                  />
+                </>
               )}
             </div>
           </div>

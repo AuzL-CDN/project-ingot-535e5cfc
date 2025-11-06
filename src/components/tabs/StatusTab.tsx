@@ -2,6 +2,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, CheckCircle, AlertCircle, FileText, Mail, Calendar, Activity, Upload, Users, Shield } from 'lucide-react';
+import { useNotifications } from '@/hooks/useNotifications';
+import { formatDaysRemaining } from '@/utils/businessDayCalculator';
 
 export interface ActivityLogEntry {
   id: string;
@@ -72,6 +74,8 @@ const sampleActivityLog: ActivityLogEntry[] = [
 ];
 
 export const StatusTab = ({ currentActivity, activityLog = sampleActivityLog }: StatusTabProps) => {
+  const { notifications, counts, getColorForType } = useNotifications();
+  
   const formatTimestamp = (timestamp: string) => {
     return new Date(timestamp).toLocaleString();
   };
@@ -118,6 +122,44 @@ export const StatusTab = ({ currentActivity, activityLog = sampleActivityLog }: 
     return <Activity className="h-4 w-4" />;
   };
 
+  const getDeadlineBadgeColor = (color: string) => {
+    switch (color) {
+      case 'red':
+        return 'bg-red-100 text-red-800 border-red-200';
+      case 'yellow':
+        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'green':
+        return 'bg-green-100 text-green-800 border-green-200';
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  if (!currentActivity) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="h-5 w-5 text-primary" />
+              <span>Activity Log</span>
+            </CardTitle>
+            <CardDescription>
+              Real-time tracking of all actions, uploads, and status changes
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-12 text-muted-foreground">
+              <Activity className="h-16 w-16 mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-medium text-foreground mb-2">No Activity Selected</h3>
+              <p>Save an activity from the Main tab or load one from Search to view status information.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6">
       <Card>
@@ -136,6 +178,78 @@ export const StatusTab = ({ currentActivity, activityLog = sampleActivityLog }: 
               <div className="bg-muted/50 rounded-lg p-4">
                 <h4 className="font-semibold text-foreground mb-2">Current Activity</h4>
                 <p className="text-sm text-muted-foreground font-mono">{currentActivity}</p>
+              </div>
+
+              {/* Deadlines Section */}
+              <div className="space-y-4">
+                <h4 className="font-semibold text-foreground">Active Deadlines</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Checklist Deadline */}
+                  <Card className="border-l-4 border-l-blue-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Checklist</span>
+                        {counts.checklist > 0 && (
+                          <Badge className={getDeadlineBadgeColor(getColorForType('checklist'))}>
+                            {counts.checklist}
+                          </Badge>
+                        )}
+                      </div>
+                      {notifications.filter(n => n.deadlineType === 'checklist').map(n => (
+                        <div key={n.id} className="text-xs text-muted-foreground mt-2">
+                          {formatDaysRemaining(n.daysRemaining)}
+                        </div>
+                      ))}
+                      {counts.checklist === 0 && (
+                        <div className="text-xs text-muted-foreground">On track</div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* DoC Deadline */}
+                  <Card className="border-l-4 border-l-purple-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">DoC</span>
+                        {counts.doc > 0 && (
+                          <Badge className={getDeadlineBadgeColor(getColorForType('doc'))}>
+                            {counts.doc}
+                          </Badge>
+                        )}
+                      </div>
+                      {notifications.filter(n => n.deadlineType === 'doc').map(n => (
+                        <div key={n.id} className="text-xs text-muted-foreground mt-2">
+                          {formatDaysRemaining(n.daysRemaining)}
+                        </div>
+                      ))}
+                      {counts.doc === 0 && (
+                        <div className="text-xs text-muted-foreground">On track</div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Corrective Measures Deadline */}
+                  <Card className="border-l-4 border-l-orange-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium">Corrective</span>
+                        {counts.corrective_measures > 0 && (
+                          <Badge className={getDeadlineBadgeColor(getColorForType('corrective_measures'))}>
+                            {counts.corrective_measures}
+                          </Badge>
+                        )}
+                      </div>
+                      {notifications.filter(n => n.deadlineType === 'corrective_measures').map(n => (
+                        <div key={n.id} className="text-xs text-muted-foreground mt-2">
+                          {formatDaysRemaining(n.daysRemaining)}
+                        </div>
+                      ))}
+                      {counts.corrective_measures === 0 && (
+                        <div className="text-xs text-muted-foreground">On track</div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
               </div>
 
               <div className="space-y-4">
