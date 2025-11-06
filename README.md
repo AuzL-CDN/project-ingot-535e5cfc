@@ -1008,6 +1008,253 @@ vercel env add VITE_AZURE_CLIENT_ID
 vercel env add VITE_SHAREPOINT_SITE_URL
 ```
 
+### Option 5: GitHub + CI/CD Pipeline (Independent Development)
+
+This option enables team members to make changes using any code editor and automatically deploy through GitHub Actions.
+
+#### Step 1: GitHub Repository Setup
+
+```bash
+# If not already done, push your code to GitHub
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/project-ingot.git
+git push -u origin main
+```
+
+#### Step 2: Configure GitHub Actions for Azure Static Web Apps
+
+Create `.github/workflows/azure-static-web-apps.yml`:
+
+```yaml
+name: Azure Static Web Apps CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_VAPID_PUBLIC_KEY: ${{ secrets.VITE_VAPID_PUBLIC_KEY }}
+      
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "/"
+          output_location: "dist"
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
+    runs-on: ubuntu-latest
+    name: Close Pull Request Job
+    steps:
+      - name: Close Pull Request
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: "close"
+```
+
+#### Step 3: Configure GitHub Secrets
+
+Add these secrets in **GitHub → Settings → Secrets and variables → Actions**:
+
+```bash
+# Required secrets:
+AZURE_STATIC_WEB_APPS_API_TOKEN    # From Azure Static Web Apps deployment token
+VITE_SUPABASE_URL                   # Your Supabase project URL
+VITE_SUPABASE_ANON_KEY             # Your Supabase anonymous key
+VITE_VAPID_PUBLIC_KEY              # Push notification public key
+```
+
+**To get Azure deployment token:**
+1. Go to Azure Portal → Static Web Apps → Your app
+2. Navigate to **Manage deployment token**
+3. Copy the deployment token
+4. Add it to GitHub Secrets as `AZURE_STATIC_WEB_APPS_API_TOKEN`
+
+#### Step 4: Local Development Workflow
+
+```bash
+# Clone repository
+git clone https://github.com/YOUR_USERNAME/project-ingot.git
+cd project-ingot
+
+# Install dependencies
+npm install
+
+# Create local environment file
+cp .env.example .env.local
+
+# Add your environment variables to .env.local
+# VITE_SUPABASE_URL=your_supabase_url
+# VITE_SUPABASE_ANON_KEY=your_anon_key
+# VITE_VAPID_PUBLIC_KEY=your_vapid_key
+
+# Start development server
+npm run dev
+
+# Application runs at http://localhost:5173
+```
+
+#### Step 5: Making Changes and Deploying
+
+```bash
+# 1. Create a feature branch (recommended)
+git checkout -b feature/your-feature-name
+
+# 2. Make your changes in any code editor (VS Code, Vim, etc.)
+
+# 3. Test locally
+npm run dev
+
+# 4. Build to verify production compatibility
+npm run build
+npm run preview
+
+# 5. Commit changes
+git add .
+git commit -m "Description of changes"
+
+# 6. Push to GitHub
+git push origin feature/your-feature-name
+
+# 7. Create Pull Request on GitHub
+# - Navigate to repository on GitHub
+# - Click "Compare & pull request"
+# - Review changes and create PR
+# - GitHub Actions will automatically build and deploy to staging
+
+# 8. After PR approval, merge to main
+# - GitHub Actions will automatically deploy to production
+# - Deployment takes 3-10 minutes
+```
+
+#### Step 6: Monitor Deployments
+
+**View deployment status:**
+- **GitHub**: Actions tab shows build progress
+- **Azure Portal**: Static Web Apps → Deployments shows deployment history
+
+**Verify deployment:**
+```bash
+# Check your production URL
+curl -I https://your-app.azurestaticapps.net
+
+# Should return 200 OK with proper headers
+```
+
+#### Step 7: Rollback Procedure (if needed)
+
+```bash
+# Option 1: Revert via GitHub
+git revert HEAD
+git push origin main
+
+# Option 2: Revert to specific commit
+git revert <commit-hash>
+git push origin main
+
+# Option 3: Via Azure Portal
+# Navigate to: Static Web Apps → Deployments
+# Click on previous successful deployment
+# Select "Reactivate"
+```
+
+#### Step 8: Team Collaboration Best Practices
+
+```bash
+# Always pull latest changes before starting work
+git checkout main
+git pull origin main
+git checkout -b feature/new-feature
+
+# Keep your branch up to date
+git checkout main
+git pull origin main
+git checkout feature/new-feature
+git merge main
+
+# Use meaningful commit messages
+git commit -m "feat: Add push notification UI component"
+git commit -m "fix: Resolve authentication token expiration"
+git commit -m "docs: Update deployment guide"
+```
+
+#### Automated Deployment Triggers
+
+| Event | Action | Result |
+|-------|--------|--------|
+| Push to `main` | Automatic build & deploy | Production deployment |
+| Pull Request opened | Automatic build & deploy | Staging environment for testing |
+| Pull Request merged | Automatic build & deploy | Production deployment |
+| Manual trigger | Click "Run workflow" in Actions | On-demand deployment |
+
+#### Development Environment Setup Recommendations
+
+**Recommended Code Editors:**
+- Visual Studio Code (with React, TypeScript, Tailwind CSS extensions)
+- WebStorm
+- Sublime Text
+- Vim/Neovim
+
+**Essential VS Code Extensions:**
+```json
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "dsznajder.es7-react-js-snippets",
+    "formulahendry.auto-rename-tag"
+  ]
+}
+```
+
+**Local Testing Checklist:**
+```bash
+☐ npm run dev - Development server runs without errors
+☐ npm run build - Production build completes successfully
+☐ npm run preview - Production preview works correctly
+☐ Test authentication flow locally
+☐ Verify all environment variables are configured
+☐ Check browser console for errors
+☐ Test responsive design on different screen sizes
+```
+
 ---
 
 ## ✅ Post-Deployment Verification
