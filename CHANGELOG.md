@@ -66,7 +66,7 @@ and this project adheres to Semantic Versioning with the following convention:
 
 ---
 
-## [2.2.0] - 2025-10-28
+## [2.2.0] - 2025-09-22
 
 ### Added
 - Advanced checklist system with 1F (Protected) and 1G (Classified) sub-tabs
@@ -94,7 +94,7 @@ and this project adheres to Semantic Versioning with the following convention:
 
 ---
 
-## [2.1.0] - 2025-10-15
+## [2.1.0] - 2025-08-10
 
 ### Added
 - Content automation color-coding system (yellow highlights, red placeholders)
@@ -125,9 +125,10 @@ and this project adheres to Semantic Versioning with the following convention:
 
 ---
 
-## [2.0.0] - 2025-09-20
+## [2.0.0] - 2025-03-15
 
 ### Added - Core System Infrastructure
+- Project scaffolding with React + Vite + TypeScript
 - Complete Supabase integration (Authentication, Database, Storage)
 - Multi-tab inspection workflow interface (TabNavigation)
 - Inspector profile management system (InspectorInfo)
@@ -187,15 +188,6 @@ and this project adheres to Semantic Versioning with the following convention:
 - XLSX for Excel file handling
 - Recharts for data visualization
 - Lucide React for icons
-
----
-
-## [1.0.0] - Initial Release
-
-### Added
-- Project scaffolding with React + Vite + TypeScript
-- Shadcn/ui component library setup
-- Basic project structure and configuration
 - ESLint and TypeScript configuration
 - Tailwind CSS setup with custom configuration
 - Initial routing structure
@@ -205,11 +197,10 @@ and this project adheres to Semantic Versioning with the following convention:
 
 ## Version History Summary
 
-- **2.3.x**: Push notifications and CI/CD enhancements
-- **2.2.x**: Advanced checklist system
-- **2.1.x**: Document automation framework
-- **2.0.x**: Core system infrastructure and UI
-- **1.0.x**: Initial project foundation
+- **2.3.x**: Push notifications and CI/CD enhancements (October-November 2025)
+- **2.2.x**: Advanced checklist system (September 2025)
+- **2.1.x**: Document automation framework (August 2025)
+- **2.0.x**: Core system infrastructure and UI (March 2025 - Initial Release)
 
 ---
 
