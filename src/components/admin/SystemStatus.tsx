@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { PushNotificationPrompt } from '@/components/PushNotificationPrompt';
 import { 
   Activity, 
   Database, 
@@ -165,7 +164,6 @@ export const SystemStatus = () => {
 
   return (
     <div className="space-y-6">
-      <PushNotificationPrompt />
       {/* Header */}
       <Card>
         <CardHeader>

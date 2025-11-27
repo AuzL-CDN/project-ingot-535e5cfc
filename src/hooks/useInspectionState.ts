@@ -1,6 +1,4 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { addBusinessDays } from '@/utils/businessDayCalculator';
 
 export interface InspectorProfile {
   name: string;
@@ -188,7 +186,7 @@ export const useInspectionState = () => {
     setCurrentActivity(activity.id);
   }, []);
 
-  const saveActivity = useCallback(async (): Promise<ActivityRecord> => {
+  const saveActivity = useCallback((): ActivityRecord => {
     const activity: ActivityRecord = {
       id: currentActivity || `${mainForm.activityNumber}_${Date.now()}`,
       inspector,
@@ -199,66 +197,9 @@ export const useInspectionState = () => {
       updatedAt: new Date().toISOString()
     };
 
-    // Save to localStorage for backward compatibility
+    // In a real app, this would save to SharePoint/database
     localStorage.setItem(`activity_${activity.id}`, JSON.stringify(activity));
     setCurrentActivity(activity.id);
-    
-    // Save to Supabase if user is authenticated and activity is new
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user && !currentActivity && mainForm.activityNumber && mainForm.inspectionClass) {
-      try {
-        // Create activity record in database
-        const { data: activityData, error: activityError } = await supabase
-          .from('activities')
-          .insert({
-            user_id: user.id,
-            activity_number: mainForm.activityNumber,
-            org_site_number: mainForm.orgSiteNumber,
-            company_name: mainForm.companyName,
-            inspection_class: mainForm.inspectionClass,
-          })
-          .select()
-          .single();
-
-        if (activityError) throw activityError;
-
-        // Determine which deadlines to create based on inspection class
-        const deadlines: Array<{ deadline_type: string; business_days: number }> = [];
-        
-        if (mainForm.inspectionClass === '1F' || mainForm.inspectionClass === '1G') {
-          deadlines.push({ deadline_type: 'checklist', business_days: 20 });
-          deadlines.push({ deadline_type: 'corrective_measures', business_days: 30 });
-        } else if (mainForm.inspectionClass === '19F' || mainForm.inspectionClass === '19G') {
-          deadlines.push({ deadline_type: 'checklist', business_days: 20 });
-          deadlines.push({ deadline_type: 'doc', business_days: 20 });
-        }
-
-        // Create deadline records
-        const startDate = new Date();
-        const deadlineRecords = deadlines.map(d => {
-          const dueDate = addBusinessDays(startDate, d.business_days);
-          return {
-            activity_id: activityData.id,
-            deadline_type: d.deadline_type,
-            start_date: startDate.toISOString().split('T')[0],
-            due_date: dueDate.toISOString().split('T')[0],
-            business_days_allocated: d.business_days,
-          };
-        });
-
-        if (deadlineRecords.length > 0) {
-          const { error: deadlineError } = await supabase
-            .from('activity_deadlines')
-            .insert(deadlineRecords);
-
-          if (deadlineError) throw deadlineError;
-        }
-
-        console.log('Activity and deadlines created successfully');
-      } catch (error) {
-        console.error('Error creating activity in database:', error);
-      }
-    }
     
     return activity;
   }, [inspector, mainForm, approvalLetter, correctiveMeasures, currentActivity]);
@@ -288,43 +229,9 @@ export const useInspectionState = () => {
     return results;
   }, []);
 
-  const completeActivity = useCallback(async () => {
+  const completeActivity = () => {
     setIsActivityCompleted(true);
-    
-    // Update activity in Supabase if user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user && mainForm.activityNumber) {
-      try {
-        // Find the activity by activity number and user_id
-        const { data: activities, error: findError } = await supabase
-          .from('activities')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('activity_number', mainForm.activityNumber)
-          .single();
-
-        if (findError || !activities) {
-          console.error('Error finding activity:', findError);
-          return;
-        }
-
-        // Update activity as completed
-        const { error: updateError } = await supabase
-          .from('activities')
-          .update({
-            is_completed: true,
-            completed_at: new Date().toISOString(),
-          })
-          .eq('id', activities.id);
-
-        if (updateError) throw updateError;
-
-        console.log('Activity marked as completed');
-      } catch (error) {
-        console.error('Error completing activity in database:', error);
-      }
-    }
-  }, [mainForm.activityNumber]);
+  };
 
   const updateGlobalUILanguage = (language: 'en' | 'fr') => {
     setGlobalState(prev => ({ ...prev, globalUILanguage: language }));

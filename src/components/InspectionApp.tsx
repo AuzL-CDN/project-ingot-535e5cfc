@@ -18,9 +18,6 @@ import { DISISNotesTab } from './tabs/DISISNotesTab';
 import { ResourcesTab } from './tabs/ResourcesTab';
 import { AdminTab } from './tabs/AdminTab';
 import { UserMenuDropdown } from '@/components/UserMenuDropdown';
-import { NotificationHeader } from '@/components/NotificationHeader';
-import { NotificationBanner } from '@/components/NotificationBanner';
-import { useNotifications } from '@/hooks/useNotifications';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useAuth } from './auth/AuthProvider';
 
@@ -46,7 +43,6 @@ export const InspectionApp = () => {
   const [checklistFiles, setChecklistFiles] = useState<File[]>([]);
   const inspectionState = useInspectionState();
   const { user, loading } = useAuth();
-  const { notifications } = useNotifications();
 
   const { mainForm, inspector, isActivityCompleted, globalState } = inspectionState;
   const { t } = useTranslation(globalState.globalUILanguage === 'fr' ? 'french' : 'english');
@@ -125,42 +121,19 @@ export const InspectionApp = () => {
               <p className="text-muted-foreground">{t('professionalInspectionWorkflow')}</p>
             </div>
             <div className="flex items-center space-x-4">
-              {isInspectorSetup && user && (
-                <>
-                  <NotificationHeader 
-                    onViewActivity={(activityNumber) => {
-                      // Load the activity
-                      const activities = inspectionState.searchActivities(activityNumber);
-                      if (activities.length > 0) {
-                        inspectionState.loadActivity(activities[0]);
-                        setActiveTab('main');
-                      }
-                    }}
-                  />
-                  <UserMenuDropdown
-                    inspector={inspector}
-                    globalUILanguage={globalState.globalUILanguage}
-                    documentLanguage={globalState.documentLanguage}
-                    onUILanguageChange={inspectionState.updateGlobalUILanguage}
-                    onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
-                  />
-                </>
+              {isInspectorSetup && (
+                <UserMenuDropdown
+                  inspector={inspector}
+                  globalUILanguage={globalState.globalUILanguage}
+                  documentLanguage={globalState.documentLanguage}
+                  onUILanguageChange={inspectionState.updateGlobalUILanguage}
+                  onDocumentLanguageChange={inspectionState.updateDocumentLanguage}
+                />
               )}
             </div>
           </div>
         </div>
       </div>
-
-      <NotificationBanner 
-        notifications={notifications}
-        onViewActivity={(activityNumber) => {
-          const activities = inspectionState.searchActivities(activityNumber);
-          if (activities.length > 0) {
-            inspectionState.loadActivity(activities[0]);
-            setActiveTab('main');
-          }
-        }}
-      />
 
         <TabNavigation
           activeTab={currentTab}

@@ -6,19 +6,14 @@ This document explains how to use GitHub with Project INGOT for version control,
 
 ---
 
-## 🔗 Connecting to GitHub from Lovable
 
-### Option 1: Create New Repository from Lovable
 
-1. **In Lovable Editor**:
    - Click the **GitHub** button in the top-right corner
    - Select **Connect to GitHub**
-   - Authorize the Lovable GitHub App
    - Select your GitHub account/organization
    - Click **Create Repository**
 
 2. **Repository Created**:
-   - Lovable automatically creates a new repository
    - Initial commit includes all current code
    - Repository is connected for bidirectional sync
 
@@ -26,7 +21,6 @@ This document explains how to use GitHub with Project INGOT for version control,
 
 > **Note**: Direct import is not currently supported. Use this workaround:
 
-1. Create a new Lovable project
 2. Connect to GitHub (creates new repo)
 3. Manually copy your existing code to the new repo
 4. Push to GitHub
@@ -37,10 +31,7 @@ This document explains how to use GitHub with Project INGOT for version control,
 
 ### How It Works
 
-Lovable features **real-time two-way sync** with GitHub:
 
-- **Lovable → GitHub**: Changes made in Lovable automatically push to GitHub
-- **GitHub → Lovable**: Changes pushed to GitHub automatically sync to Lovable
 - No manual pull/push required
 
 ### What Gets Synced
@@ -64,7 +55,6 @@ Lovable features **real-time two-way sync** with GitHub:
 
 ### Working with Branches
 
-Lovable has **experimental support** for Git branches:
 
 1. **Enable Branch Switching**:
    - Go to **Account Settings** > **Labs**
@@ -77,8 +67,6 @@ Lovable has **experimental support** for Git branches:
    git push origin feature/new-inspection-type
    ```
 
-3. **Switch Branches in Lovable**:
-   - Use the branch selector in Lovable UI
    - Changes automatically sync to selected branch
 
 ### Recommended Branch Strategy
@@ -93,7 +81,6 @@ main (production)
 
 **Workflow**:
 1. Create feature branches from `develop`
-2. Make changes in Lovable or local IDE
 3. Create Pull Request to `develop`
 4. Review and test
 5. Merge to `develop`
@@ -105,17 +92,13 @@ main (production)
 
 ### Working with Multiple Developers
 
-You can develop using **Lovable AND local IDE** simultaneously:
 
-1. **Developer A** (using Lovable):
-   - Makes changes in Lovable UI
    - Changes auto-push to GitHub
 
 2. **Developer B** (using local IDE):
    - Clones repository
    - Makes changes locally
    - Pushes to GitHub
-   - Changes auto-sync to Lovable
 
 ### Best Practices
 
@@ -299,7 +282,6 @@ npm run dev
 git checkout -b feature/my-new-feature
 
 # Make changes...
-# Changes in Lovable will auto-sync here
 
 # Commit changes (if made locally)
 git add .
@@ -364,7 +346,6 @@ Follow Semantic Versioning (SemVer):
 
 ## 🔄 Rollback Procedures
 
-### Rollback in Lovable
 
 1. Click the project name > **Version History**
 2. Find the version before the issue
@@ -424,7 +405,6 @@ Configure in GitHub Settings > Branches:
 
 ### Common Issues
 
-**Issue**: Changes in Lovable not syncing to GitHub
 - **Solution**: Check GitHub connection status, reconnect if needed
 
 **Issue**: GitHub Actions deployment failing
@@ -438,7 +418,6 @@ Configure in GitHub Settings > Branches:
 
 ### Getting Help
 
-- **Lovable Documentation**: [docs.lovable.dev](https://docs.lovable.dev/)
 - **GitHub Actions Docs**: [docs.github.com/actions](https://docs.github.com/actions)
 - **Azure Static Web Apps Docs**: [docs.microsoft.com/azure/static-web-apps](https://docs.microsoft.com/azure/static-web-apps)
 - **Project INGOT Support**: [Your support contact]

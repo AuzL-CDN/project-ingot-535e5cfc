@@ -604,9 +604,6 @@ VITE_SHAREPOINT_SITE_URL=https://yourtenant.sharepoint.com/sites/ProjectINGOT
 VITE_APP_VERSION=2.5.0
 VITE_ENVIRONMENT=production
 
-# Push Notifications (Configure after generating VAPID keys)
-VITE_VAPID_PUBLIC_KEY=your-vapid-public-key-here
-
 # Power Automate Flow URLs (Configure these after creating flows)
 VITE_FLOW_CREATE_FOLDER=https://prod-xx.westus.logic.azure.com:443/workflows/xxx
 VITE_FLOW_GENERATE_DOC=https://prod-xx.westus.logic.azure.com:443/workflows/xxx
@@ -633,9 +630,6 @@ VITE_SHAREPOINT_SITE_URL=
 VITE_APP_VERSION=2.5.0
 VITE_ENVIRONMENT=production
 
-# Push Notifications
-VITE_VAPID_PUBLIC_KEY=
-
 # Power Automate Flow URLs
 VITE_FLOW_CREATE_FOLDER=
 VITE_FLOW_GENERATE_DOC=
@@ -645,184 +639,7 @@ EOF
 
 ---
 
-### PHASE 7: Configure Push Notifications System
-
-Project INGOT includes a comprehensive deadline notification system that sends push notifications to users' browsers when inspection deadlines are approaching, due, or overdue.
-
-#### Step 7.1: Generate VAPID Keys
-
-VAPID (Voluntary Application Server Identification) keys are required for Web Push notifications:
-
-```bash
-# Install web-push globally (if not already installed)
-npm install -g web-push
-
-# Generate VAPID key pair
-web-push generate-vapid-keys
-
-# Output will show:
-# Public Key: BNxxx...
-# Private Key: xxx...
-
-# Save both keys securely
-```
-
-#### Step 7.2: Configure Environment Variables
-
-Add the VAPID public key to your environment files:
-
-**Production (.env.production):**
-```bash
-VITE_VAPID_PUBLIC_KEY=your-public-key-from-step-7.1
-```
-
-**Development (.env):**
-```bash
-VITE_VAPID_PUBLIC_KEY=your-public-key-from-step-7.1
-```
-
-**Note:** The private key should be stored as a Supabase secret (configured in Supabase Dashboard → Project Settings → Edge Functions → Secrets).
-
-#### Step 7.3: Enable Database Extensions for Scheduled Notifications
-
-The notification system uses PostgreSQL cron to check deadlines daily. Enable required extensions:
-
-```sql
--- Enable pg_cron extension for scheduling
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-
--- Enable pg_net extension for making HTTP requests
-CREATE EXTENSION IF NOT EXISTS pg_net;
-```
-
-Run this SQL in your Supabase SQL Editor.
-
-#### Step 7.4: Schedule Daily Notification Check
-
-Configure the cron job to run daily at 8:00 AM UTC:
-
-```sql
-SELECT cron.schedule(
-  'check-deadline-notifications-daily',
-  '0 8 * * *', -- Every day at 8:00 AM UTC
-  $$
-  SELECT
-    net.http_post(
-      url:='https://ejctzcsegswfrkwbywte.supabase.co/functions/v1/check-deadline-notifications',
-      headers:='{"Content-Type": "application/json", "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqY3R6Y3NlZ3N3ZnJrd2J5d3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg3Mjk1NDMsImV4cCI6MjA3NDMwNTU0M30.lu-xf1W72mRfCdGyUDTrcohJKkRxoWEzJZv0toZ5qWs"}'::jsonb,
-      body:='{}'::jsonb
-    ) as request_id;
-  $$
-);
-```
-
-**Adjust timezone if needed:**
-- 8 AM EST (UTC-5): use `'0 13 * * *'`
-- 8 AM PST (UTC-8): use `'0 16 * * *'`
-- 8 AM CST (UTC-6): use `'0 14 * * *'`
-
-#### Step 7.5: Verify Cron Job Installation
-
-```sql
--- View all scheduled jobs
-SELECT * FROM cron.job;
-
--- Check job execution history
-SELECT * FROM cron.job_run_details 
-WHERE jobname = 'check-deadline-notifications-daily' 
-ORDER BY start_time DESC 
-LIMIT 10;
-```
-
-#### Step 7.6: Notification Trigger Points
-
-The system automatically sends notifications at these intervals:
-
-| Trigger Point | Days Before/After Due Date | Notification Type | Priority |
-|--------------|---------------------------|-------------------|----------|
-| **Upcoming** | 10 business days before | 📅 "Upcoming Deadline" | Normal |
-| **Due Today** | 0 (on due date) | ⏰ "Deadline Due Today" | High |
-| **Overdue** | 5 business days after | 🚨 "Deadline Overdue" | Critical |
-
-#### Step 7.7: User Instructions for Enabling Notifications
-
-Users must enable push notifications in their browser:
-
-1. **Navigate to Admin Tab**
-   - Click the Admin tab (visible to authenticated users)
-   
-2. **Enable Push Notifications**
-   - Look for the "Push Notifications" card
-   - Click "Enable Notifications" button
-   - Allow browser notification permission when prompted
-
-3. **Test Notifications**
-   - Notifications appear in the notification header (bell icon)
-   - In-app banners show at the top of the application
-   - Browser push notifications appear even when the app is closed
-
-#### Step 7.8: Troubleshooting Notifications
-
-```bash
-# Issue: Browser notifications not appearing
-Solution:
-1. Check browser notification permissions (browser settings)
-2. Verify service worker is registered (DevTools → Application → Service Workers)
-3. Check that VAPID public key is correctly configured in .env
-4. Test with a different browser
-
-# Issue: Cron job not running
-Solution:
-1. Verify pg_cron extension is enabled: SELECT * FROM pg_extension WHERE extname = 'pg_cron';
-2. Check job status: SELECT * FROM cron.job WHERE jobname = 'check-deadline-notifications-daily';
-3. Review job execution logs: SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 10;
-4. Manually trigger the edge function to test: curl -X POST [edge-function-url]
-
-# Issue: Notifications not sending
-Solution:
-1. Check edge function logs in Supabase Dashboard
-2. Verify push subscriptions exist: SELECT COUNT(*) FROM push_subscriptions;
-3. Test notification endpoint manually
-4. Ensure user has active deadlines in the system
-```
-
-#### Step 7.9: Monitoring Notification System
-
-```sql
--- Check active push subscriptions
-SELECT 
-  COUNT(*) as total_subscriptions,
-  COUNT(DISTINCT user_id) as unique_users
-FROM push_subscriptions;
-
--- View users with approaching deadlines
-SELECT 
-  a.activity_number,
-  a.company_name,
-  ad.deadline_type,
-  ad.due_date,
-  ad.status
-FROM activity_deadlines ad
-JOIN activities a ON ad.activity_id = a.id
-WHERE a.is_completed = false
-ORDER BY ad.due_date ASC;
-
--- Check cron job execution history
-SELECT 
-  jobname,
-  start_time,
-  end_time,
-  status,
-  return_message
-FROM cron.job_run_details 
-WHERE jobname = 'check-deadline-notifications-daily'
-ORDER BY start_time DESC 
-LIMIT 20;
-```
-
----
-
-### PHASE 8: Create Power Automate Flows
+### PHASE 7: Create Power Automate Flows
 
 #### Flow 1: Create Inspector Folder
 
@@ -907,8 +724,6 @@ After creating each flow:
 1. Copy the HTTP POST URL
 2. Add to `.env.production` file
 3. Update environment configuration
-
----
 
 ---
 
@@ -1008,253 +823,6 @@ vercel env add VITE_AZURE_CLIENT_ID
 vercel env add VITE_SHAREPOINT_SITE_URL
 ```
 
-### Option 5: GitHub + CI/CD Pipeline (Independent Development)
-
-This option enables team members to make changes using any code editor and automatically deploy through GitHub Actions.
-
-#### Step 1: GitHub Repository Setup
-
-```bash
-# If not already done, push your code to GitHub
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/project-ingot.git
-git push -u origin main
-```
-
-#### Step 2: Configure GitHub Actions for Azure Static Web Apps
-
-Create `.github/workflows/azure-static-web-apps.yml`:
-
-```yaml
-name: Azure Static Web Apps CI/CD
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
-    runs-on: ubuntu-latest
-    name: Build and Deploy Job
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          cache: 'npm'
-      
-      - name: Install dependencies
-        run: npm ci
-      
-      - name: Build application
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-          VITE_VAPID_PUBLIC_KEY: ${{ secrets.VITE_VAPID_PUBLIC_KEY }}
-      
-      - name: Deploy to Azure Static Web Apps
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          action: "upload"
-          app_location: "/"
-          output_location: "dist"
-
-  close_pull_request_job:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Pull Request Job
-    steps:
-      - name: Close Pull Request
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          action: "close"
-```
-
-#### Step 3: Configure GitHub Secrets
-
-Add these secrets in **GitHub → Settings → Secrets and variables → Actions**:
-
-```bash
-# Required secrets:
-AZURE_STATIC_WEB_APPS_API_TOKEN    # From Azure Static Web Apps deployment token
-VITE_SUPABASE_URL                   # Your Supabase project URL
-VITE_SUPABASE_ANON_KEY             # Your Supabase anonymous key
-VITE_VAPID_PUBLIC_KEY              # Push notification public key
-```
-
-**To get Azure deployment token:**
-1. Go to Azure Portal → Static Web Apps → Your app
-2. Navigate to **Manage deployment token**
-3. Copy the deployment token
-4. Add it to GitHub Secrets as `AZURE_STATIC_WEB_APPS_API_TOKEN`
-
-#### Step 4: Local Development Workflow
-
-```bash
-# Clone repository
-git clone https://github.com/YOUR_USERNAME/project-ingot.git
-cd project-ingot
-
-# Install dependencies
-npm install
-
-# Create local environment file
-cp .env.example .env.local
-
-# Add your environment variables to .env.local
-# VITE_SUPABASE_URL=your_supabase_url
-# VITE_SUPABASE_ANON_KEY=your_anon_key
-# VITE_VAPID_PUBLIC_KEY=your_vapid_key
-
-# Start development server
-npm run dev
-
-# Application runs at http://localhost:5173
-```
-
-#### Step 5: Making Changes and Deploying
-
-```bash
-# 1. Create a feature branch (recommended)
-git checkout -b feature/your-feature-name
-
-# 2. Make your changes in any code editor (VS Code, Vim, etc.)
-
-# 3. Test locally
-npm run dev
-
-# 4. Build to verify production compatibility
-npm run build
-npm run preview
-
-# 5. Commit changes
-git add .
-git commit -m "Description of changes"
-
-# 6. Push to GitHub
-git push origin feature/your-feature-name
-
-# 7. Create Pull Request on GitHub
-# - Navigate to repository on GitHub
-# - Click "Compare & pull request"
-# - Review changes and create PR
-# - GitHub Actions will automatically build and deploy to staging
-
-# 8. After PR approval, merge to main
-# - GitHub Actions will automatically deploy to production
-# - Deployment takes 3-10 minutes
-```
-
-#### Step 6: Monitor Deployments
-
-**View deployment status:**
-- **GitHub**: Actions tab shows build progress
-- **Azure Portal**: Static Web Apps → Deployments shows deployment history
-
-**Verify deployment:**
-```bash
-# Check your production URL
-curl -I https://your-app.azurestaticapps.net
-
-# Should return 200 OK with proper headers
-```
-
-#### Step 7: Rollback Procedure (if needed)
-
-```bash
-# Option 1: Revert via GitHub
-git revert HEAD
-git push origin main
-
-# Option 2: Revert to specific commit
-git revert <commit-hash>
-git push origin main
-
-# Option 3: Via Azure Portal
-# Navigate to: Static Web Apps → Deployments
-# Click on previous successful deployment
-# Select "Reactivate"
-```
-
-#### Step 8: Team Collaboration Best Practices
-
-```bash
-# Always pull latest changes before starting work
-git checkout main
-git pull origin main
-git checkout -b feature/new-feature
-
-# Keep your branch up to date
-git checkout main
-git pull origin main
-git checkout feature/new-feature
-git merge main
-
-# Use meaningful commit messages
-git commit -m "feat: Add push notification UI component"
-git commit -m "fix: Resolve authentication token expiration"
-git commit -m "docs: Update deployment guide"
-```
-
-#### Automated Deployment Triggers
-
-| Event | Action | Result |
-|-------|--------|--------|
-| Push to `main` | Automatic build & deploy | Production deployment |
-| Pull Request opened | Automatic build & deploy | Staging environment for testing |
-| Pull Request merged | Automatic build & deploy | Production deployment |
-| Manual trigger | Click "Run workflow" in Actions | On-demand deployment |
-
-#### Development Environment Setup Recommendations
-
-**Recommended Code Editors:**
-- Visual Studio Code (with React, TypeScript, Tailwind CSS extensions)
-- WebStorm
-- Sublime Text
-- Vim/Neovim
-
-**Essential VS Code Extensions:**
-```json
-{
-  "recommendations": [
-    "dbaeumer.vscode-eslint",
-    "esbenp.prettier-vscode",
-    "bradlc.vscode-tailwindcss",
-    "dsznajder.es7-react-js-snippets",
-    "formulahendry.auto-rename-tag"
-  ]
-}
-```
-
-**Local Testing Checklist:**
-```bash
-☐ npm run dev - Development server runs without errors
-☐ npm run build - Production build completes successfully
-☐ npm run preview - Production preview works correctly
-☐ Test authentication flow locally
-☐ Verify all environment variables are configured
-☐ Check browser console for errors
-☐ Test responsive design on different screen sizes
-```
-
 ---
 
 ## ✅ Post-Deployment Verification
@@ -1286,29 +854,21 @@ git commit -m "docs: Update deployment guide"
 ☐ Email template generation
 ☐ Final report creation
 
-# 4. Notification System
-☐ Push notification subscriptions working
-☐ In-app notification banners displaying correctly
-☐ Deadline notifications appear in notification header
-☐ Cron job executing daily at scheduled time
-☐ Edge function processing deadlines correctly
-☐ Service worker registered and active
-
-# 5. Integration Tests
+# 4. Integration Tests
 ☐ SharePoint list read/write operations
 ☐ Document library access
 ☐ Power Automate flow triggers
 ☐ Microsoft Graph API calls
 ☐ Template population and download
 
-# 6. Performance Tests
+# 5. Performance Tests
 ☐ Page load time < 3 seconds
 ☐ File upload for 10MB+ files
 ☐ Concurrent user testing (10+ users)
 ☐ Network latency handling
 ☐ Browser compatibility (Chrome, Edge, Firefox)
 
-# 7. Security Validation
+# 6. Security Validation
 ☐ HTTPS enforcement
 ☐ Authentication token expiration handling
 ☐ Role-based access control
@@ -1555,11 +1115,10 @@ Solution:
 
 ## 📝 Version Information
 
-**Current Version:** 2.6.0  
+**Current Version:** 2.5.0  
 **Last Updated:** 2025-01-28  
-**Compatibility:** Microsoft 365, Azure AD, SharePoint Online, Supabase  
-**Mandatory Admins:** Austin Larocque, James Grace  
-**New Features:** Push Notifications, In-App Deadline Alerts, Automated Reminder System
+**Compatibility:** Microsoft 365, Azure AD, SharePoint Online  
+**Mandatory Admins:** Austin Larocque, James Grace
 
 ---
 
