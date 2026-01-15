@@ -1,34 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { Shield, User, LogIn, UserPlus, AlertCircle, Info } from 'lucide-react';
+import { Shield, User, LogIn, AlertCircle, Lock } from 'lucide-react';
 import { useAuth } from './AuthProvider';
+import { ChangePasswordDialog } from './ChangePasswordDialog';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
-// Validation schemas
-const emailSchema = z.string().trim().email({ message: "Invalid email address" }).max(255);
-const passwordSchema = z.string().min(6, { message: "Password must be at least 6 characters" }).max(100);
-const displayNameSchema = z.string().trim().min(1, { message: "Display name is required" }).max(100);
+// Validation schemas for Login Prime 1
+const usernameSchema = z.string().trim().min(2, { message: "Username is required" }).max(50);
+const passwordSchema = z.string().min(1, { message: "Password is required" }).max(100);
 
 export const AuthPage = () => {
-  const { user, signIn, signUp, isDev, isM365 } = useAuth();
+  const { user, signIn, isDev, mustChangePassword, loading } = useAuth();
   const { toast } = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
-  const [signInData, setSignInData] = useState({ email: '', password: '' });
-  const [signUpData, setSignUpData] = useState({ email: '', password: '', displayName: '' });
+  const [signInData, setSignInData] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
 
-  // Redirect if already authenticated
-  if (user) {
+  // Show password change dialog when required
+  useEffect(() => {
+    if (user && mustChangePassword) {
+      setShowPasswordChange(true);
+    }
+  }, [user, mustChangePassword]);
+
+  // Redirect if authenticated and password change not required
+  if (user && !mustChangePassword && !loading) {
     return <Navigate to="/" replace />;
   }
 
@@ -36,40 +41,15 @@ export const AuthPage = () => {
     const newErrors: Record<string, string> = {};
     
     try {
-      emailSchema.parse(signInData.email);
+      usernameSchema.parse(signInData.username);
     } catch (error) {
-      newErrors.email = error instanceof z.ZodError ? error.issues[0].message : 'Invalid email';
+      newErrors.username = error instanceof z.ZodError ? error.issues[0].message : 'Invalid username';
     }
     
     try {
       passwordSchema.parse(signInData.password);
     } catch (error) {
       newErrors.password = error instanceof z.ZodError ? error.issues[0].message : 'Invalid password';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateSignUp = () => {
-    const newErrors: Record<string, string> = {};
-    
-    try {
-      emailSchema.parse(signUpData.email);
-    } catch (error) {
-      newErrors.email = error instanceof z.ZodError ? error.issues[0].message : 'Invalid email';
-    }
-    
-    try {
-      passwordSchema.parse(signUpData.password);
-    } catch (error) {
-      newErrors.password = error instanceof z.ZodError ? error.issues[0].message : 'Invalid password';
-    }
-    
-    try {
-      displayNameSchema.parse(signUpData.displayName);
-    } catch (error) {
-      newErrors.displayName = error instanceof z.ZodError ? error.issues[0].message : 'Invalid display name';
     }
     
     setErrors(newErrors);
@@ -85,19 +65,19 @@ export const AuthPage = () => {
     setErrors({});
 
     try {
-      const { error } = await signIn(signInData.email, signInData.password);
+      const { error } = await signIn(signInData.username, signInData.password);
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setErrors({ general: 'Invalid email or password. Please check your credentials and try again.' });
-        } else if (error.message.includes('Email not confirmed')) {
-          setErrors({ general: 'Please check your email and click the confirmation link before signing in.' });
+        if (error.message.includes('Invalid') || error.message.includes('401')) {
+          setErrors({ general: 'Invalid username or password. Please check your credentials and try again.' });
+        } else if (error.message.includes('429') || error.message.includes('rate')) {
+          setErrors({ general: 'Too many login attempts. Please wait a moment before trying again.' });
         } else {
           setErrors({ general: error.message });
         }
       } else {
         toast({
-          title: "Welcome back!",
+          title: "Welcome!",
           description: "You have successfully signed in.",
         });
       }
@@ -108,38 +88,23 @@ export const AuthPage = () => {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateSignUp()) return;
-    
-    setIsLoading(true);
-    setErrors({});
-
-    try {
-      const { error } = await signUp(signUpData.email, signUpData.password, signUpData.displayName);
-
-      if (error) {
-        if (error.message.includes('User already registered')) {
-          setErrors({ general: 'An account with this email already exists. Please sign in instead.' });
-        } else {
-          setErrors({ general: error.message });
-        }
-      } else {
-        toast({
-          title: "Account Created!",
-          description: "Please check your email for a confirmation link.",
-        });
-      }
-    } catch (error) {
-      setErrors({ general: 'An unexpected error occurred. Please try again.' });
-    } finally {
-      setIsLoading(false);
-    }
+  const handlePasswordChanged = () => {
+    setShowPasswordChange(false);
+    toast({
+      title: "Password Updated",
+      description: "Your password has been changed successfully.",
+    });
   };
 
   return (
     <div className="min-h-screen bg-gradient-subtle flex items-center justify-center p-4">
+      {/* Password Change Dialog - Non-dismissable on first login */}
+      <ChangePasswordDialog 
+        open={showPasswordChange} 
+        onSuccess={handlePasswordChanged}
+        isFirstLogin={mustChangePassword}
+      />
+
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4">
           <div className="flex items-center justify-center">
@@ -148,146 +113,77 @@ export const AuthPage = () => {
             </div>
           </div>
           <div className="text-center">
-            <CardTitle className="text-2xl font-bold">Inspection System</CardTitle>
+            <CardTitle className="text-2xl font-bold">INGOT</CardTitle>
             <CardDescription>
-              Access the professional inspection management system
+              Inspection Management System
             </CardDescription>
           </div>
           
-          {/* Environment Badges */}
-          <div className="flex justify-center space-x-2">
+          {/* Environment Badge */}
+          <div className="flex justify-center">
             {isDev && (
               <Badge variant="outline" className="text-xs">
-                <Info className="h-3 w-3 mr-1" />
+                <Lock className="h-3 w-3 mr-1" />
                 Dev Mode
-              </Badge>
-            )}
-            {isM365 && (
-              <Badge variant="secondary" className="text-xs">
-                M365 Ready
               </Badge>
             )}
           </div>
         </CardHeader>
 
-        <CardContent>
-          <Tabs defaultValue="signin" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin" className="flex items-center space-x-2">
-                <LogIn className="h-4 w-4" />
-                <span>Sign In</span>
-              </TabsTrigger>
-              <TabsTrigger value="signup" className="flex items-center space-x-2">
-                <UserPlus className="h-4 w-4" />
-                <span>Sign Up</span>
-              </TabsTrigger>
-            </TabsList>
+        <CardContent className="space-y-4">
+          {errors.general && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{errors.general}</AlertDescription>
+            </Alert>
+          )}
 
-            {errors.general && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{errors.general}</AlertDescription>
-              </Alert>
-            )}
+          <form onSubmit={handleSignIn} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="signin-username">Username</Label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="signin-username"
+                  type="text"
+                  placeholder="Enter your username"
+                  value={signInData.username}
+                  onChange={(e) => setSignInData(prev => ({ ...prev, username: e.target.value }))}
+                  className={`pl-10 ${errors.username ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
+                  autoComplete="username"
+                  autoFocus
+                />
+              </div>
+              {errors.username && <p className="text-sm text-destructive">{errors.username}</p>}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="signin-password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="signin-password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={signInData.password}
+                  onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
+                  className={`pl-10 ${errors.password ? 'border-destructive' : ''}`}
+                  disabled={isLoading}
+                  autoComplete="current-password"
+                />
+              </div>
+              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+            </div>
+            
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              <LogIn className="h-4 w-4 mr-2" />
+              {isLoading ? 'Signing in...' : 'Sign In'}
+            </Button>
+          </form>
 
-            <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={signInData.email}
-                    onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
-                    className={errors.email ? 'border-destructive' : ''}
-                    disabled={isLoading}
-                  />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={signInData.password}
-                    onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
-                    className={errors.password ? 'border-destructive' : ''}
-                    disabled={isLoading}
-                  />
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-                
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  <LogIn className="h-4 w-4 mr-2" />
-                  {isLoading ? 'Signing in...' : 'Sign In'}
-                </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-name">Display Name</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Your full name"
-                    value={signUpData.displayName}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, displayName: e.target.value }))}
-                    className={errors.displayName ? 'border-destructive' : ''}
-                    disabled={isLoading}
-                  />
-                  {errors.displayName && <p className="text-sm text-destructive">{errors.displayName}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="your.email@example.com"
-                    value={signUpData.email}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
-                    className={errors.email ? 'border-destructive' : ''}
-                    disabled={isLoading}
-                  />
-                  {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Create a strong password"
-                    value={signUpData.password}
-                    onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
-                    className={errors.password ? 'border-destructive' : ''}
-                    disabled={isLoading}
-                  />
-                  {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-                </div>
-                
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  {isLoading ? 'Creating account...' : 'Create Account'}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
-
-          <Separator className="my-6" />
-          
-          <div className="text-center text-sm text-muted-foreground">
-            <p>First user automatically becomes admin</p>
-            {isDev && (
-              <p className="mt-1 text-xs">
-                Dev mode: Email confirmation disabled for testing
-              </p>
-            )}
+          <div className="text-center text-sm text-muted-foreground pt-4 border-t">
+            <p>Contact your administrator for access</p>
           </div>
         </CardContent>
       </Card>

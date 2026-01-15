@@ -72,8 +72,8 @@ try {
         
         try {
             // Check if username already exists
-            $stmt = $db->prepare('SELECT id FROM users WHERE email = ?');
-            $stmt->execute([$email]);
+            $stmt = $db->prepare('SELECT id FROM users WHERE username = ? OR email = ?');
+            $stmt->execute([$username, $email]);
             
             if ($stmt->fetch()) {
                 $results['skipped'][] = [
@@ -83,29 +83,28 @@ try {
                 continue;
             }
             
-            // Hash password
-            $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+            // Hash password with bcrypt (cost 12 for 256-bit security equivalent)
+            $passwordHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
             
-            // Create user
+            // Create user with username and must_change_password = TRUE
             $stmt = $db->prepare('
-                INSERT INTO users (email, password_hash, display_name)
-                VALUES (?, ?, ?)
+                INSERT INTO users (username, email, password_hash, display_name, must_change_password)
+                VALUES (?, ?, ?, ?, TRUE)
             ');
-            $stmt->execute([$email, $passwordHash, $displayName]);
+            $stmt->execute([$username, $email, $passwordHash, $displayName]);
             
             $userId = $db->lastInsertId();
             
-            // The trigger auto-creates profile and assigns 'user' role
-            // If role is different, update it
-            if ($role !== 'user') {
-                // Remove the auto-assigned 'user' role
-                $stmt = $db->prepare('DELETE FROM user_roles WHERE user_id = ? AND role = ?');
-                $stmt->execute([$userId, 'user']);
-                
-                // Add the specified role
-                $stmt = $db->prepare('INSERT INTO user_roles (user_id, role) VALUES (?, ?)');
-                $stmt->execute([$userId, $role]);
-            }
+            // Create profile with profile_completed = FALSE
+            $stmt = $db->prepare('
+                INSERT INTO profiles (user_id, display_name, email, profile_completed)
+                VALUES (?, ?, ?, FALSE)
+            ');
+            $stmt->execute([$userId, $displayName, $email]);
+            
+            // Assign role
+            $stmt = $db->prepare('INSERT INTO user_roles (user_id, role) VALUES (?, ?)');
+            $stmt->execute([$userId, $role]);
             
             $results['created'][] = [
                 'id' => $userId,
@@ -113,7 +112,8 @@ try {
                 'email' => $email,
                 'display_name' => $displayName,
                 'password' => $password, // Only shown during seeding!
-                'role' => $role
+                'role' => $role,
+                'must_change_password' => true
             ];
             
         } catch (Exception $e) {
@@ -143,9 +143,9 @@ try {
         'credentials' => array_map(function($user) {
             return [
                 'username' => $user['username'],
-                'email' => $user['email'],
                 'password' => $user['password'],
-                'role' => $user['role']
+                'role' => $user['role'],
+                'note' => 'Password change required on first login'
             ];
         }, $results['created']),
         'warning' => '⚠️ DELETE THIS FILE (seed-users.php) IMMEDIATELY FOR SECURITY!'
