@@ -159,6 +159,34 @@ export const api = {
     remove: (userId: number, role: string) =>
       fetchApi(`/roles.php?user=${userId}&role=${role}`, { method: 'DELETE' }),
   },
+
+  users: {
+    list: () => fetchApi<{ users: any[] }>('/users.php'),
+
+    get: (userId: number) =>
+      fetchApi<{ user: any }>(`/users.php?id=${userId}`),
+
+    create: (data: { email: string; password: string; display_name?: string; role?: string }) =>
+      fetchApi<{ user: any }>('/users.php', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+
+    update: (userId: number, data: { email?: string; display_name?: string; role?: string }) =>
+      fetchApi<{ user: any }>(`/users.php?id=${userId}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }),
+
+    delete: (userId: number) =>
+      fetchApi(`/users.php?id=${userId}`, { method: 'DELETE' }),
+
+    resetPassword: (userId: number, newPassword: string) =>
+      fetchApi(`/users.php?action=reset_password&id=${userId}`, {
+        method: 'POST',
+        body: JSON.stringify({ new_password: newPassword }),
+      }),
+  },
 };
 
 export default api;
