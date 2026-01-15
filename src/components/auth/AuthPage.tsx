@@ -6,9 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Shield, User, LogIn, AlertCircle, Lock } from 'lucide-react';
+import { Shield, User, LogIn, AlertCircle, Lock, HelpCircle } from 'lucide-react';
 import { useAuth } from './AuthProvider';
 import { ChangePasswordDialog } from './ChangePasswordDialog';
+import { ForgotPasswordDialog } from './ForgotPasswordDialog';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 
@@ -24,6 +25,7 @@ export const AuthPage = () => {
   const [signInData, setSignInData] = useState({ username: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   // Show password change dialog when required
   useEffect(() => {
@@ -180,11 +182,27 @@ export const AuthPage = () => {
               <LogIn className="h-4 w-4 mr-2" />
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
+
+            <Button
+              type="button"
+              variant="link"
+              className="w-full text-muted-foreground"
+              onClick={() => setShowForgotPassword(true)}
+            >
+              <HelpCircle className="h-4 w-4 mr-1" />
+              Forgot your password?
+            </Button>
           </form>
 
           <div className="text-center text-sm text-muted-foreground pt-4 border-t">
             <p>Contact your administrator for access</p>
           </div>
+
+          {/* Forgot Password Dialog */}
+          <ForgotPasswordDialog
+            open={showForgotPassword}
+            onOpenChange={setShowForgotPassword}
+          />
         </CardContent>
       </Card>
     </div>

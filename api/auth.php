@@ -29,6 +29,9 @@ switch ($action) {
     case 'session':
         handleSession();
         break;
+    case 'request_password_reset':
+        handleRequestPasswordReset();
+        break;
     default:
         sendError('Invalid action', 400);
 }
@@ -288,4 +291,58 @@ function handleSession(): void {
         'profile' => $profile,
         'roles' => $roles
     ], 'Session active');
+}
+
+/**
+ * Handle password reset request (from users who forgot their password)
+ */
+function handleRequestPasswordReset(): void {
+    if (getRequestMethod() !== 'POST') {
+        sendError('Method not allowed', 405);
+    }
+    
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    
+    // Rate limit password reset requests
+    if (!checkRateLimit($ip)) {
+        sendError('Too many requests. Please wait before trying again.', 429);
+    }
+    
+    $data = getJsonBody();
+    $username = trim($data['username'] ?? '');
+    
+    if (empty($username)) {
+        sendError('Username is required', 400);
+    }
+    
+    $db = getDB();
+    
+    // Find user by username
+    $stmt = $db->prepare('SELECT id, username, display_name FROM users WHERE username = ?');
+    $stmt->execute([$username]);
+    $user = $stmt->fetch();
+    
+    // Always return success to prevent username enumeration
+    // But only create request if user exists
+    if ($user) {
+        // Check if there's already a pending request
+        $stmt = $db->prepare('SELECT id FROM password_reset_requests WHERE user_id = ? AND status = ?');
+        $stmt->execute([$user['id'], 'pending']);
+        $existing = $stmt->fetch();
+        
+        if (!$existing) {
+            // Create password reset request
+            $stmt = $db->prepare('
+                INSERT INTO password_reset_requests (user_id, requested_at, status)
+                VALUES (?, NOW(), ?)
+            ');
+            $stmt->execute([$user['id'], 'pending']);
+            
+            logAuditEvent('password_reset_requested', $user['id'], ['ip' => $ip]);
+        }
+    }
+    
+    recordLoginAttempt($ip); // Still record for rate limiting
+    
+    sendSuccess([], 'If your username exists in our system, your administrator has been notified of your password reset request.');
 }
