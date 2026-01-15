@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 
 interface SystemMetrics {
   totalUsers: number;
@@ -61,13 +62,36 @@ export const SystemStatus = () => {
     try {
       setLoading(true);
       
-      // Metrics removed - will be replaced with SharePoint integration
+      // Check API health by calling session endpoint
+      const startTime = Date.now();
+      let apiHealthy = false;
+      let apiLatency = 0;
+      
+      try {
+        await api.auth.session();
+        apiLatency = Date.now() - startTime;
+        apiHealthy = true;
+      } catch {
+        apiHealthy = false;
+      }
+      
+      // Try to fetch activities count
+      let activitiesCount = 0;
+      try {
+        const activitiesResponse = await api.activities.list();
+        if (activitiesResponse.success && activitiesResponse.data) {
+          activitiesCount = activitiesResponse.data.length;
+        }
+      } catch {
+        // Ignore errors
+      }
+      
       setMetrics({
-        totalUsers: 0,
-        totalOrganizations: 0,
-        totalActivities: 0,
-        databaseStatus: 'error',
-        authStatus: 'error',
+        totalUsers: 0, // Would need admin API endpoint
+        totalOrganizations: 0, // Would need admin API endpoint
+        totalActivities: activitiesCount,
+        databaseStatus: apiHealthy ? 'healthy' : 'error',
+        authStatus: apiHealthy ? 'healthy' : 'error',
         storageUsage: 0,
         lastBackup: new Date().toISOString()
       });
@@ -75,28 +99,28 @@ export const SystemStatus = () => {
       // Update health checks
       setHealthChecks([
         {
-          service: 'Database',
-          status: 'error',
-          latency: 0,
-          message: 'Database not available - awaiting SharePoint integration',
+          service: 'PHP/MySQL Backend',
+          status: apiHealthy ? 'healthy' : 'error',
+          latency: apiLatency,
+          message: apiHealthy ? 'Database connection active' : 'Backend not responding',
           icon: Database
         },
         {
           service: 'Authentication',
-          status: 'healthy',
-          message: 'Active session management working',
+          status: apiHealthy ? 'healthy' : 'error',
+          message: apiHealthy ? 'Session management working' : 'Auth service unavailable',
           icon: Users
         },
         {
           service: 'File Storage',
-          status: Math.random() > 0.8 ? 'warning' : 'healthy',
-          message: Math.random() > 0.8 ? 'High storage usage detected' : 'Storage operating normally',
+          status: 'healthy',
+          message: 'Local storage operating normally',
           icon: HardDrive
         },
         {
           service: 'Network',
-          status: 'healthy',
-          message: 'All endpoints accessible',
+          status: apiHealthy ? 'healthy' : 'warning',
+          message: apiHealthy ? 'All endpoints accessible' : 'Some endpoints may be unavailable',
           icon: Wifi
         }
       ]);
@@ -261,7 +285,7 @@ export const SystemStatus = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    {check.latency && (
+                    {check.latency !== undefined && check.latency > 0 && (
                       <span className="text-xs text-muted-foreground">
                         {check.latency}ms
                       </span>
@@ -287,7 +311,7 @@ export const SystemStatus = () => {
               <div className="flex space-x-2 mt-1">
                 {isDev && <Badge variant="outline">Development</Badge>}
                 {isM365 && <Badge variant="secondary">M365 Integration</Badge>}
-                <Badge variant="outline">Supabase Backend</Badge>
+                <Badge variant="outline">PHP/MySQL Backend</Badge>
               </div>
             </div>
             
@@ -316,7 +340,7 @@ export const SystemStatus = () => {
           <Activity className="h-4 w-4" />
           <AlertDescription>
             <strong>Development Mode:</strong> System monitoring shows test data. 
-            In M365 production, this will integrate with Azure Monitor and provide comprehensive system analytics.
+            In production on IONOS, this will show live PHP/MySQL backend metrics.
           </AlertDescription>
         </Alert>
       )}

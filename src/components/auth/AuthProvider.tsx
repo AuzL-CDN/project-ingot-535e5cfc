@@ -1,9 +1,16 @@
 import { createContext, useContext, ReactNode, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
-import { supabase } from '@/integrations/supabase/client';
+import { api } from '@/lib/api';
+
+interface User {
+  id: number;
+  email: string;
+  display_name: string | null;
+  created_at: string;
+}
 
 interface Profile {
-  id: string;
+  id: number;
+  user_id: number;
   display_name: string | null;
   email: string | null;
   created_at: string;
@@ -12,7 +19,7 @@ interface Profile {
 
 interface AuthContextType {
   user: User | null;
-  session: Session | null;
+  session: { user: User } | null;
   profile: Profile | null;
   roles: string[];
   isAdmin: boolean;
@@ -42,7 +49,6 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,200 +59,116 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
      (window.location.hostname === 'localhost' || 
       window.location.hostname === '127.0.0.1'));
 
-  const fetchUserRoles = async (userId: string) => {
+  const fetchUserData = async () => {
     try {
-      console.log('[AuthProvider] Fetching roles for user:', userId);
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId);
+      console.log('[AuthProvider] Fetching session from PHP API...');
+      const response = await api.auth.session();
       
-      if (error) {
-        console.error('[AuthProvider] Error fetching roles:', error);
-        throw error;
+      if (response.success && response.data?.user) {
+        const userData = response.data.user;
+        const profileData = response.data.profile;
+        const userRoles = response.data.roles || [];
+        
+        console.log('[AuthProvider] Session loaded:', {
+          email: userData.email,
+          roles: userRoles,
+          isAdmin: userRoles.includes('admin')
+        });
+        
+        setUser(userData);
+        setProfile(profileData);
+        setRoles(userRoles);
+      } else {
+        console.log('[AuthProvider] No active session');
+        setUser(null);
+        setProfile(null);
+        setRoles([]);
       }
-      
-      const roles = data?.map(r => r.role) || [];
-      console.log('[AuthProvider] Loaded roles:', roles);
-      return roles;
     } catch (error) {
-      console.error('[AuthProvider] Failed to fetch user roles:', error);
-      return [];
-    }
-  };
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      console.log('[AuthProvider] Fetching profile for user:', userId);
-      
-      // First try to find by user_id (auth.users reference)
-      let { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', userId)
-        .maybeSingle();
-      
-      // Fallback: try by id if not found
-      if (!data && !error) {
-        ({ data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userId)
-          .maybeSingle());
-      }
-      
-      if (error) {
-        console.error('[AuthProvider] Error fetching profile:', error);
-        throw error;
-      }
-      
-      console.log('[AuthProvider] Loaded profile:', data?.display_name);
-      return data;
-    } catch (error) {
-      console.error('[AuthProvider] Failed to fetch profile:', error);
-      return null;
+      console.error('[AuthProvider] Failed to fetch session:', error);
+      setUser(null);
+      setProfile(null);
+      setRoles([]);
+    } finally {
+      setLoading(false);
     }
   };
 
   const refreshProfile = async () => {
     if (!user) return;
-    const [userProfile, userRoles] = await Promise.all([
-      fetchProfile(user.id),
-      fetchUserRoles(user.id)
-    ]);
-    setProfile(userProfile);
-    setRoles(userRoles);
+    await fetchUserData();
   };
 
   useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('[AuthProvider] Auth state changed:', event, session?.user?.email);
-        
-        if (!mounted) return;
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Defer async operations to prevent blocking
-          setTimeout(async () => {
-            if (!mounted) return;
-            
-            const [userProfile, userRoles] = await Promise.all([
-              fetchProfile(session.user.id),
-              fetchUserRoles(session.user.id)
-            ]);
-            
-            if (mounted) {
-              setProfile(userProfile);
-              setRoles(userRoles);
-              setLoading(false);
-              
-              console.log('[AuthProvider] Auth context ready:', {
-                email: session.user.email,
-                roles: userRoles,
-                isAdmin: userRoles.includes('admin')
-              });
-            }
-          }, 0);
-        } else {
-          setProfile(null);
-          setRoles([]);
-          setLoading(false);
-        }
-      }
-    );
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      console.log('[AuthProvider] Initial session check:', session?.user?.email);
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        Promise.all([
-          fetchProfile(session.user.id),
-          fetchUserRoles(session.user.id)
-        ]).then(([userProfile, userRoles]) => {
-          if (mounted) {
-            setProfile(userProfile);
-            setRoles(userRoles);
-            setLoading(false);
-            
-            console.log('[AuthProvider] Initial auth context ready:', {
-              email: session.user.email,
-              roles: userRoles,
-              isAdmin: userRoles.includes('admin')
-            });
-          }
-        }).catch(error => {
-          console.error('[AuthProvider] Failed to load user data:', error);
-          if (mounted) {
-            setLoading(false);
-          }
-        });
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+    fetchUserData();
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    return { error };
+    try {
+      const response = await api.auth.login(email, password);
+      
+      if (response.success) {
+        console.log('[AuthProvider] Sign in successful');
+        await fetchUserData();
+        return { error: null };
+      } else {
+        return { error: { message: response.error || 'Login failed' } };
+      }
+    } catch (error) {
+      console.error('[AuthProvider] Sign in error:', error);
+      return { error: { message: 'Network error during login' } };
+    }
   };
 
   const signUp = async (email: string, password: string, displayName: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          display_name: displayName,
-        },
-      },
-    });
-    return { error };
+    try {
+      const response = await api.auth.register(email, password, displayName);
+      
+      if (response.success) {
+        console.log('[AuthProvider] Sign up successful');
+        await fetchUserData();
+        return { error: null };
+      } else {
+        return { error: { message: response.error || 'Registration failed' } };
+      }
+    } catch (error) {
+      console.error('[AuthProvider] Sign up error:', error);
+      return { error: { message: 'Network error during registration' } };
+    }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setRoles([]);
+    try {
+      await api.auth.logout();
+      console.log('[AuthProvider] Signed out');
+    } catch (error) {
+      console.error('[AuthProvider] Sign out error:', error);
+    } finally {
+      setUser(null);
+      setProfile(null);
+      setRoles([]);
+    }
   };
 
   // In dev mode, override with mock admin user
   const value: AuthContextType = isDevMode ? {
     user: { 
-      id: 'dev-user', 
+      id: 1, 
       email: 'dev@localhost',
-      app_metadata: {},
-      user_metadata: {},
-      aud: 'authenticated',
+      display_name: 'Dev Admin',
       created_at: new Date().toISOString()
-    } as User,
-    session: null,
+    },
+    session: {
+      user: { 
+        id: 1, 
+        email: 'dev@localhost',
+        display_name: 'Dev Admin',
+        created_at: new Date().toISOString()
+      }
+    },
     profile: {
-      id: 'dev-user',
+      id: 1,
+      user_id: 1,
       display_name: 'Dev Admin',
       email: 'dev@localhost',
       created_at: new Date().toISOString(),
@@ -264,7 +186,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     refreshProfile,
   } : {
     user,
-    session,
+    session: user ? { user } : null,
     profile,
     roles,
     isAdmin: roles.includes('admin'),

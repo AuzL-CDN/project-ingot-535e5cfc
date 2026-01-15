@@ -5,6 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Database, Upload, CheckCircle, AlertCircle, FileText } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import * as XLSX from 'xlsx';
 
 interface ImportRecord {
@@ -20,16 +21,8 @@ export const DataImportUtility = () => {
   const [status, setStatus] = useState<'idle' | 'parsing' | 'importing' | 'success' | 'error'>('idle');
   const [recordCount, setRecordCount] = useState<number>(0);
   const [totalRecords, setTotalRecords] = useState<number>(0);
+  const [importedCount, setImportedCount] = useState<number>(0);
   const { toast } = useToast();
-
-  // Sample data extracted from the Excel file structure
-  const sampleData: ImportRecord[] = [
-    { org_site_id: '113-0', organization_name: 'A.U.G. Signals Ltd.', address: '103-73 Richmond Street West Toronto ON M5H4E8', phone_number: '(416) 923-4425' },
-    { org_site_id: '118-0', organization_name: 'ABI/Advanced Business Interiors Inc.', address: '2355 St. Laurent Boulevard Ottawa ON K1G4L2', phone_number: '(613) 738-1003' },
-    { org_site_id: '120-0', organization_name: 'Robert Half Canada Inc.', address: '820-181 Bay Street (Head Office) Toronto ON M5J2T3', phone_number: '(613) 236-4253' },
-    { org_site_id: '123-0', organization_name: 'Accurate Design & Communication Inc.', address: '100-57 Auriga Drive Ottawa ON K2E8B2', phone_number: '(613) 723-2057' },
-    { org_site_id: '128-0', organization_name: 'Action Personnel of Ottawa-Hull Limited', address: '126-130 Albert Street Ottawa ON K1P5G4', phone_number: '(613) 238-8511' },
-  ];
 
   const processExcelData = async (): Promise<ImportRecord[]> => {
     setStatus('parsing');
@@ -60,13 +53,13 @@ export const DataImportUtility = () => {
       
       for (let i = 1; i < jsonData.length; i++) {
         const row = jsonData[i];
-        if (row && row.length >= 4 && row[0]) { // Ensure we have data
+        if (row && row.length >= 4 && row[0]) {
           const orgSiteId = String(row[0] || '').trim();
           const organizationName = String(row[1] || '').trim();
           const address = String(row[2] || '').trim();
           const phoneNumber = String(row[3] || '').trim();
           
-          if (orgSiteId && organizationName && address) { // Must have at least these fields
+          if (orgSiteId && organizationName && address) {
             organizations.push({
               org_site_id: orgSiteId,
               organization_name: organizationName,
@@ -98,6 +91,7 @@ export const DataImportUtility = () => {
     setIsImporting(true);
     setStatus('parsing');
     setProgress(0);
+    setImportedCount(0);
 
     try {
       // Parse the Excel file
@@ -111,8 +105,37 @@ export const DataImportUtility = () => {
       setStatus('importing');
       setProgress(50);
 
-      // Import removed - will be replaced with SharePoint integration
-      throw new Error('Import functionality not available. Awaiting SharePoint integration.');
+      // Import in batches of 100
+      const batchSize = 100;
+      let successCount = 0;
+      
+      for (let i = 0; i < organizations.length; i += batchSize) {
+        const batch = organizations.slice(i, i + batchSize);
+        
+        try {
+          const response = await api.organizations.importBatch(batch);
+          
+          if (response.success && response.data) {
+            successCount += response.data.imported || batch.length;
+          }
+        } catch (error) {
+          console.error(`Batch ${Math.floor(i / batchSize) + 1} failed:`, error);
+        }
+        
+        // Update progress
+        const progressPercent = 50 + Math.floor((i / organizations.length) * 50);
+        setProgress(progressPercent);
+        setImportedCount(successCount);
+      }
+
+      setProgress(100);
+      setStatus('success');
+      setImportedCount(successCount);
+      
+      toast({
+        title: "Import Complete",
+        description: `Successfully imported ${successCount} of ${organizations.length} organization records.`,
+      });
 
     } catch (error) {
       console.error('Import error:', error);
@@ -129,18 +152,22 @@ export const DataImportUtility = () => {
 
   const checkCurrentRecords = async () => {
     try {
-      // Database check removed - will be replaced with SharePoint integration
-      setRecordCount(0);
-      toast({
-        title: "Not Available",
-        description: "Database status check not available. Awaiting SharePoint integration.",
-        variant: "destructive"
-      });
+      const response = await api.organizations.count();
+      
+      if (response.success && response.data) {
+        setRecordCount(response.data.total || 0);
+        toast({
+          title: "Database Status",
+          description: `Database contains ${response.data.total || 0} organization records.`,
+        });
+      } else {
+        throw new Error(response.error || 'Failed to check status');
+      }
     } catch (error) {
       console.error('Status check error:', error);
       toast({
         title: "Status Check Failed",
-        description: "Failed to check database status.",
+        description: "Failed to check database status. Make sure the PHP API is accessible.",
         variant: "destructive"
       });
     }
@@ -154,7 +181,7 @@ export const DataImportUtility = () => {
           <span>Organization Data Import</span>
         </CardTitle>
         <CardDescription>
-          Import organization address data from Excel file to Supabase database for address lookup functionality.
+          Import organization address data from Excel file to MySQL database for address lookup functionality.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -163,7 +190,7 @@ export const DataImportUtility = () => {
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Ready to import organization data from the uploaded Excel file into your Supabase database.
+                Ready to import organization data from the Excel file into your MySQL database.
                 Current database contains {recordCount} records.
               </AlertDescription>
             </Alert>
@@ -186,7 +213,7 @@ export const DataImportUtility = () => {
               <Alert>
                 <Upload className="h-4 w-4" />
                 <AlertDescription>
-                  Importing {totalRecords} organization records in batches...
+                  Importing {totalRecords} organization records... ({importedCount} imported)
                 </AlertDescription>
               </Alert>
               <Progress value={progress} className="w-full" />
@@ -197,7 +224,7 @@ export const DataImportUtility = () => {
             <Alert className="border-green-500 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-green-700">
-                Successfully imported {recordCount} organization records! Address lookup is now ready with the full database.
+                Successfully imported {importedCount} organization records! Address lookup is now ready.
               </AlertDescription>
             </Alert>
           )}
@@ -206,7 +233,7 @@ export const DataImportUtility = () => {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                Import failed. Please try again or check the console for error details.
+                Import failed. Make sure the PHP API backend is running and accessible.
               </AlertDescription>
             </Alert>
           )}
@@ -236,7 +263,7 @@ export const DataImportUtility = () => {
 
         <div className="text-sm text-muted-foreground">
           <p><strong>Excel File:</strong> Processing the complete ORGs_Actual_Address-Merge_Data.xlsx file with 25,000+ organization records.</p>
-          <p><strong>Import Process:</strong> Data will be imported in batches of 500 records for optimal performance.</p>
+          <p><strong>Import Process:</strong> Data will be imported in batches of 100 records to the PHP/MySQL backend.</p>
           <p>The imported data will be used by the Address Lookup component to automatically populate organization details.</p>
         </div>
       </CardContent>
