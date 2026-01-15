@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 
 interface ChangePasswordDialogProps {
   open: boolean;
-  username: string;
   onSuccess: () => void;
+  isFirstLogin?: boolean;
 }
 
 interface PasswordRequirement {
@@ -30,7 +30,7 @@ const PASSWORD_REQUIREMENTS: PasswordRequirement[] = [
   { id: 'special', label: 'One special character (!@#$%^&*)', test: (p) => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p) },
 ];
 
-export const ChangePasswordDialog = ({ open, username, onSuccess }: ChangePasswordDialogProps) => {
+export const ChangePasswordDialog = ({ open, onSuccess, isFirstLogin = false }: ChangePasswordDialogProps) => {
   const { toast } = useToast();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -119,7 +119,9 @@ export const ChangePasswordDialog = ({ open, username, onSuccess }: ChangePasswo
           </div>
           <DialogTitle className="text-center">Change Your Password</DialogTitle>
           <DialogDescription className="text-center">
-            Welcome, <strong>{username}</strong>! For security, you must change your password before continuing.
+            {isFirstLogin 
+              ? 'For security, you must change your password before continuing.'
+              : 'Update your password to keep your account secure.'}
           </DialogDescription>
         </DialogHeader>
 
