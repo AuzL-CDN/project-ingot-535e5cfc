@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 export interface TemplateField {
   id: string;
   name: string;
-  type: 'static' | 'dynamic' | 'conditional' | 'repeating' | 'user-input' | 'auto-calculated';
+  type: 'static' | 'dynamic' | 'conditional' | 'repeating' | 'user-input' | 'auto-calculated' | 'calculated';
   category: 'black' | 'green' | 'blue' | 'orange' | 'red' | 'purple';
   description: string;
   example?: string;
@@ -34,6 +34,7 @@ const typeIcons = {
   repeating: '🟠',
   'user-input': '🔴',
   'auto-calculated': '🟣',
+  'calculated': '🟣',
 };
 
 const typeDescriptions = {
@@ -43,6 +44,7 @@ const typeDescriptions = {
   repeating: 'Lists that repeat based on data',
   'user-input': 'Requires manual inspector input',
   'auto-calculated': 'Computed/derived values',
+  'calculated': 'Computed date values (e.g., +5, +20, +30 days)',
 };
 
 export const TemplateFieldMapper: React.FC<TemplateFieldMapperProps> = ({
@@ -128,7 +130,91 @@ export const TemplateFieldMapper: React.FC<TemplateFieldMapperProps> = ({
   );
 };
 
-// Predefined field mappings for each template
+// ==========================================
+// M365 Content Control Field Mappings
+// Based on actual uploaded Word templates
+// ==========================================
+
+// Approval Letter / IT-Approval fields
+export const APPROVAL_LETTER_FIELDS: TemplateField[] = [
+  // Dynamic Fields (Green) - Auto-populated from database
+  { id: 'TodayDate', name: 'Today Date', type: 'dynamic', category: 'green', description: 'Current date when document is generated', example: 'January 15, 2026', required: true },
+  { id: 'OrgCSO', name: 'CSO Name', type: 'dynamic', category: 'green', description: 'Chief Security Officer full name from CSO database', example: 'John Smith', required: true },
+  { id: 'OrgName', name: 'Organization Name', type: 'dynamic', category: 'green', description: 'Company/organization name from ORG database', example: 'Acme Corp Ltd.', required: true },
+  { id: 'OrgSite', name: 'Org Site Number', type: 'dynamic', category: 'green', description: 'Organization site identifier', example: 'ORG-12345', required: true },
+  { id: 'SiteAddress', name: 'Site Address', type: 'dynamic', category: 'green', description: 'Organization address from database', example: '123 Main Street, Ottawa, ON K1A 0B1' },
+  { id: 'Contract', name: 'Contract Number', type: 'dynamic', category: 'green', description: 'Contract reference number', example: 'W8486-220001/001/CY', required: true },
+  { id: 'ConType', name: 'Contract Type', type: 'dynamic', category: 'green', description: 'Type of contract', example: 'Supply Arrangement' },
+  { id: 'SecLevel', name: 'Security Level', type: 'dynamic', category: 'green', description: 'Security classification level', example: 'PROTECTED A', required: true },
+  
+  // Conditional Fields (Blue) - Shown/hidden based on rules
+  { id: 'ApprRen', name: 'Approval/Renewal', type: 'conditional', category: 'blue', description: 'Whether this is initial approval or renewal', example: 'GRANTS/RENEWS' },
+  { id: 'CSCSection', name: 'CSC Section', type: 'conditional', category: 'blue', description: 'Correctional Service Canada specific content', example: 'CSC computer annex details' },
+  
+  // User Input Fields (Red) - Manual entry required
+  { id: 'Initials', name: 'Inspector Initials', type: 'user-input', category: 'red', description: 'Inspector identification initials', example: 'JS', required: true },
+  
+  // Repeating Fields (Orange) - Multiple items
+  { id: 'CCList', name: 'CC Recipients', type: 'repeating', category: 'orange', description: 'Carbon copy recipient list', example: 'Multiple CC recipients' },
+  
+  // CSC-specific fields
+  { id: 'ComputerName', name: 'Computer Name', type: 'dynamic', category: 'green', description: 'CSC computer identification', example: 'CSC-WS-001' },
+  { id: 'AssetSerial', name: 'Asset Serial', type: 'dynamic', category: 'green', description: 'Computer serial number', example: 'SN123456789' },
+];
+
+// Corrective Measures Letter fields
+export const CORRECTIVE_MEASURES_FIELDS: TemplateField[] = [
+  // Dynamic Fields (Green)
+  { id: 'TodayDate', name: 'Today Date', type: 'dynamic', category: 'green', description: 'Current date', example: 'January 15, 2026', required: true },
+  { id: 'OrgSite', name: 'Org Site Number', type: 'dynamic', category: 'green', description: 'Organization site identifier', example: 'ORG-12345', required: true },
+  { id: 'OrgCSO', name: 'CSO Name', type: 'dynamic', category: 'green', description: 'CSO full name', example: 'John Smith', required: true },
+  { id: 'RoleType', name: 'CSO Role Type', type: 'dynamic', category: 'green', description: 'CSO or ACSO designation', example: 'Chief Security Officer' },
+  { id: 'CompanyName', name: 'Company Name', type: 'dynamic', category: 'green', description: 'Organization name', example: 'Acme Corp Ltd.', required: true },
+  { id: 'SITEADDRESS', name: 'Site Address', type: 'dynamic', category: 'green', description: 'Full site address', example: '123 Main Street, Ottawa' },
+  { id: 'InspDate', name: 'Inspection Date', type: 'dynamic', category: 'green', description: 'Date of inspection', example: 'January 10, 2026' },
+  { id: 'Contype', name: 'Contract Type', type: 'dynamic', category: 'green', description: 'Type of contract', example: 'Supply Arrangement' },
+  { id: 'SecLevel', name: 'Security Level', type: 'dynamic', category: 'green', description: 'Security classification', example: 'PROTECTED B' },
+  
+  // Calculated Fields (Purple)
+  { id: 'Plus30', name: 'Due Date (+30 days)', type: 'calculated', category: 'purple', description: 'Corrective measures due date (30 business days from inspection)', example: 'February 24, 2026', required: true },
+  
+  // Repeating Fields (Orange)
+  { id: 'CorrectiveMeasures', name: 'Corrective Measures List', type: 'repeating', category: 'orange', description: 'List of required corrective actions', example: 'Multiple measures' },
+];
+
+// Initial Email fields (Protected and Classified)
+export const INITIAL_EMAIL_FIELDS: TemplateField[] = [
+  // Dynamic Fields (Green)
+  { id: 'OrgName', name: 'Organization Name', type: 'dynamic', category: 'green', description: 'Organization name', example: 'Acme Corp Ltd.', required: true },
+  { id: 'OrgSite', name: 'Org Site Number', type: 'dynamic', category: 'green', description: 'Organization site ID', example: 'ORG-12345', required: true },
+  { id: 'Contract', name: 'Contract Number', type: 'dynamic', category: 'green', description: 'Contract reference', example: 'W8486-220001', required: true },
+  { id: 'CSOName', name: 'CSO Name', type: 'dynamic', category: 'green', description: 'CSO contact name', example: 'John Smith', required: true },
+  { id: 'SecLevel', name: 'Security Level', type: 'dynamic', category: 'green', description: 'Classification level', example: 'PROTECTED A' },
+  { id: 'ConType', name: 'Contract Type', type: 'dynamic', category: 'green', description: 'Contract type', example: 'Supply Arrangement' },
+  
+  // Calculated Fields (Purple) - Business day calculations
+  { id: 'Plus5', name: 'Response Due (+5 days)', type: 'calculated', category: 'purple', description: 'Acknowledgement due date (5 business days)', example: 'January 22, 2026', required: true },
+  { id: 'Plus20', name: 'Documents Due (+20 days)', type: 'calculated', category: 'purple', description: 'Documentation due date (20 business days)', example: 'February 12, 2026', required: true },
+];
+
+// Checklist fields (Protected and Classified)
+export const CHECKLIST_FIELDS: TemplateField[] = [
+  // Dynamic Fields (Green)
+  { id: 'OrgName', name: 'Organization Name', type: 'dynamic', category: 'green', description: 'Organization name', example: 'Acme Corp Ltd.', required: true },
+  { id: 'OrgSite', name: 'Org Site Number', type: 'dynamic', category: 'green', description: 'Site identifier', example: 'ORG-12345', required: true },
+  { id: 'ContractNumber', name: 'Contract Number', type: 'dynamic', category: 'green', description: 'Contract reference', example: 'W8486-220001' },
+  { id: 'StartDate', name: 'Award Date', type: 'dynamic', category: 'green', description: 'Contract award date', example: 'January 1, 2024' },
+  { id: 'EndDate', name: 'Expiry Date', type: 'dynamic', category: 'green', description: 'Contract expiry date', example: 'December 31, 2026' },
+  { id: 'ClientDept', name: 'Client Department', type: 'dynamic', category: 'green', description: 'Government client department', example: 'DND' },
+  { id: 'SecLevel', name: 'Security Level', type: 'dynamic', category: 'green', description: 'Classification level', example: 'SECRET' },
+  { id: 'ITLink', name: 'IT Link', type: 'dynamic', category: 'green', description: 'IT connectivity type', example: 'GC Network' },
+  { id: 'ConType', name: 'Contract Type', type: 'dynamic', category: 'green', description: 'Contract type', example: 'Standing Offer' },
+  
+  // User Input Fields (Red)
+  { id: 'InspectionFindings', name: 'Inspection Findings', type: 'user-input', category: 'red', description: 'Detailed inspection observations', example: 'Access control measures are adequate...' },
+];
+
+// Final Report fields
 export const FINAL_REPORT_FIELDS: TemplateField[] = [
   // Dynamic Fields (Green)
   { id: 'OrganizationName', name: 'Organization Name', type: 'dynamic', category: 'green', description: 'Company name from organization database', example: 'Acme Corp Ltd.', required: true },
@@ -154,25 +240,7 @@ export const FINAL_REPORT_FIELDS: TemplateField[] = [
   { id: 'CompliancePercentage', name: 'Compliance Percentage', type: 'auto-calculated', category: 'purple', description: 'Overall compliance score', example: '95%' },
 ];
 
-export const APPROVAL_LETTER_FIELDS: TemplateField[] = [
-  // Dynamic Fields (Green)
-  { id: 'InspectorInitials', name: 'Inspector Initials', type: 'dynamic', category: 'green', description: 'Inspector identification initials', example: 'JS', required: true },
-  { id: 'Date', name: 'Letter Date', type: 'dynamic', category: 'green', description: 'Date of approval letter', example: 'March 15, 2024', required: true },
-  { id: 'CSOFullName', name: 'CSO Full Name', type: 'dynamic', category: 'green', description: 'Chief Security Officer full name', example: 'Jane Doe', required: true },
-  { id: 'CompanyName', name: 'Company Name', type: 'dynamic', category: 'green', description: 'Organization name', example: 'Acme Corp Ltd.', required: true },
-  
-  // Conditional Fields (Blue)
-  { id: 'CSCSection', name: 'CSC Section', type: 'conditional', category: 'blue', description: 'Correctional Service Canada specific content', example: 'CSC computer details section' },
-  { id: 'ApprovalType', name: 'Approval Type', type: 'conditional', category: 'blue', description: 'Type of approval granted/denied', example: 'GRANTS/DENIES' },
-  
-  // Repeating Fields (Orange)
-  { id: 'CCList', name: 'CC Recipients', type: 'repeating', category: 'orange', description: 'Carbon copy recipient list', example: 'Multiple CC recipients' },
-  
-  // CSC-specific Dynamic Fields (Green but conditional)
-  { id: 'ComputerName', name: 'Computer Name', type: 'dynamic', category: 'green', description: 'CSC computer identification', example: 'CSC-WS-001' },
-  { id: 'AssetSerial', name: 'Asset Serial', type: 'dynamic', category: 'green', description: 'Computer serial number', example: 'SN123456789' },
-];
-
+// Memorandum fields
 export const MEMORANDUM_FIELDS: TemplateField[] = [
   // Dynamic Fields (Green)
   { id: 'Date', name: 'Memorandum Date', type: 'dynamic', category: 'green', description: 'Date of memorandum', example: 'March 15, 2024', required: true },

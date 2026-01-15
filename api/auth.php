@@ -3,15 +3,16 @@
  * INGOT API - Authentication Endpoints
  * 
  * Endpoints:
- * - POST ?action=login    - Sign in with email/password
- * - POST ?action=register - Create new account
- * - POST ?action=logout   - Sign out
- * - GET  ?action=session  - Get current session/user data
+ * - POST ?action=login           - Sign in with username/password
+ * - POST ?action=change_password - Change password (forced on first login)
+ * - POST ?action=logout          - Sign out
+ * - GET  ?action=session         - Get current session/user data
  */
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/response.php';
 require_once __DIR__ . '/middleware.php';
+require_once __DIR__ . '/audit.php';
 
 $action = getQueryParam('action', '');
 
@@ -19,8 +20,8 @@ switch ($action) {
     case 'login':
         handleLogin();
         break;
-    case 'register':
-        handleRegister();
+    case 'change_password':
+        handleChangePassword();
         break;
     case 'logout':
         handleLogout();
@@ -33,43 +34,81 @@ switch ($action) {
 }
 
 /**
- * Handle user login
+ * Check rate limiting for login attempts
+ */
+function checkRateLimit(string $ip): bool {
+    $db = getDB();
+    
+    // Clean old entries (older than 15 minutes)
+    $stmt = $db->prepare('DELETE FROM rate_limits WHERE created_at < DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
+    $stmt->execute();
+    
+    // Count recent attempts
+    $stmt = $db->prepare('SELECT COUNT(*) as attempts FROM rate_limits WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)');
+    $stmt->execute([$ip]);
+    $result = $stmt->fetch();
+    
+    return $result['attempts'] < 5; // Max 5 attempts per minute
+}
+
+/**
+ * Record login attempt for rate limiting
+ */
+function recordLoginAttempt(string $ip): void {
+    $db = getDB();
+    $stmt = $db->prepare('INSERT INTO rate_limits (ip_address, endpoint) VALUES (?, ?)');
+    $stmt->execute([$ip, 'login']);
+}
+
+/**
+ * Handle user login (username-based for Login Prime 1)
  */
 function handleLogin(): void {
     if (getRequestMethod() !== 'POST') {
         sendError('Method not allowed', 405);
     }
     
-    $data = getJsonBody();
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     
-    // Validate required fields
-    $errors = validateRequired($data, ['email', 'password']);
-    if (!empty($errors)) {
-        sendValidationError($errors);
+    // Check rate limiting
+    if (!checkRateLimit($ip)) {
+        logAuditEvent('login_rate_limited', null, ['ip' => $ip]);
+        sendError('Too many login attempts. Please wait before trying again.', 429);
     }
     
-    $email = strtolower(trim($data['email']));
-    $password = $data['password'];
+    $data = getJsonBody();
     
-    // Validate email format
-    if (!validateEmail($email)) {
-        sendError('Invalid email format', 400);
+    // Accept either 'username' or 'email' field for backwards compatibility
+    $identifier = trim($data['username'] ?? $data['email'] ?? '');
+    $password = $data['password'] ?? '';
+    
+    if (empty($identifier) || empty($password)) {
+        recordLoginAttempt($ip);
+        sendValidationError(['username' => 'Username and password are required']);
     }
     
     $db = getDB();
     
-    // Find user by email
-    $stmt = $db->prepare('SELECT id, email, password_hash, display_name FROM users WHERE email = ?');
-    $stmt->execute([$email]);
+    // Find user by username OR email
+    $stmt = $db->prepare('
+        SELECT id, email, username, password_hash, display_name, must_change_password 
+        FROM users 
+        WHERE username = ? OR email = ?
+    ');
+    $stmt->execute([$identifier, strtolower($identifier)]);
     $user = $stmt->fetch();
     
     if (!$user) {
-        sendError('Invalid email or password', 401);
+        recordLoginAttempt($ip);
+        logAuditEvent('login_failed', null, ['identifier' => $identifier, 'reason' => 'user_not_found']);
+        sendError('Invalid username or password', 401);
     }
     
     // Verify password
     if (!password_verify($password, $user['password_hash'])) {
-        sendError('Invalid email or password', 401);
+        recordLoginAttempt($ip);
+        logAuditEvent('login_failed', $user['id'], ['reason' => 'invalid_password']);
+        sendError('Invalid username or password', 401);
     }
     
     // Set session
@@ -78,16 +117,20 @@ function handleLogin(): void {
     // Get user roles
     $roles = getUserRoles($user['id']);
     
-    // Get profile
+    // Get profile with profile_completed status
     $stmt = $db->prepare('SELECT * FROM profiles WHERE user_id = ?');
     $stmt->execute([$user['id']]);
     $profile = $stmt->fetch();
+    
+    logAuditEvent('login_success', $user['id']);
     
     sendSuccess([
         'user' => [
             'id' => $user['id'],
             'email' => $user['email'],
-            'display_name' => $user['display_name']
+            'username' => $user['username'],
+            'display_name' => $user['display_name'],
+            'must_change_password' => (bool)$user['must_change_password']
         ],
         'profile' => $profile,
         'roles' => $roles
@@ -95,89 +138,80 @@ function handleLogin(): void {
 }
 
 /**
- * Handle user registration
+ * Handle password change (enforced on first login)
  */
-function handleRegister(): void {
+function handleChangePassword(): void {
     if (getRequestMethod() !== 'POST') {
         sendError('Method not allowed', 405);
     }
     
+    requireAuth();
+    
     $data = getJsonBody();
+    $currentPassword = $data['current_password'] ?? '';
+    $newPassword = $data['new_password'] ?? '';
     
-    // Validate required fields
-    $errors = validateRequired($data, ['email', 'password']);
+    if (empty($currentPassword) || empty($newPassword)) {
+        sendValidationError(['password' => 'Current and new password are required']);
+    }
+    
+    // Validate password strength (256-bit equivalent security)
+    // Must be 12+ chars, uppercase, lowercase, number, special char
+    $errors = [];
+    if (strlen($newPassword) < 12) {
+        $errors[] = 'Password must be at least 12 characters';
+    }
+    if (!preg_match('/[A-Z]/', $newPassword)) {
+        $errors[] = 'Password must contain at least one uppercase letter';
+    }
+    if (!preg_match('/[a-z]/', $newPassword)) {
+        $errors[] = 'Password must contain at least one lowercase letter';
+    }
+    if (!preg_match('/[0-9]/', $newPassword)) {
+        $errors[] = 'Password must contain at least one number';
+    }
+    if (!preg_match('/[!@#$%^&*()_+\-=\[\]{};\':"\\|,.<>\/?]/', $newPassword)) {
+        $errors[] = 'Password must contain at least one special character';
+    }
+    
     if (!empty($errors)) {
-        sendValidationError($errors);
+        sendError(implode('. ', $errors), 400);
     }
     
-    $email = strtolower(trim($data['email']));
-    $password = $data['password'];
-    $displayName = sanitizeString($data['display_name'] ?? '');
-    
-    // Validate email format
-    if (!validateEmail($email)) {
-        sendError('Invalid email format', 400);
-    }
-    
-    // Validate password strength
-    if (strlen($password) < 8) {
-        sendError('Password must be at least 8 characters', 400);
-    }
-    
+    $userId = getCurrentUserId();
     $db = getDB();
     
-    // Check if email already exists
-    $stmt = $db->prepare('SELECT id FROM users WHERE email = ?');
-    $stmt->execute([$email]);
-    
-    if ($stmt->fetch()) {
-        sendError('Email already registered', 409);
-    }
-    
-    // Check if this is the first user (make them admin)
-    $stmt = $db->prepare('SELECT COUNT(*) as count FROM users');
-    $stmt->execute();
-    $isFirstUser = $stmt->fetch()['count'] == 0;
-    
-    // Hash password
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    
-    // Create user
-    $stmt = $db->prepare('
-        INSERT INTO users (email, password_hash, display_name)
-        VALUES (?, ?, ?)
-    ');
-    $stmt->execute([$email, $passwordHash, $displayName ?: null]);
-    
-    $userId = $db->lastInsertId();
-    
-    // If first user, assign admin role
-    if ($isFirstUser) {
-        $stmt = $db->prepare('INSERT INTO user_roles (user_id, role) VALUES (?, ?)');
-        $stmt->execute([$userId, 'admin']);
-    }
-    
-    // Set session
-    setAuthSession($userId, $email, $displayName);
-    
-    // Get roles
-    $roles = getUserRoles($userId);
-    
-    // Get profile (created by trigger)
-    $stmt = $db->prepare('SELECT * FROM profiles WHERE user_id = ?');
+    // Verify current password
+    $stmt = $db->prepare('SELECT password_hash FROM users WHERE id = ?');
     $stmt->execute([$userId]);
-    $profile = $stmt->fetch();
+    $user = $stmt->fetch();
+    
+    if (!$user || !password_verify($currentPassword, $user['password_hash'])) {
+        logAuditEvent('password_change_failed', $userId, ['reason' => 'invalid_current_password']);
+        sendError('Current password is incorrect', 401);
+    }
+    
+    // Update password and clear must_change_password flag
+    $newHash = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]);
+    $stmt = $db->prepare('UPDATE users SET password_hash = ?, must_change_password = FALSE, updated_at = NOW() WHERE id = ?');
+    $stmt->execute([$newHash, $userId]);
+    
+    logAuditEvent('password_changed', $userId);
+    
+    // Return updated user data
+    $stmt = $db->prepare('SELECT id, email, username, display_name, must_change_password FROM users WHERE id = ?');
+    $stmt->execute([$userId]);
+    $updatedUser = $stmt->fetch();
     
     sendSuccess([
         'user' => [
-            'id' => $userId,
-            'email' => $email,
-            'display_name' => $displayName
-        ],
-        'profile' => $profile,
-        'roles' => $roles,
-        'isFirstUser' => $isFirstUser
-    ], 'Registration successful', 201);
+            'id' => $updatedUser['id'],
+            'email' => $updatedUser['email'],
+            'username' => $updatedUser['username'],
+            'display_name' => $updatedUser['display_name'],
+            'must_change_password' => false
+        ]
+    ], 'Password changed successfully');
 }
 
 /**
@@ -186,6 +220,11 @@ function handleRegister(): void {
 function handleLogout(): void {
     if (getRequestMethod() !== 'POST') {
         sendError('Method not allowed', 405);
+    }
+    
+    $userId = getCurrentUserId();
+    if ($userId) {
+        logAuditEvent('logout', $userId);
     }
     
     clearAuthSession();
@@ -211,17 +250,41 @@ function handleSession(): void {
         return;
     }
     
-    $user = getCurrentUser();
-    $roles = getUserRoles($user['id']);
-    
     $db = getDB();
+    $userId = getCurrentUserId();
+    
+    // Get user with must_change_password
+    $stmt = $db->prepare('SELECT id, email, username, display_name, must_change_password FROM users WHERE id = ?');
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch();
+    
+    if (!$user) {
+        clearAuthSession();
+        sendSuccess([
+            'authenticated' => false,
+            'user' => null,
+            'profile' => null,
+            'roles' => []
+        ], 'Session invalid');
+        return;
+    }
+    
+    $roles = getUserRoles($userId);
+    
+    // Get profile with profile_completed
     $stmt = $db->prepare('SELECT * FROM profiles WHERE user_id = ?');
-    $stmt->execute([$user['id']]);
+    $stmt->execute([$userId]);
     $profile = $stmt->fetch();
     
     sendSuccess([
         'authenticated' => true,
-        'user' => $user,
+        'user' => [
+            'id' => $user['id'],
+            'email' => $user['email'],
+            'username' => $user['username'],
+            'display_name' => $user['display_name'],
+            'must_change_password' => (bool)$user['must_change_password']
+        ],
         'profile' => $profile,
         'roles' => $roles
     ], 'Session active');
