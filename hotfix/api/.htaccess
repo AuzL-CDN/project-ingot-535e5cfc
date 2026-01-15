@@ -1,18 +1,15 @@
-# INGOT API .htaccess - PHP 8.4
-# Force PHP execution in this directory
+# INGOT API .htaccess - IONOS PHP 8.4
+# If you ever see raw PHP source in the browser, it means PHP is NOT executing.
 
-# PHP 8.4 Handler (IONOS specific)
-<IfModule mod_php.c>
-    AddHandler application/x-httpd-php84 .php
-</IfModule>
+# Force PHP 8.4 for .php/.phtml in this directory (IONOS shared hosting)
+# (Do not wrap these in <IfModule mod_php.c> — IONOS often runs PHP via CGI/FPM.)
+AddType application/x-httpd-php84 .php .phtml
+AddHandler application/x-httpd-php84 .php .phtml
 
-# Fallback PHP handler
-<FilesMatch "\.php$">
-    SetHandler application/x-httpd-php
+# Extra safety: explicitly set the handler
+<FilesMatch "\.(php|phtml)$">
+    SetHandler application/x-httpd-php84
 </FilesMatch>
-
-# Alternative handler if above doesn't work
-AddHandler application/x-httpd-php .php
 
 # CORS Headers
 <IfModule mod_headers.c>
