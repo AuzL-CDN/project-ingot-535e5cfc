@@ -1,0 +1,29 @@
+# INGOT API .htaccess - PHP 8.4
+# Force PHP execution in this directory
+
+# PHP 8.4 Handler (IONOS specific)
+<IfModule mod_php.c>
+    AddHandler application/x-httpd-php84 .php
+</IfModule>
+
+# Fallback PHP handler
+<FilesMatch "\.php$">
+    SetHandler application/x-httpd-php
+</FilesMatch>
+
+# Alternative handler if above doesn't work
+AddHandler application/x-httpd-php .php
+
+# CORS Headers
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
+</IfModule>
+
+# Handle preflight OPTIONS requests
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ $1 [R=200,L]
+</IfModule>
