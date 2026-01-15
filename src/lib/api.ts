@@ -64,6 +64,12 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
       }),
+
+    requestPasswordReset: (username: string) =>
+      fetchApi('/auth.php?action=request_password_reset', {
+        method: 'POST',
+        body: JSON.stringify({ username }),
+      }),
   },
 
   activities: {
@@ -208,6 +214,21 @@ export const api = {
       fetchApi(`/users.php?action=reset_password&id=${userId}`, {
         method: 'POST',
         body: JSON.stringify({ new_password: newPassword }),
+      }),
+  },
+
+  passwordResets: {
+    list: (status: string = 'pending') =>
+      fetchApi<{ requests: any[]; counts: Record<string, number> }>(`/password-resets.php?status=${status}`),
+
+    approve: (requestId: number) =>
+      fetchApi<{ temporary_password: string; username: string }>(`/password-resets.php?action=approve&id=${requestId}`, {
+        method: 'POST',
+      }),
+
+    reject: (requestId: number) =>
+      fetchApi(`/password-resets.php?action=reject&id=${requestId}`, {
+        method: 'POST',
       }),
   },
 };

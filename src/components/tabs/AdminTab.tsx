@@ -13,10 +13,12 @@ import {
   AlertCircle,
   LogOut,
   Crown,
-  AlertTriangle
+  AlertTriangle,
+  KeyRound
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
 import { UserManagement } from '../admin/UserManagement';
+import { PasswordResetRequests } from '../admin/PasswordResetRequests';
 import { SystemStatus } from '../admin/SystemStatus';
 import { DataImportUtility } from '../DataImportUtility';
 import { useToast } from '@/hooks/use-toast';
@@ -252,8 +254,9 @@ export const AdminTab = () => {
           </Alert>
         </TabsContent>
 
-        <TabsContent value="users">
+        <TabsContent value="users" className="space-y-6">
           <UserManagement />
+          <PasswordResetRequests />
         </TabsContent>
 
         <TabsContent value="data" className="space-y-6">
