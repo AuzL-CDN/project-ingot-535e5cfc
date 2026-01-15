@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Canadian Flag -->
+  <rect x="0" y="0" width="8" height="32" fill="#FF0000"/>
+  <rect x="8" y="0" width="16" height="32" fill="#FFFFFF"/>
+  <rect x="24" y="0" width="8" height="32" fill="#FF0000"/>
+  <!-- Maple Leaf -->
+  <path fill="#FF0000" d="M16 4l1.5 4.5 1.5-1 1 2-2 1 2.5 3-2 .5.5 2-2.5-1-0.5 3-0.5-3-2.5 1 .5-2-2-.5 2.5-3-2-1 1-2 1.5 1z"/>
+</svg>
