@@ -33,14 +33,27 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// Default context value for when provider isn't available (e.g., during HMR)
+const defaultAuthContext: AuthContextType = {
+  user: null,
+  session: null,
+  profile: null,
+  roles: [],
+  isAdmin: false,
+  isModerator: false,
+  isDev: false,
+  isM365: false,
+  loading: true,
+  signIn: async () => ({ error: { message: 'Auth not ready' } }),
+  signUp: async () => ({ error: { message: 'Auth not ready' } }),
+  signOut: async () => {},
+  refreshProfile: async () => {},
+};
+
+const AuthContext = createContext<AuthContextType>(defaultAuthContext);
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
+  return useContext(AuthContext);
 };
 
 interface AuthProviderProps {
