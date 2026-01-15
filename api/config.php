@@ -1,0 +1,111 @@
+<?php
+/**
+ * INGOT API Configuration
+ * Database connection and global settings
+ */
+
+// Error reporting (disable in production)
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
+// Timezone
+date_default_timezone_set('America/Toronto');
+
+// Session settings
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
+ini_set('session.cookie_samesite', 'Lax');
+ini_set('session.gc_maxlifetime', 86400); // 24 hours
+
+// Database Configuration
+// UPDATE THESE VALUES FOR YOUR IONOS HOSTING
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'ingot_db');
+define('DB_USER', getenv('DB_USER') ?: 'ingot_user');
+define('DB_PASS', getenv('DB_PASS') ?: '');
+define('DB_CHARSET', 'utf8mb4');
+
+// Application settings
+define('APP_NAME', 'INGOT');
+define('APP_URL', getenv('APP_URL') ?: 'https://ingot.watchnexus.ca');
+define('API_VERSION', '1.0.0');
+
+// CORS settings
+define('ALLOWED_ORIGINS', [
+    'https://ingot.watchnexus.ca',
+    'http://localhost:8080',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173'
+]);
+
+/**
+ * Get PDO database connection
+ */
+function getDB(): PDO {
+    static $pdo = null;
+    
+    if ($pdo === null) {
+        try {
+            $dsn = sprintf(
+                'mysql:host=%s;dbname=%s;charset=%s',
+                DB_HOST,
+                DB_NAME,
+                DB_CHARSET
+            );
+            
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+            ];
+            
+            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
+            
+        } catch (PDOException $e) {
+            error_log('Database connection failed: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Database connection failed'
+            ]);
+            exit;
+        }
+    }
+    
+    return $pdo;
+}
+
+/**
+ * Set CORS headers
+ */
+function setCorsHeaders(): void {
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    
+    if (in_array($origin, ALLOWED_ORIGINS)) {
+        header("Access-Control-Allow-Origin: $origin");
+    }
+    
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    header('Access-Control-Max-Age: 86400');
+    
+    // Handle preflight requests
+    if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+        http_response_code(204);
+        exit;
+    }
+}
+
+/**
+ * Set JSON content type header
+ */
+function setJsonHeaders(): void {
+    header('Content-Type: application/json; charset=utf-8');
+}
+
+// Apply headers
+setCorsHeaders();
+setJsonHeaders();

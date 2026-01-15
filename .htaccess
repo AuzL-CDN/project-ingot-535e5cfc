@@ -1,0 +1,31 @@
+# INGOT Application .htaccess
+# For IONOS shared hosting deployment
+
+RewriteEngine On
+RewriteBase /
+
+# Handle API requests - pass to PHP files
+RewriteRule ^api/(.*)$ api/$1 [L,QSA]
+
+# React Router - serve index.html for all non-file routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/api/
+RewriteRule . /index.html [L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Prevent directory listing
+Options -Indexes
+
+# Deny access to sensitive files
+<FilesMatch "(^\.env|\.sql$|\.log$)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
