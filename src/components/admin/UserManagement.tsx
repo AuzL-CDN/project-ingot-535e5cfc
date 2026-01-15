@@ -13,8 +13,8 @@ import { useAuth } from '../auth/AuthProvider';
 import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   email: string;
   display_name: string | null;
   created_at: string;
@@ -57,7 +57,7 @@ export const UserManagement = () => {
     }
   }, [isAdmin]);
 
-  const handleRoleChange = async (userId: string, newRole: AppRole) => {
+  const handleRoleChange = async (userId: number, newRole: AppRole) => {
     try {
       // Role management removed - will be replaced with SharePoint integration
       toast({
@@ -170,7 +170,7 @@ export const UserManagement = () => {
                             </div>
                             <div>
                               <p className="font-medium">{userProfile.display_name || 'Unknown'}</p>
-                              {userProfile.user_id === user?.id && (
+                              {user && userProfile.user_id === user.id && (
                                 <Badge variant="outline" className="text-xs">You</Badge>
                               )}
                             </div>
@@ -182,7 +182,7 @@ export const UserManagement = () => {
                           {new Date(userProfile.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          {userProfile.user_id !== user?.id && (
+                          {(!user || userProfile.user_id !== user.id) && (
                             <Dialog open={showRoleDialog && selectedUser?.id === userProfile.id} onOpenChange={setShowRoleDialog}>
                               <DialogTrigger asChild>
                                 <Button

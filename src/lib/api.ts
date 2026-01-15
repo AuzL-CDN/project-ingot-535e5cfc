@@ -57,7 +57,7 @@ export const api = {
       fetchApi('/auth.php?action=logout', { method: 'POST' }),
 
     session: () =>
-      fetchApi('/auth.php?action=session'),
+      fetchApi<{ user: any; profile: any; roles: string[] }>('/auth.php?action=session'),
   },
 
   activities: {
@@ -66,7 +66,7 @@ export const api = {
       if (params?.completed !== undefined) query.set('completed', String(params.completed));
       if (params?.limit) query.set('limit', String(params.limit));
       if (params?.offset) query.set('offset', String(params.offset));
-      return fetchApi(`/activities.php?${query}`);
+      return fetchApi<any[]>(`/activities.php?${query}`);
     },
 
     get: (id: number) =>
@@ -125,19 +125,22 @@ export const api = {
       const query = new URLSearchParams();
       if (params?.limit) query.set('limit', String(params.limit));
       if (params?.offset) query.set('offset', String(params.offset));
-      return fetchApi(`/organizations.php?${query}`);
+      return fetchApi<{ organizations: any[]; total: number }>(`/organizations.php?${query}`);
     },
 
     get: (orgSiteId: string) =>
-      fetchApi(`/organizations.php?id=${encodeURIComponent(orgSiteId)}`),
+      fetchApi<{ organization: any }>(`/organizations.php?id=${encodeURIComponent(orgSiteId)}`),
 
     search: (query: string) =>
-      fetchApi(`/organizations.php?search=${encodeURIComponent(query)}`),
+      fetchApi<{ organizations: any[]; count: number }>(`/organizations.php?search=${encodeURIComponent(query)}`),
 
-    import: (organizations: any[]) =>
-      fetchApi('/organizations.php?action=import', {
+    count: () =>
+      fetchApi<{ total: number }>('/organizations.php?action=count'),
+
+    importBatch: (records: Array<{ org_site_id: string; organization_name: string; address: string; phone_number: string }>) =>
+      fetchApi<{ imported: number; skipped: number }>('/organizations.php?action=import', {
         method: 'POST',
-        body: JSON.stringify({ organizations }),
+        body: JSON.stringify({ organizations: records }),
       }),
   },
 

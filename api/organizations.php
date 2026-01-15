@@ -24,6 +24,8 @@ $action = getQueryParam('action');
 
 if ($action === 'import') {
     handleBulkImport();
+} elseif ($action === 'count') {
+    handleGetCount();
 } else {
     routeRequest([
         'GET' => function() use ($id, $search) {
@@ -37,6 +39,17 @@ if ($action === 'import') {
         },
         'POST' => 'handleCreateOrganization'
     ]);
+}
+
+/**
+ * Get organization count
+ */
+function handleGetCount(): void {
+    $db = getDB();
+    $stmt = $db->prepare('SELECT COUNT(*) as total FROM organizations');
+    $stmt->execute();
+    $result = $stmt->fetch();
+    sendSuccess(['total' => (int)$result['total']]);
 }
 
 /**
