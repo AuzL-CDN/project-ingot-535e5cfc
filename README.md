@@ -1,92 +1,151 @@
-# INGOT Deployment Guide for IONOS Shared Hosting
+# 🍁 INGOT - Inspection Management System
 
-## Prerequisites
-- IONOS shared hosting account with PHP 8.0+ and MySQL
-- FTP client (FileZilla) or IONOS File Manager
-- phpMyAdmin access
+> **I**nspection **N**avigator for **G**overnment **O**perations & **T**racking
 
-## Step 1: Create MySQL Database
+A sleek, secure, and bilingual inspection workflow system built for the Government of Canada. INGOT streamlines security inspections from initial contact through final approval—all in one powerful web application.
 
-1. Log into IONOS Control Panel
-2. Navigate to **Hosting > Databases**
-3. Create a new MySQL database:
-   - Database name: `ingot_db`
-   - Note the hostname, username, and password
+---
 
-## Step 2: Import Database Schema
+## ✨ What is INGOT?
 
-1. Open phpMyAdmin from IONOS Control Panel
-2. Select your new database
-3. Go to **Import** tab
-4. Upload `database/schema.sql`
-5. Click **Go** to execute
+INGOT is a comprehensive inspection management platform designed for DISIS (Departmental Industrial Security Inspection Services). It handles the complete lifecycle of security inspections:
 
-## Step 3: Configure API
+- 📋 **Inspection Workflow** - From initial contact to final approval letter
+- 📝 **Document Generation** - Auto-populated templates for memorandums, reports, and approval letters  
+- 🔍 **Organization Search** - Quick lookup of organizations by OID, CAGE, or name
+- 📧 **Email Templates** - Pre-formatted bilingual communications
+- 👥 **Team Collaboration** - Multi-inspector support with role-based access
+- 🌐 **Fully Bilingual** - Complete English/French support
 
-1. Edit `api/config.php` with your database credentials:
-```php
-define('DB_HOST', 'your-db-host.ionos.com');
-define('DB_NAME', 'ingot_db');
-define('DB_USER', 'your-username');
-define('DB_PASS', 'your-password');
-```
+---
 
-2. Update `APP_URL` to `https://ingot.watchnexus.ca`
+## 🚀 Quick Start
 
-## Step 4: Build React App
+### For Developers
 
 ```bash
+# Install dependencies
+npm install
+
+# Start development server  
+npm run dev
+
+# Build for production
 npm run build
 ```
 
-This creates a `dist/` folder with production files.
+### For Deployment (IONOS)
 
-## Step 5: Upload Files
+1. **Database Setup**
+   - Create MySQL database in IONOS panel
+   - Import `database/schema.sql` via phpMyAdmin
 
-Upload via FTP to your domain root (`/ingot.watchnexus.ca/`):
+2. **Configure API**
+   - Update `api/config.php` with your credentials (or set environment variables)
+
+3. **Upload Files**
+   - Build: `npm run build`
+   - Upload `dist/` contents to web root
+   - Upload `api/` folder to web root
+
+4. **Create Admin User**
+   - Insert first user via phpMyAdmin (see schema for structure)
+   - First login will prompt password change
+
+---
+
+## 🔐 Security Features
+
+- **256-bit Password Requirements** - 8+ chars, mixed case, numbers, symbols
+- **Forced Password Change** - New users must change initial password
+- **Rate Limiting** - Protection against brute force attacks
+- **AES-256 Encryption** - Sensitive data encrypted at rest
+- **Session-Based Auth** - Secure PHP sessions with CSRF protection
+- **Role-Based Access** - Admin, Inspector, and Viewer roles
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18, TypeScript, Tailwind CSS, shadcn/ui |
+| Backend | PHP 8.x, MySQL 8.x |
+| Hosting | IONOS Shared Hosting (Apache) |
+| Build | Vite |
+
+---
+
+## 📁 Project Structure
 
 ```
-/ingot.watchnexus.ca/
-├── api/                    ← Upload entire api/ folder
-│   ├── config.php
-│   ├── auth.php
-│   ├── activities.php
+ingot/
+├── api/                    # PHP backend endpoints
+│   ├── config.php          # Database configuration (⚠️ update for your host)
+│   ├── auth.php            # Authentication endpoints
+│   ├── organizations.php   # Organization CRUD
 │   └── ...
-├── cron/                   ← Upload cron/ folder
-│   └── check-deadlines.php
-├── assets/                 ← From dist/assets/
-├── index.html              ← From dist/
-├── .htaccess               ← Root .htaccess
-└── ...                     ← Other dist/ files
+├── database/
+│   └── schema.sql          # MySQL database schema
+├── src/                    # React frontend
+│   ├── components/         # UI components
+│   ├── hooks/              # Custom React hooks
+│   └── pages/              # Route pages
+├── public/                 # Static assets
+│   └── data/               # Excel data files
+└── docs/                   # Word templates
 ```
 
-## Step 6: Set Up Cron Job
+---
 
-1. In IONOS Control Panel, go to **Cron Jobs**
-2. Create new cron job:
-   - Command: `php /homepages/XX/dXXXXXX/htdocs/ingot.watchnexus.ca/cron/check-deadlines.php`
-   - Schedule: Daily at 8:00 AM
+## 🔧 Configuration
 
-## Step 7: Create Admin User
+### Database (api/config.php)
 
-In phpMyAdmin, run:
-```sql
-INSERT INTO users (email, password_hash, display_name) 
-VALUES ('your-email@example.com', '$2y$10$YOUR_HASHED_PASSWORD', 'Admin');
+The app uses environment variables with fallbacks. To migrate hosts:
 
-INSERT INTO user_roles (user_id, role) VALUES (1, 'admin');
+```php
+// Option 1: Set environment variables in hosting panel
+DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
+
+// Option 2: Update fallback values directly in config.php
+define('DB_HOST', getenv('DB_HOST') ?: 'your-host.io');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'your_database');
+define('DB_USER', getenv('DB_USER') ?: 'your_user');
+define('DB_PASS', getenv('DB_PASS') ?: 'your_password');
 ```
 
-Generate password hash at: https://bcrypt-generator.com/
+---
 
-## Step 8: Test
+## 👥 User Management
 
-1. Visit https://ingot.watchnexus.ca
-2. Log in with admin credentials
-3. Verify all features work
+### Default Username Format
+- Format: `firstname` + first initial of `lastname` (e.g., `austinl`)
+- Initial Password: `firstname@Ingot2026!`
 
-## Troubleshooting
+### Roles
+- **Admin** - Full access, user management, system settings
+- **Inspector** - Create/manage inspections, generate documents
+- **Viewer** - Read-only access to assigned inspections
 
-- **500 Error**: Check PHP error logs in IONOS
-- **CORS Issues**: Verify `.htaccess` is uploaded
-- **Database errors**: Confirm credentials in `config.php`
+---
+
+## 🇨🇦 Made with Pride
+
+Built for the Government of Canada's security inspection teams. INGOT represents a modern approach to government software—fast, secure, and delightful to use.
+
+*Inspection management, the way it should be.*
+
+---
+
+## 📄 License
+
+Government of Canada Internal Use Only
+
+---
+
+<p align="center">
+  <strong>🍁 INGOT</strong><br>
+  <em>Streamlining Security Inspections Across Canada</em>
+</p>

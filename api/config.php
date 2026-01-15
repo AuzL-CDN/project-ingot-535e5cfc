@@ -18,12 +18,18 @@ ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
 ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.gc_maxlifetime', 86400); // 24 hours
 
-// Database Configuration
-// UPDATE THESE VALUES FOR YOUR IONOS HOSTING
-define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
-define('DB_NAME', getenv('DB_NAME') ?: 'ingot_db');
-define('DB_USER', getenv('DB_USER') ?: 'ingot_user');
-define('DB_PASS', getenv('DB_PASS') ?: '');
+// Database Configuration - IONOS Production
+// ============================================================================
+// MIGRATION INSTRUCTIONS: To move to a different host, either:
+//   1. Set environment variables in your hosting panel (recommended):
+//      DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
+//   2. Or update the fallback values below directly
+// ============================================================================
+define('DB_HOST', getenv('DB_HOST') ?: 'db5019381304.hosting-data.io');
+define('DB_PORT', getenv('DB_PORT') ?: '3306');
+define('DB_NAME', getenv('DB_NAME') ?: 'dbs15164102');
+define('DB_USER', getenv('DB_USER') ?: 'dbu4409535');
+define('DB_PASS', getenv('DB_PASS') ?: ''); // Set via IONOS environment panel
 define('DB_CHARSET', 'utf8mb4');
 
 // Application settings
@@ -48,8 +54,9 @@ function getDB(): PDO {
     if ($pdo === null) {
         try {
             $dsn = sprintf(
-                'mysql:host=%s;dbname=%s;charset=%s',
+                'mysql:host=%s;port=%s;dbname=%s;charset=%s',
                 DB_HOST,
+                DB_PORT,
                 DB_NAME,
                 DB_CHARSET
             );

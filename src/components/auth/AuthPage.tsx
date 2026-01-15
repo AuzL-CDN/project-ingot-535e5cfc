@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,6 +20,7 @@ const passwordSchema = z.string().min(1, { message: "Password is required" }).ma
 export const AuthPage = () => {
   const { user, signIn, isDev, mustChangePassword, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(false);
   const [signInData, setSignInData] = useState({ username: '', password: '' });
@@ -36,7 +37,8 @@ export const AuthPage = () => {
 
   // Redirect if authenticated and password change not required
   if (user && !mustChangePassword && !loading) {
-    return <Navigate to="/" replace />;
+    // Navigate with state to trigger welcome transition
+    return <Navigate to="/" state={{ justLoggedIn: true, userName: user.display_name || user.username }} replace />;
   }
 
   const validateSignIn = () => {
