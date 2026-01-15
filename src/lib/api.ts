@@ -41,10 +41,10 @@ async function fetchApi<T>(
 
 export const api = {
   auth: {
-    login: (email: string, password: string) =>
+    login: (username: string, password: string) =>
       fetchApi('/auth.php?action=login', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       }),
 
     register: (email: string, password: string, display_name: string) =>
@@ -57,7 +57,13 @@ export const api = {
       fetchApi('/auth.php?action=logout', { method: 'POST' }),
 
     session: () =>
-      fetchApi<{ user: any; profile: any; roles: string[] }>('/auth.php?action=session'),
+      fetchApi<{ user: any; profile: any; roles: string[]; mustChangePassword?: boolean }>('/auth.php?action=session'),
+
+    changePassword: (currentPassword: string, newPassword: string) =>
+      fetchApi('/auth.php?action=change_password', {
+        method: 'POST',
+        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+      }),
   },
 
   activities: {
@@ -141,6 +147,23 @@ export const api = {
       fetchApi<{ imported: number; skipped: number }>('/organizations.php?action=import', {
         method: 'POST',
         body: JSON.stringify({ organizations: records }),
+      }),
+  },
+
+  cso: {
+    getByOrgSite: (orgSiteId: string) =>
+      fetchApi<{ contacts: any[]; count: number }>(`/cso.php?org_site_id=${encodeURIComponent(orgSiteId)}`),
+
+    search: (query: string) =>
+      fetchApi<{ contacts: any[]; count: number }>(`/cso.php?search=${encodeURIComponent(query)}`),
+
+    count: () =>
+      fetchApi<{ total: number; by_role: Record<string, number> }>('/cso.php?action=count'),
+
+    importBatch: (contacts: Array<{ org_site_id: string; role: string; full_name: string; email?: string; acso_index?: number }>) =>
+      fetchApi<{ imported: number; skipped: number }>('/cso.php?action=import', {
+        method: 'POST',
+        body: JSON.stringify({ contacts }),
       }),
   },
 

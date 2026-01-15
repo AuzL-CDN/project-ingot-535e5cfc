@@ -1,13 +1,17 @@
 -- =====================================================
 -- INGOT MySQL Database Schema
 -- For deployment on IONOS shared hosting
+-- With 256-bit encryption support and Login Prime 1
 -- =====================================================
 
 -- Drop existing tables if they exist (in correct order due to foreign keys)
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS cso_contacts;
 DROP TABLE IF EXISTS activity_deadlines;
 DROP TABLE IF EXISTS activities;
 DROP TABLE IF EXISTS profiles;
 DROP TABLE IF EXISTS user_roles;
+DROP TABLE IF EXISTS rate_limits;
 DROP TABLE IF EXISTS sessions;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS organizations;
@@ -17,13 +21,16 @@ DROP TABLE IF EXISTS organizations;
 -- =====================================================
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(100),
+    must_change_password BOOLEAN DEFAULT TRUE,
     email_verified BOOLEAN DEFAULT FALSE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_email (email)
+    INDEX idx_email (email),
+    INDEX idx_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -40,6 +47,21 @@ CREATE TABLE sessions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- RATE LIMITS TABLE (for login attempt tracking)
+-- =====================================================
+CREATE TABLE rate_limits (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip_address VARCHAR(45) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    attempts INT DEFAULT 1,
+    first_attempt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_attempt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    blocked_until DATETIME NULL,
+    INDEX idx_ip_action (ip_address, action_type),
+    INDEX idx_blocked_until (blocked_until)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- USER ROLES TABLE (separate for security)
 -- =====================================================
 CREATE TABLE user_roles (
@@ -53,21 +75,26 @@ CREATE TABLE user_roles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- PROFILES TABLE
+-- PROFILES TABLE (with encrypted fields)
 -- =====================================================
 CREATE TABLE profiles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     display_name VARCHAR(100),
-    email VARCHAR(255),
+    initials VARCHAR(10),
+    email TEXT,
+    phone_encrypted TEXT,
+    profile_completed BOOLEAN DEFAULT FALSE,
+    encryption_version TINYINT DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    INDEX idx_user_id (user_id)
+    INDEX idx_user_id (user_id),
+    INDEX idx_profile_completed (profile_completed)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- ACTIVITIES TABLE
+-- ACTIVITIES TABLE (with encrypted data)
 -- =====================================================
 CREATE TABLE activities (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -76,7 +103,9 @@ CREATE TABLE activities (
     org_site_number VARCHAR(50) NOT NULL,
     company_name VARCHAR(255) NOT NULL,
     inspection_class ENUM('1F', '1G', '19F', '19G') NOT NULL,
+    activity_data_encrypted TEXT,
     activity_data JSON,
+    encryption_version TINYINT DEFAULT 1,
     is_completed BOOLEAN DEFAULT FALSE,
     completed_at DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -123,6 +152,43 @@ CREATE TABLE organizations (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- CSO CONTACTS TABLE (with encrypted email)
+-- =====================================================
+CREATE TABLE cso_contacts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    org_site_id VARCHAR(50) NOT NULL,
+    role ENUM('CSO', 'ACSO') NOT NULL DEFAULT 'CSO',
+    full_name VARCHAR(255) NOT NULL,
+    email_encrypted TEXT,
+    acso_index INT NULL,
+    encryption_version TINYINT DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_org_site_id (org_site_id),
+    INDEX idx_role (role),
+    INDEX idx_full_name (full_name),
+    UNIQUE KEY unique_org_role_index (org_site_id, role, acso_index)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- AUDIT LOGS TABLE (for security monitoring)
+-- =====================================================
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    event_type VARCHAR(50) NOT NULL,
+    event_details JSON,
+    ip_address VARCHAR(45),
+    severity ENUM('info', 'warning', 'critical') DEFAULT 'info',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_user_id (user_id),
+    INDEX idx_event_type (event_type),
+    INDEX idx_severity (severity),
+    INDEX idx_created_at (created_at),
+    INDEX idx_ip_address (ip_address)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- TRIGGER: Auto-create profile on user creation
 -- =====================================================
 DELIMITER //
@@ -150,17 +216,18 @@ DELIMITER ;
 
 -- =====================================================
 -- INITIAL ADMIN USER SETUP
--- Password: Admin123! (pre-hashed with bcrypt)
+-- Password: Admin@Ingot2026! (pre-hashed with bcrypt)
 -- Change this password immediately after first login!
 -- =====================================================
--- INSERT INTO users (email, password_hash, display_name) 
--- VALUES ('admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Admin User');
+-- INSERT INTO users (username, email, password_hash, display_name, must_change_password) 
+-- VALUES ('admina', 'admin@ingot.local', '$2y$10$...', 'Admin User', TRUE);
 -- 
 -- INSERT INTO user_roles (user_id, role) VALUES (1, 'admin');
 
 -- =====================================================
--- SAMPLE ORGANIZATION DATA (optional)
+-- CLEANUP: Remove expired sessions and old rate limits
+-- Run daily via cron job
 -- =====================================================
--- INSERT INTO organizations (org_site_id, organization_name, address, phone_number) VALUES
--- ('113-0', 'A.U.G. Signals Ltd.', '103-73 Richmond Street West Toronto ON M5H4E8', '(416) 923-4425'),
--- ('118-0', 'ABI/Advanced Business Interiors Inc.', '2355 St. Laurent Boulevard Ottawa ON K1G4L2', '(613) 738-1003');
+-- DELETE FROM sessions WHERE expires_at < NOW();
+-- DELETE FROM rate_limits WHERE last_attempt < DATE_SUB(NOW(), INTERVAL 1 DAY);
+-- DELETE FROM audit_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);
