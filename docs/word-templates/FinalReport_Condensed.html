@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>IT Security Inspection Report - Condensed Template</title>
+  <style>
+    @page { size: letter; margin: 0.75in; }
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.4; color: #212529; }
+    
+    .header-box { border: 2px solid #003366; margin-bottom: 20px; }
+    .header-top { background: #003366; color: white; padding: 8px 15px; display: flex; justify-content: space-between; }
+    .header-top .security-badge { background: #DC3545; padding: 2px 10px; font-weight: bold; }
+    .header-content { padding: 10px 15px; }
+    .header-row { display: flex; border-bottom: 1px solid #dee2e6; padding: 4px 0; }
+    .header-row:last-child { border-bottom: none; }
+    .header-label { width: 160px; font-weight: bold; color: #003366; }
+    .header-value { flex: 1; }
+    .header-footer { background: #f5f5f5; padding: 8px 15px; font-size: 10pt; }
+    
+    .purpose-box { border-left: 4px solid #003366; padding: 10px 15px; background: #f8f9fa; margin-bottom: 20px; }
+    
+    .section-box { border: 1px solid #dee2e6; margin-bottom: 15px; page-break-inside: avoid; }
+    .section-header { background: #003366; color: white; padding: 6px 12px; display: flex; justify-content: space-between; font-weight: bold; }
+    .section-status { display: flex; gap: 15px; }
+    .section-status label { display: flex; align-items: center; gap: 4px; }
+    .section-content { padding: 10px 12px; min-height: 60px; }
+    .observation-lines { border-bottom: 1px solid #ccc; min-height: 18px; margin-bottom: 5px; }
+    
+    .measures-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .measures-table th { background: #003366; color: white; padding: 8px; text-align: left; font-weight: bold; }
+    .measures-table td { border: 1px solid #dee2e6; padding: 6px 8px; }
+    .measures-table tr:nth-child(even) { background: #f8f9fa; }
+    .checkbox-cell { width: 50px; text-align: center; }
+    .section-cell { width: 180px; }
+    
+    .remarks-box { border: 2px solid #003366; margin-bottom: 20px; }
+    .remarks-header { background: #003366; color: white; padding: 8px 12px; font-weight: bold; }
+    .remarks-content { padding: 15px; min-height: 100px; }
+    
+    .docs-box { border: 1px solid #dee2e6; margin-bottom: 20px; padding: 15px; }
+    .docs-header { font-weight: bold; color: #003366; margin-bottom: 10px; border-bottom: 2px solid #003366; padding-bottom: 5px; }
+    .docs-row { display: flex; margin-bottom: 8px; align-items: center; }
+    .docs-label { width: 220px; }
+    .docs-input { border-bottom: 1px solid #333; width: 50px; display: inline-block; text-align: center; }
+    .docs-list { margin-top: 15px; }
+    .docs-list-item { border-bottom: 1px solid #ccc; padding: 5px 0; margin-left: 20px; }
+    
+    .summary-box { border: 2px solid #003366; margin-bottom: 20px; }
+    .summary-header { background: #003366; color: white; padding: 8px 12px; font-weight: bold; }
+    .summary-content { padding: 15px; }
+    .assessment-row { margin: 10px 0; }
+    .assessment-row label { margin-right: 20px; }
+    .recommendation-box { background: #f8f9fa; padding: 10px; margin-top: 15px; }
+    
+    .signature-box { margin-top: 30px; }
+    .signature-line { border-bottom: 1px solid #333; width: 250px; display: inline-block; margin-right: 30px; }
+    .signature-label { font-size: 10pt; color: #666; }
+    
+    .footer { text-align: center; font-size: 9pt; color: #666; margin-top: 30px; padding-top: 10px; border-top: 1px solid #ccc; }
+    
+    .page-break { page-break-before: always; }
+    
+    /* Checkbox styling */
+    input[type="checkbox"] { width: 14px; height: 14px; margin-right: 5px; }
+  </style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: HEADER & PURPOSE ==================== -->
+
+<div class="header-box">
+  <div class="header-top">
+    <span class="security-badge">PROTECTED {SecurityLevel}</span>
+    <span style="font-weight: bold; font-size: 13pt;">IT SECURITY INSPECTION REPORT</span>
+  </div>
+  <div class="header-content">
+    <div class="header-row">
+      <span class="header-label">Organization:</span>
+      <span class="header-value">{CompanyName}</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">Org Number:</span>
+      <span class="header-value">{OrgSiteNumber}</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">Activity Number:</span>
+      <span class="header-value">{ActivityNumber}</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">Contract Number:</span>
+      <span class="header-value">{ContractNumber}</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">Security Level:</span>
+      <span class="header-value">{SecurityLevel}</span>
+    </div>
+    <div class="header-row">
+      <span class="header-label">Client Department:</span>
+      <span class="header-value">{ClientDepartment}</span>
+    </div>
+  </div>
+  <div class="header-footer">
+    <strong>Inspection Date:</strong> {InspectionDate} &nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>Inspector:</strong> {InspectorName}<br>
+    <strong>Location:</strong> {Address}<br>
+    <strong>CSO:</strong> {CSOFullName} &nbsp;&nbsp;&nbsp;&nbsp;
+    <strong>Alt CSO:</strong> {AltCSOName}
+  </div>
+</div>
+
+<div class="purpose-box">
+  <strong>Purpose:</strong> The purpose of this inspection was to verify that {CompanyName} has the appropriate 
+  IT security measures in place to safeguard PROTECTED {SecurityLevel} government information in connection 
+  with Contract {ContractNumber}.
+</div>
+
+<!-- ==================== SECTION OBSERVATIONS ==================== -->
+
+<div class="section-box">
+  <div class="section-header">
+    <span>1. INFORMATION SYSTEM / PHYSICAL LOCATION</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section1_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>2. THREAT RISK ASSESSMENT (TRA)</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Yes</label>
+      <label><input type="checkbox"> No</label>
+      <label><input type="checkbox"> N/A</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section2_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>3. DATA TRANSFER</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section3_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>4. IT MEDIA & MEDIA HANDLING</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section4_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>5. PERSONNEL SECURITY</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section5_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>6. IT PERSONNEL SECURITY</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section6_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>7. IT EQUIPMENT / INFORMATION TECHNOLOGY SECURITY</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section7_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>8. RECOVERY</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section8_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<div class="section-box">
+  <div class="section-header">
+    <span>9. DISPOSAL</span>
+    <div class="section-status">
+      <label><input type="checkbox"> Pass</label>
+      <label><input type="checkbox"> Fail</label>
+    </div>
+  </div>
+  <div class="section-content">
+    <div class="observation-lines">{Section9_Observations}</div>
+    <div class="observation-lines"></div>
+    <div class="observation-lines"></div>
+  </div>
+</div>
+
+<!-- ==================== CORRECTIVE MEASURES ==================== -->
+
+<div class="page-break"></div>
+
+<h2 style="color: #003366; border-bottom: 2px solid #003366; padding-bottom: 5px;">CORRECTIVE MEASURES</h2>
+
+<table class="measures-table">
+  <thead>
+    <tr>
+      <th style="width: 30px;">#</th>
+      <th>Corrective Measure Description</th>
+      <th class="section-cell">Section</th>
+      <th class="checkbox-cell">Done</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>{Measure1_Text}</td><td>{Measure1_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>2</td><td>{Measure2_Text}</td><td>{Measure2_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>3</td><td>{Measure3_Text}</td><td>{Measure3_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>4</td><td>{Measure4_Text}</td><td>{Measure4_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>5</td><td>{Measure5_Text}</td><td>{Measure5_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>6</td><td>{Measure6_Text}</td><td>{Measure6_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>7</td><td>{Measure7_Text}</td><td>{Measure7_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>8</td><td>{Measure8_Text}</td><td>{Measure8_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>9</td><td>{Measure9_Text}</td><td>{Measure9_Section}</td><td style="text-align:center;">☐</td></tr>
+    <tr><td>10</td><td>{Measure10_Text}</td><td>{Measure10_Section}</td><td style="text-align:center;">☐</td></tr>
+  </tbody>
+</table>
+
+<p style="text-align: right; font-weight: bold;">Total Corrective Measures: <span class="docs-input">{TotalMeasures}</span></p>
+
+<!-- ==================== ADDITIONAL REMARKS ==================== -->
+
+<div class="remarks-box">
+  <div class="remarks-header">ADDITIONAL REMARKS / INSPECTOR OBSERVATIONS</div>
+  <div class="remarks-content">
+    {AdditionalRemarks}
+  </div>
+</div>
+
+<!-- ==================== SUPPORTING DOCUMENTS ==================== -->
+
+<div class="docs-box">
+  <div class="docs-header">SUPPORTING DOCUMENTS ATTACHED</div>
+  
+  <div class="docs-row">
+    <span class="docs-label">Number of Supporting Documents:</span>
+    <span class="docs-input">{SupportingDocCount}</span>
+  </div>
+  <div class="docs-row">
+    <span class="docs-label">Number of Emails:</span>
+    <span class="docs-input">{EmailCount}</span>
+  </div>
+  <div class="docs-row">
+    <span class="docs-label">Inspection Video:</span>
+    <label><input type="checkbox"> Yes</label> &nbsp;
+    <label><input type="checkbox"> No</label>
+  </div>
+  <div class="docs-row">
+    <span class="docs-label">Checklist Document:</span>
+    <label><input type="checkbox"> Attached</label>
+  </div>
+  
+  <div class="docs-list">
+    <strong>List of Attachments:</strong>
+    <div class="docs-list-item">1. {Attachment1}</div>
+    <div class="docs-list-item">2. {Attachment2}</div>
+    <div class="docs-list-item">3. {Attachment3}</div>
+    <div class="docs-list-item">4. {Attachment4}</div>
+    <div class="docs-list-item">5. {Attachment5}</div>
+  </div>
+</div>
+
+<!-- ==================== SUMMARY & SIGN-OFF ==================== -->
+
+<div class="summary-box">
+  <div class="summary-header">SUMMARY</div>
+  <div class="summary-content">
+    <p>The IT Security Inspection revealed that <strong>{CompanyName}</strong> has:</p>
+    
+    <div class="assessment-row">
+      <label><input type="checkbox"> Good</label>
+      <label><input type="checkbox"> Adequate</label>
+      <label><input type="checkbox"> Insufficient</label>
+      <span>IT security measures to safeguard government information for this contract.</span>
+    </div>
+    
+    <div class="recommendation-box">
+      <strong>Recommendation:</strong><br><br>
+      <label><input type="checkbox"> <strong>APPROVED</strong> for processing at PROTECTED {SecurityLevel}</label><br>
+      <label><input type="checkbox"> <strong>CONDITIONALLY APPROVED</strong> (pending completion of corrective measures)</label><br>
+      <label><input type="checkbox"> <strong>NOT APPROVED</strong></label>
+    </div>
+  </div>
+</div>
+
+<div class="signature-box">
+  <p>
+    <span class="signature-line"></span>
+    <span class="signature-line" style="width: 150px;"></span>
+  </p>
+  <p>
+    <span class="signature-label" style="width: 250px; display: inline-block;">Inspector Signature</span>
+    <span class="signature-label">Date</span>
+  </p>
+  <p style="margin-top: 10px;">
+    <strong>{InspectorName}</strong><br>
+    IT Security Inspector<br>
+    Contract Security Program
+  </p>
+</div>
+
+<div class="footer">
+  Contract Security Program | Industrial Security Sector | PROTECTED {SecurityLevel}
+</div>
+
+<!-- 
+==================== CONTENT CONTROL REFERENCE ====================
+
+Replace the following placeholders with Word Content Controls:
+
+HEADER FIELDS:
+- {CompanyName} → Tag: CompanyName
+- {OrgSiteNumber} → Tag: OrgSiteNumber
+- {ActivityNumber} → Tag: ActivityNumber
+- {ContractNumber} → Tag: ContractNumber
+- {SecurityLevel} → Tag: SecurityLevel
+- {ClientDepartment} → Tag: ClientDepartment
+- {InspectionDate} → Tag: InspectionDate (Date Picker)
+- {InspectorName} → Tag: InspectorName
+- {Address} → Tag: Address
+- {CSOFullName} → Tag: CSOFullName
+- {AltCSOName} → Tag: AltCSOName
+
+SECTION OBSERVATIONS:
+- {Section1_Observations} through {Section9_Observations} → Tags: Section1_Observations, etc.
+
+CORRECTIVE MEASURES:
+- {Measure1_Text} through {Measure10_Text} → Plain Text controls
+- {Measure1_Section} through {Measure10_Section} → Dropdown controls
+- {TotalMeasures} → Tag: TotalMeasures
+
+ADDITIONAL FIELDS:
+- {AdditionalRemarks} → Tag: AdditionalRemarks (Rich Text)
+- {SupportingDocCount} → Tag: SupportingDocCount
+- {EmailCount} → Tag: EmailCount
+- {Attachment1} through {Attachment5} → Plain Text controls
+
+=================================================================== -->
+
+</body>
+</html>
