@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Final Report - Hybrid Template</title>
+  <style>
+    /* 
+    ========================================
+    HYBRID FINAL REPORT TEMPLATE
+    ========================================
+    INSTRUCTIONS:
+    1. Open this file in Microsoft Word
+    2. Save as FinalReport_Hybrid.docx
+    3. Replace {FieldName} placeholders with Content Controls:
+       - Developer Tab > Controls > Plain Text Content Control
+       - Set Tag property to match the field name (e.g., "OrganizationName")
+    4. For repeating sections, use Repeating Section Content Controls
+    5. Apply the color styles as indicated in comments
+    ========================================
+    */
+    
+    @page { 
+      size: letter;
+      margin: 0.75in 0.75in 0.75in 0.75in;
+    }
+    
+    body {
+      font-family: Calibri, Arial, sans-serif;
+      font-size: 11pt;
+      color: #212529;
+      line-height: 1.4;
+    }
+    
+    /* Color Variables */
+    :root {
+      --navy: #003366;
+      --grey-bg: #F5F5F5;
+      --success: #28A745;
+      --warning: #FFC107;
+      --danger: #DC3545;
+      --text: #212529;
+      --border: #DEE2E6;
+    }
+    
+    /* Header Styles */
+    .header-banner {
+      background-color: #003366;
+      color: white;
+      padding: 12px 20px;
+      margin-bottom: 0;
+    }
+    
+    .header-banner h1 {
+      font-size: 16pt;
+      font-weight: bold;
+      margin: 0;
+      text-align: center;
+    }
+    
+    .security-badge {
+      display: inline-block;
+      background-color: #DC3545;
+      color: white;
+      padding: 4px 12px;
+      font-size: 10pt;
+      font-weight: bold;
+      border-radius: 3px;
+      float: right;
+    }
+    
+    .flag-icon {
+      float: right;
+      font-size: 18pt;
+      margin-left: 10px;
+    }
+    
+    /* Dashboard Cards */
+    .dashboard-row {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .dashboard-card {
+      flex: 1;
+      border-left: 4px solid #003366;
+      background-color: #F5F5F5;
+      padding: 12px 15px;
+    }
+    
+    .dashboard-card.status-pass {
+      border-left-color: #28A745;
+    }
+    
+    .dashboard-card.status-conditional {
+      border-left-color: #FFC107;
+    }
+    
+    .dashboard-card.status-fail {
+      border-left-color: #DC3545;
+    }
+    
+    .card-label {
+      font-size: 9pt;
+      color: #6C757D;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+    
+    .card-value {
+      font-size: 12pt;
+      font-weight: bold;
+      color: #212529;
+    }
+    
+    .card-subtitle {
+      font-size: 9pt;
+      color: #6C757D;
+      margin-top: 2px;
+    }
+    
+    /* Quick Reference Block */
+    .quick-ref {
+      background-color: #F5F5F5;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .quick-ref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    
+    .quick-ref-item {
+      display: flex;
+    }
+    
+    .quick-ref-label {
+      font-weight: bold;
+      min-width: 140px;
+    }
+    
+    /* Section Headers */
+    .section-header {
+      background-color: #003366;
+      color: white;
+      padding: 10px 15px;
+      margin: 25px 0 15px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .section-title {
+      font-size: 12pt;
+      font-weight: bold;
+    }
+    
+    .compliance-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 9pt;
+      font-weight: bold;
+      border-radius: 3px;
+    }
+    
+    .badge-pass {
+      background-color: #28A745;
+      color: white;
+    }
+    
+    .badge-partial {
+      background-color: #FFC107;
+      color: #212529;
+    }
+    
+    .badge-fail {
+      background-color: #DC3545;
+      color: white;
+    }
+    
+    /* Comments Box */
+    .comments-box {
+      background-color: #F5F5F5;
+      border: 1px solid #DEE2E6;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    
+    .comments-box-header {
+      font-size: 10pt;
+      font-weight: bold;
+      color: #6C757D;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #DEE2E6;
+      padding-bottom: 5px;
+    }
+    
+    .comments-content {
+      min-height: 60px;
+    }
+    
+    /* Accent Box */
+    .accent-box {
+      border-left: 4px solid #003366;
+      background-color: #F5F5F5;
+      padding: 15px;
+      margin: 15px 0;
+    }
+    
+    .accent-box.warning {
+      border-left-color: #FFC107;
+      background-color: #FFF9E6;
+    }
+    
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    
+    th {
+      background-color: #003366;
+      color: white;
+      padding: 10px;
+      text-align: left;
+      font-size: 10pt;
+    }
+    
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #DEE2E6;
+    }
+    
+    tr:nth-child(even) {
+      background-color: #F5F5F5;
+    }
+    
+    /* Checkbox Column */
+    .checkbox-col {
+      width: 30px;
+      text-align: center;
+    }
+    
+    .checkbox {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #003366;
+      border-radius: 2px;
+    }
+    
+    /* Summary Card */
+    .summary-card {
+      border-left: 4px solid #003366;
+      background-color: #F5F5F5;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    
+    .summary-card h3 {
+      font-size: 14pt;
+      color: #003366;
+      margin: 0 0 10px 0;
+    }
+    
+    /* Metrics Box */
+    .metrics-box {
+      display: flex;
+      gap: 30px;
+      background-color: #F5F5F5;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+    }
+    
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .metric-icon {
+      font-size: 14pt;
+    }
+    
+    /* Signature Block */
+    .signature-block {
+      margin-top: 40px;
+      padding: 20px;
+      border: 1px solid #DEE2E6;
+    }
+    
+    .signature-line {
+      border-bottom: 1px solid #212529;
+      width: 250px;
+      margin-top: 40px;
+      display: inline-block;
+    }
+    
+    .date-line {
+      border-bottom: 1px solid #212529;
+      width: 150px;
+      margin-left: 50px;
+      display: inline-block;
+    }
+    
+    /* Footer */
+    .footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 9pt;
+      color: #6C757D;
+      border-top: 1px solid #DEE2E6;
+      padding: 10px;
+    }
+    
+    /* Page Break */
+    .page-break {
+      page-break-before: always;
+    }
+    
+    /* Field Placeholder Styling (remove after adding content controls) */
+    .field {
+      background-color: #E8F4E8;
+      padding: 2px 4px;
+      border-radius: 2px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ==================== PAGE 1: COVER & EXECUTIVE DASHBOARD ==================== -->
+
+<div class="header-banner">
+  <span class="flag-icon">🇨🇦</span>
+  <span class="security-badge">PROTECTED A</span>
+  <h1>Information Technology Security Inspection Report</h1>
+</div>
+
+<p style="text-align: right; font-size: 10pt; color: #6C757D;">
+  Report Date: <span class="field">{ReportDate}</span>
+</p>
+
+<!-- Executive Dashboard - 4 Visual Callout Boxes -->
+<div class="dashboard-row">
+  <div class="dashboard-card">
+    <div class="card-label">Organization</div>
+    <div class="card-value"><span class="field">{OrganizationName}</span></div>
+    <div class="card-subtitle">Site #: <span class="field">{OrgNumber}</span></div>
+  </div>
+  
+  <div class="dashboard-card">
+    <div class="card-label">Contract</div>
+    <div class="card-value"><span class="field">{ContractNumber}</span></div>
+    <div class="card-subtitle">
+      Award: <span class="field">{AwardDate}</span> | 
+      Expiry: <span class="field">{ExpiryDate}</span>
+    </div>
+  </div>
+  
+  <div class="dashboard-card">
+    <div class="card-label">Security Level</div>
+    <div class="card-value"><span class="field">{SecurityLevel}</span></div>
+    <div class="card-subtitle"><span class="field">{ContractType}</span></div>
+  </div>
+  
+  <div class="dashboard-card status-pass">
+    <div class="card-label">Inspection Status</div>
+    <div class="card-value"><span class="field">{InspectionStatus}</span></div>
+    <div class="card-subtitle"><!-- PASS | CONDITIONAL | FAIL --></div>
+  </div>
+</div>
+
+<!-- Quick Reference Block -->
+<div class="quick-ref">
+  <div class="quick-ref-grid">
+    <div class="quick-ref-item">
+      <span class="quick-ref-label">Activity Number:</span>
+      <span class="field">{ActivityNumber}</span>
+    </div>
+    <div class="quick-ref-item">
+      <span class="quick-ref-label">Government Department:</span>
+      <span class="field">{ClientDepartment}</span>
+    </div>
+    <div class="quick-ref-item">
+      <span class="quick-ref-label">Inspection Date:</span>
+      <span class="field">{InspectionDate}</span>
+    </div>
+    <div class="quick-ref-item">
+      <span class="quick-ref-label">Inspector:</span>
+      <span class="field">{InspectorName}</span>
+    </div>
+    <div class="quick-ref-item">
+      <span class="quick-ref-label">DISIS Number:</span>
+      <span class="field">{DISISNumber}</span>
+    </div>
+    <div class="quick-ref-item">
+      <span class="quick-ref-label">Address:</span>
+      <span class="field">{Address}</span>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== PAGE 2: INSPECTION DETAILS ==================== -->
+<div class="page-break"></div>
+
+<div class="section-header">
+  <span class="section-title">👤 ATTENDEES</span>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="field">{CSOFullName}</span></td>
+      <td>Company Security Officer (CSO)</td>
+    </tr>
+    <tr>
+      <td><span class="field">{AltCSOName}</span></td>
+      <td>Alternate CSO</td>
+    </tr>
+    <tr>
+      <td><span class="field">{InspectorName}</span></td>
+      <td>IT Security Inspector</td>
+    </tr>
+    <!-- REPEATING SECTION: Additional Attendees -->
+    <tr>
+      <td><span class="field">{AdditionalAttendeeName}</span></td>
+      <td><span class="field">{AdditionalAttendeeRole}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- Purpose Section -->
+<div class="accent-box">
+  <h3 style="margin-top: 0; color: #003366;">Purpose of Inspection</h3>
+  <p>
+    The purpose of this IT Security Inspection is to assess the <span class="field">{SecurityLevel}</span> 
+    capability of <span class="field">{OrganizationName}</span> and verify that adequate IT security 
+    measures are in place to safeguard classified/protected information and assets in accordance with 
+    the Industrial Security Manual and the Contract Security Program.
+  </p>
+  <p>
+    <strong>Supplier Purpose:</strong> <span class="field">{SupplierPurpose}</span>
+  </p>
+</div>
+
+<!-- TRA Status Card -->
+<div class="accent-box warning">
+  <h3 style="margin-top: 0; color: #856404;">⚠ Threat Risk Assessment (TRA)</h3>
+  <table style="margin: 0; border: none;">
+    <tr style="background: transparent;">
+      <td style="border: none; padding: 5px 20px 5px 0;">
+        <span class="checkbox"></span> Provided
+      </td>
+      <td style="border: none; padding: 5px 20px 5px 0;">
+        <span class="checkbox"></span> Not Required
+      </td>
+      <td style="border: none; padding: 5px 20px 5px 0;">
+        <span class="checkbox"></span> N/A
+      </td>
+    </tr>
+  </table>
+  <p style="margin-bottom: 0;">
+    <strong>Comments:</strong> <span class="field">{TRAComments}</span>
+  </p>
+</div>
+
+<!-- ==================== PAGES 3-5: FINDINGS BY SECTION ==================== -->
+<div class="page-break"></div>
+
+<!-- SECTION 1: Information System / Physical Location -->
+<div class="section-header">
+  <span class="section-title">1.0 INFORMATION SYSTEM / PHYSICAL LOCATION</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+  <!-- Options: badge-pass | badge-partial | badge-fail -->
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section1_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- REPEATING SECTION: Section 1 Corrective Measures -->
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section1_Measure}</span></td>
+      <td><span class="field">{Section1_DueDate}</span></td>
+    </tr>
+    <!-- If no measures: -->
+    <tr>
+      <td colspan="3" style="text-align: center; color: #6C757D; font-style: italic;">
+        No corrective measures required for this section.
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SECTION 2: Threat Risk Assessment -->
+<div class="section-header">
+  <span class="section-title">2.0 THREAT RISK ASSESSMENT (TRA)</span>
+  <span class="compliance-badge badge-partial">⚠ PARTIAL</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section2_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section2_Measure}</span></td>
+      <td><span class="field">{Section2_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SECTION 3: Data Transfer -->
+<div class="section-header">
+  <span class="section-title">3.0 DATA TRANSFER</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section3_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section3_Measure}</span></td>
+      <td><span class="field">{Section3_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- SECTION 4: IT Media & Media Handling -->
+<div class="section-header">
+  <span class="section-title">4.0 IT MEDIA & MEDIA HANDLING</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section4_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section4_Measure}</span></td>
+      <td><span class="field">{Section4_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SECTION 5: Personnel Security -->
+<div class="section-header">
+  <span class="section-title">5.0 PERSONNEL SECURITY</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section5_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section5_Measure}</span></td>
+      <td><span class="field">{Section5_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SECTION 6: IT Personnel Security -->
+<div class="section-header">
+  <span class="section-title">6.0 IT PERSONNEL SECURITY</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section6_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section6_Measure}</span></td>
+      <td><span class="field">{Section6_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- SECTION 7: IT Equipment / Information Technology Security -->
+<div class="section-header">
+  <span class="section-title">7.0 IT EQUIPMENT / INFORMATION TECHNOLOGY SECURITY</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section7_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section7_Measure}</span></td>
+      <td><span class="field">{Section7_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SECTION 8: Recovery -->
+<div class="section-header">
+  <span class="section-title">8.0 RECOVERY</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section8_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section8_Measure}</span></td>
+      <td><span class="field">{Section8_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- SECTION 9: Disposal -->
+<div class="section-header">
+  <span class="section-title">9.0 DISPOSAL</span>
+  <span class="compliance-badge badge-pass">✓ PASS</span>
+</div>
+
+<div class="comments-box">
+  <div class="comments-box-header">General Comments</div>
+  <div class="comments-content">
+    <span class="field">{Section9_Comments}</span>
+  </div>
+</div>
+
+<h4>Corrective Measures</h4>
+<table>
+  <thead>
+    <tr>
+      <th class="checkbox-col">☐</th>
+      <th>Corrective Measure</th>
+      <th style="width: 100px;">Due Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td class="checkbox-col"><span class="checkbox"></span></td>
+      <td><span class="field">{Section9_Measure}</span></td>
+      <td><span class="field">{Section9_DueDate}</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ==================== PAGE 6: SUMMARY & SIGN-OFF ==================== -->
+<div class="page-break"></div>
+
+<!-- Executive Summary Card -->
+<div class="summary-card">
+  <h3>█ SUMMARY</h3>
+  <p>
+    The IT Security Inspection revealed that <span class="field">{OrganizationName}</span> 
+    has <span class="field">{QualityAssessment}</span> IT security measures in place to 
+    safeguard government information for this contract.
+  </p>
+  <p>
+    The IT Security Inspector recommends that this site be 
+    <strong><span class="field">{ApprovalStatus}</span></strong> for processing at the 
+    <span class="field">{SecurityLevel}</span> level for this contract.
+  </p>
+</div>
+
+<!-- Metrics Summary Box -->
+<div class="metrics-box">
+  <div class="metric">
+    <span class="metric-icon">📊</span>
+    <span>Total Corrective Measures: <strong><span class="field">{TotalMeasures}</span></strong></span>
+  </div>
+  <div class="metric">
+    <span class="metric-icon" style="color: #28A745;">✓</span>
+    <span>Completed: <strong><span class="field">{CompletedCount}</span></strong></span>
+  </div>
+  <div class="metric">
+    <span class="metric-icon" style="color: #FFC107;">⚠</span>
+    <span>Pending: <strong><span class="field">{PendingCount}</span></strong></span>
+  </div>
+</div>
+
+<!-- Inspector Signature Block -->
+<div class="signature-block">
+  <p style="margin-bottom: 50px;">
+    <span class="signature-line"></span>
+    <span class="date-line"></span>
+  </p>
+  <p style="margin-left: 20px;">
+    <strong>Inspector Signature</strong>
+    <span style="margin-left: 195px;"><strong>Date</strong></span>
+  </p>
+  <br>
+  <p><strong><span class="field">{InspectorName}</span></strong></p>
+  <p>IT Security Inspector</p>
+  <p>Contract Security Program</p>
+</div>
+
+<!-- Footer Note -->
+<div style="margin-top: 40px; padding: 15px; background-color: #F5F5F5; border-radius: 4px;">
+  <p style="font-size: 9pt; color: #6C757D; margin: 0;">
+    <strong>Distribution:</strong> Original - File | Copy - CSO | Copy - Sponsoring Department
+  </p>
+</div>
+
+<div class="footer">
+  Contract Security Program | Industrial Security Sector | PROTECTED A
+</div>
+
+<!--
+========================================
+CONTENT CONTROL MAPPING REFERENCE
+========================================
+
+DYNAMIC FIELDS (GREEN):
+- {OrganizationName} → Tag: OrganizationName | Type: Plain Text
+- {OrgNumber} → Tag: OrgNumber | Type: Plain Text
+- {ContractNumber} → Tag: ContractNumber | Type: Plain Text
+- {AwardDate} → Tag: AwardDate | Type: Date
+- {ExpiryDate} → Tag: ExpiryDate | Type: Date
+- {SecurityLevel} → Tag: SecurityLevel | Type: Plain Text
+- {ContractType} → Tag: ContractType | Type: Plain Text
+- {ActivityNumber} → Tag: ActivityNumber | Type: Plain Text
+- {ClientDepartment} → Tag: ClientDepartment | Type: Plain Text
+- {InspectionDate} → Tag: InspectionDate | Type: Date
+- {ReportDate} → Tag: ReportDate | Type: Date
+- {InspectorName} → Tag: InspectorName | Type: Plain Text
+- {DISISNumber} → Tag: DISISNumber | Type: Plain Text
+- {Address} → Tag: Address | Type: Plain Text
+- {CSOFullName} → Tag: CSOFullName | Type: Plain Text
+- {AltCSOName} → Tag: AltCSOName | Type: Plain Text
+- {SupplierPurpose} → Tag: SupplierPurpose | Type: Rich Text
+
+CONDITIONAL FIELDS (BLUE):
+- {InspectionStatus} → Tag: InspectionStatus | Type: Plain Text (PASS/CONDITIONAL/FAIL)
+- {TRAComments} → Tag: TRAComments | Type: Rich Text
+- {QualityAssessment} → Tag: QualityAssessment | Type: Plain Text
+- {ApprovalStatus} → Tag: ApprovalStatus | Type: Plain Text
+
+SECTION COMMENTS (RED - User Input):
+- {Section1_Comments} through {Section9_Comments} → Rich Text
+
+REPEATING SECTIONS (ORANGE):
+- Attendees table rows → Repeating Section
+- Section corrective measures → Repeating Section per section
+
+AUTO-CALCULATED (PURPLE):
+- {TotalMeasures} → Count of all corrective measures
+- {CompletedCount} → Count of completed measures
+- {PendingCount} → Count of pending measures
+
+========================================
+-->
+
+</body>
+</html>
