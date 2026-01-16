@@ -15,36 +15,71 @@ export interface TemplateMapping {
 
 export class ContentAutomationService {
   // Template mappings for each document type
+  // Hybrid Final Report Template Mapping (v2)
   static readonly FINAL_REPORT_MAPPING: TemplateMapping = {
-    // GREEN - Dynamic Fields
+    // ═══════════════════════════════════════════════════════════════
+    // GREEN - Dynamic Fields (auto-populated from database/forms)
+    // ═══════════════════════════════════════════════════════════════
     'OrganizationName': { id: 'org-name', type: 'dynamic', category: 'green' },
-    'OrganizationNumber': { id: 'org-number', type: 'dynamic', category: 'green' },
+    'OrgNumber': { id: 'org-number', type: 'dynamic', category: 'green' },
     'ContractNumber': { id: 'contract-number', type: 'dynamic', category: 'green' },
     'AwardDate': { id: 'award-date', type: 'dynamic', category: 'green' },
     'ExpiryDate': { id: 'expiry-date', type: 'dynamic', category: 'green' },
+    'SecurityLevel': { id: 'security-level', type: 'dynamic', category: 'green' },
+    'ContractType': { id: 'contract-type', type: 'dynamic', category: 'green' },
     'ActivityNumber': { id: 'activity-number', type: 'dynamic', category: 'green' },
-    'InspectorName': { id: 'inspector-name', type: 'dynamic', category: 'green' },
+    'ClientDepartment': { id: 'client-department', type: 'dynamic', category: 'green' },
     'InspectionDate': { id: 'inspection-date', type: 'dynamic', category: 'green' },
-    'CSOName': { id: 'cso-name', type: 'dynamic', category: 'green' },
+    'ReportDate': { id: 'report-date', type: 'dynamic', category: 'green' },
+    'InspectorName': { id: 'inspector-name', type: 'dynamic', category: 'green' },
+    'DISISNumber': { id: 'disis-number', type: 'dynamic', category: 'green' },
+    'Address': { id: 'address', type: 'dynamic', category: 'green' },
+    'CSOFullName': { id: 'cso-full-name', type: 'dynamic', category: 'green' },
+    'AltCSOName': { id: 'alt-cso-name', type: 'dynamic', category: 'green' },
     
-    // BLUE - Conditional Sections
-    'SecurityLevel': { id: 'security-level', type: 'conditional', category: 'blue' },
+    // ═══════════════════════════════════════════════════════════════
+    // BLUE - Conditional Sections (logic-based visibility)
+    // ═══════════════════════════════════════════════════════════════
+    'InspectionStatus': { id: 'inspection-status', type: 'conditional', category: 'blue' },
     'TRASection': { id: 'tra-section', type: 'conditional', category: 'blue', condition: 'securityLevel >= PROTECTED_B' },
-    'ClassificationSpecific': { id: 'classification-specific', type: 'conditional', category: 'blue' },
+    'QualityAssessment': { id: 'quality-assessment', type: 'conditional', category: 'blue' },
+    'ApprovalStatus': { id: 'approval-status', type: 'conditional', category: 'blue' },
     
-    // ORANGE - Repeating Elements
-    'CorrectiveMeasures': { id: 'corrective-measures', type: 'repeating', category: 'orange' },
-    'ITEquipmentList': { id: 'it-equipment', type: 'repeating', category: 'orange' },
-    'PersonnelList': { id: 'personnel-list', type: 'repeating', category: 'orange' },
+    // ═══════════════════════════════════════════════════════════════
+    // ORANGE - Repeating Elements (lists/tables)
+    // ═══════════════════════════════════════════════════════════════
+    'Attendees': { id: 'attendees', type: 'repeating', category: 'orange' },
+    'Section1_Measures': { id: 'section1-measures', type: 'repeating', category: 'orange' },
+    'Section2_Measures': { id: 'section2-measures', type: 'repeating', category: 'orange' },
+    'Section3_Measures': { id: 'section3-measures', type: 'repeating', category: 'orange' },
+    'Section4_Measures': { id: 'section4-measures', type: 'repeating', category: 'orange' },
+    'Section5_Measures': { id: 'section5-measures', type: 'repeating', category: 'orange' },
+    'Section6_Measures': { id: 'section6-measures', type: 'repeating', category: 'orange' },
+    'Section7_Measures': { id: 'section7-measures', type: 'repeating', category: 'orange' },
+    'Section8_Measures': { id: 'section8-measures', type: 'repeating', category: 'orange' },
+    'Section9_Measures': { id: 'section9-measures', type: 'repeating', category: 'orange' },
     
-    // RED - User Input Required
-    'GeneralComments': { id: 'general-comments', type: 'user-input', category: 'red' },
-    'InspectionFindings': { id: 'inspection-findings', type: 'user-input', category: 'red' },
-    'Recommendations': { id: 'recommendations', type: 'user-input', category: 'red' },
+    // ═══════════════════════════════════════════════════════════════
+    // RED - User Input Required (inspector comments)
+    // ═══════════════════════════════════════════════════════════════
+    'SupplierPurpose': { id: 'supplier-purpose', type: 'user-input', category: 'red' },
+    'TRAComments': { id: 'tra-comments', type: 'user-input', category: 'red' },
+    'Section1_Comments': { id: 'section1-comments', type: 'user-input', category: 'red' },
+    'Section2_Comments': { id: 'section2-comments', type: 'user-input', category: 'red' },
+    'Section3_Comments': { id: 'section3-comments', type: 'user-input', category: 'red' },
+    'Section4_Comments': { id: 'section4-comments', type: 'user-input', category: 'red' },
+    'Section5_Comments': { id: 'section5-comments', type: 'user-input', category: 'red' },
+    'Section6_Comments': { id: 'section6-comments', type: 'user-input', category: 'red' },
+    'Section7_Comments': { id: 'section7-comments', type: 'user-input', category: 'red' },
+    'Section8_Comments': { id: 'section8-comments', type: 'user-input', category: 'red' },
+    'Section9_Comments': { id: 'section9-comments', type: 'user-input', category: 'red' },
     
-    // PURPLE - Auto-calculated
-    'InspectionDuration': { id: 'inspection-duration', type: 'auto-calculated', category: 'purple', calculation: 'endTime - startTime' },
-    'CompliancePercentage': { id: 'compliance-percentage', type: 'auto-calculated', category: 'purple', calculation: 'compliantItems / totalItems * 100' },
+    // ═══════════════════════════════════════════════════════════════
+    // PURPLE - Auto-calculated Fields
+    // ═══════════════════════════════════════════════════════════════
+    'TotalMeasures': { id: 'total-measures', type: 'auto-calculated', category: 'purple', calculation: 'countAllMeasures' },
+    'CompletedCount': { id: 'completed-count', type: 'auto-calculated', category: 'purple', calculation: 'countCompletedMeasures' },
+    'PendingCount': { id: 'pending-count', type: 'auto-calculated', category: 'purple', calculation: 'countPendingMeasures' },
   };
 
   static readonly APPROVAL_LETTER_MAPPING: TemplateMapping = {
@@ -140,6 +175,21 @@ export class ContentAutomationService {
         );
       case 'personnel-list':
         return data.map(person => `${person.name} - ${person.clearanceLevel}`);
+      case 'attendees':
+        return data.map(attendee => `${attendee.name} - ${attendee.role}`);
+      // Section-specific corrective measures (1-9)
+      case 'section1-measures':
+      case 'section2-measures':
+      case 'section3-measures':
+      case 'section4-measures':
+      case 'section5-measures':
+      case 'section6-measures':
+      case 'section7-measures':
+      case 'section8-measures':
+      case 'section9-measures':
+        return data.map((measure, index) => 
+          `${index + 1}. ${measure.description} | Due: ${measure.dueDate || 'N/A'}`
+        );
       default:
         return [];
     }
@@ -156,6 +206,15 @@ export class ContentAutomationService {
         return `${hours.toFixed(1)} hours`;
       case 'compliantItems / totalItems * 100':
         return Math.round((data.compliantItems / data.totalItems) * 100);
+      case 'countAllMeasures':
+        const allMeasures = data.correctiveMeasures || [];
+        return allMeasures.length;
+      case 'countCompletedMeasures':
+        const completedMeasures = (data.correctiveMeasures || []).filter((m: any) => m.completed);
+        return completedMeasures.length;
+      case 'countPendingMeasures':
+        const pendingMeasures = (data.correctiveMeasures || []).filter((m: any) => !m.completed);
+        return pendingMeasures.length;
       default:
         return '';
     }
