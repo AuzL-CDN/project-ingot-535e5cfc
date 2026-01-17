@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Security Inspection Report - Definitive Edition</title>
+    <style>
+        /* Page Setup */
+        @page {
+            size: letter;
+            margin: 0.75in;
+        }
+        
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.4;
+            color: #000;
+            max-width: 8.5in;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Security Classification Banner */
+        .classification-banner {
+            background-color: #DC3545;
+            color: white;
+            text-align: center;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 12pt;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        /* Header Box */
+        .header-box {
+            background-color: #003366;
+            color: white;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
+
+        .header-box h1 {
+            margin: 0 0 15px 0;
+            font-size: 16pt;
+            text-align: center;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px 30px;
+        }
+
+        .header-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-label {
+            font-weight: bold;
+            font-size: 9pt;
+            opacity: 0.85;
+            min-width: 110px;
+        }
+
+        .header-value {
+            font-size: 10pt;
+            color: #FFD700;
+        }
+
+        .header-full-row {
+            grid-column: 1 / -1;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            padding-top: 10px;
+            margin-top: 5px;
+        }
+
+        /* Purpose Section */
+        .purpose-section {
+            background-color: #f8f9fa;
+            border-left: 4px solid #003366;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+        }
+
+        .purpose-section h2 {
+            margin: 0 0 8px 0;
+            font-size: 12pt;
+            color: #003366;
+        }
+
+        .purpose-section p {
+            margin: 0;
+            font-size: 10pt;
+        }
+
+        /* Section Observations */
+        .section-box {
+            border: 1px solid #dee2e6;
+            margin-bottom: 12px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background-color: #003366;
+            color: white;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 10pt;
+        }
+
+        .section-status {
+            display: flex;
+            gap: 15px;
+            font-size: 9pt;
+        }
+
+        .section-status label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .section-content {
+            padding: 10px 12px;
+            background-color: #fff;
+            min-height: 40px;
+        }
+
+        .section-content p {
+            margin: 0;
+            font-size: 10pt;
+            color: #495057;
+        }
+
+        .placeholder-text {
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        /* Corrective Measures Table */
+        .measures-section {
+            margin: 25px 0;
+        }
+
+        .measures-section h2 {
+            background-color: #003366;
+            color: white;
+            padding: 10px 15px;
+            margin: 0;
+            font-size: 12pt;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .measures-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10pt;
+        }
+
+        .measures-table th {
+            background-color: #495057;
+            color: white;
+            padding: 8px 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .measures-table th:first-child {
+            width: 30px;
+            text-align: center;
+        }
+
+        .measures-table th:nth-child(3) {
+            width: 60px;
+            text-align: center;
+        }
+
+        .measures-table th:last-child {
+            width: 50px;
+            text-align: center;
+        }
+
+        .measures-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .measures-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        .measures-table tr:nth-child(odd) {
+            background-color: #fff;
+        }
+
+        .measures-table td:first-child,
+        .measures-table td:nth-child(3),
+        .measures-table td:last-child {
+            text-align: center;
+        }
+
+        .measures-total {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            text-align: right;
+            font-weight: bold;
+            font-size: 10pt;
+            border-radius: 0 0 4px 4px;
+            border: 1px solid #dee2e6;
+            border-top: none;
+        }
+
+        /* Additional Sections */
+        .remarks-box {
+            border: 1px solid #dee2e6;
+            margin: 20px 0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .remarks-header {
+            background-color: #003366;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .remarks-content {
+            padding: 15px;
+            min-height: 80px;
+            background-color: #fff;
+        }
+
+        /* Supporting Documents */
+        .docs-box {
+            border: 1px solid #dee2e6;
+            margin: 20px 0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .docs-header {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 11pt;
+        }
+
+        .docs-content {
+            padding: 15px;
+            background-color: #fff;
+        }
+
+        .docs-counts {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 12px;
+            font-size: 10pt;
+        }
+
+        .docs-counts span {
+            font-weight: bold;
+        }
+
+        .docs-list {
+            font-size: 10pt;
+        }
+
+        .docs-list p {
+            margin: 5px 0;
+            padding-left: 15px;
+            border-left: 2px solid #dee2e6;
+        }
+
+        /* Summary & Sign-off */
+        .summary-box {
+            border: 2px solid #003366;
+            margin: 25px 0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .summary-header {
+            background-color: #003366;
+            color: white;
+            padding: 10px 15px;
+            font-weight: bold;
+            font-size: 12pt;
+        }
+
+        .summary-content {
+            padding: 20px;
+            background-color: #fff;
+        }
+
+        .assessment-row {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 15px;
+            font-size: 10pt;
+        }
+
+        .assessment-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .assessment-group label {
+            font-weight: bold;
+        }
+
+        .checkbox-options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .checkbox-options span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .signature-block {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .signature-line {
+            display: flex;
+            gap: 50px;
+            margin-bottom: 10px;
+        }
+
+        .signature-field {
+            flex: 1;
+        }
+
+        .signature-field .line {
+            border-bottom: 1px solid #000;
+            min-height: 25px;
+            margin-bottom: 3px;
+        }
+
+        .signature-field .label {
+            font-size: 9pt;
+            color: #6c757d;
+        }
+
+        .signature-info {
+            margin-top: 10px;
+            font-size: 10pt;
+        }
+
+        .signature-info p {
+            margin: 2px 0;
+        }
+
+        /* Footer */
+        .page-footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #dee2e6;
+            font-size: 9pt;
+            color: #6c757d;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Checkbox styling */
+        input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            margin: 0;
+        }
+
+        /* Page break helpers */
+        .page-break {
+            page-break-before: always;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                padding: 0;
+            }
+            .section-box, .measures-section, .remarks-box, .docs-box, .summary-box {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Security Classification Banner -->
+    <div class="classification-banner">PROTECTED {SecurityLevel}</div>
+
+    <!-- Header Box -->
+    <div class="header-box">
+        <h1>IT SECURITY INSPECTION REPORT</h1>
+        
+        <div class="header-grid">
+            <div class="header-row">
+                <span class="header-label">Organization:</span>
+                <span class="header-value">{CompanyName}</span>
+            </div>
+            <div class="header-row">
+                <span class="header-label">Contract Number:</span>
+                <span class="header-value">{ContractNumber}</span>
+            </div>
+            <div class="header-row">
+                <span class="header-label">Org/Site Number:</span>
+                <span class="header-value">{OrgSiteNumber}</span>
+            </div>
+            <div class="header-row">
+                <span class="header-label">Client Department:</span>
+                <span class="header-value">{ClientDepartment}</span>
+            </div>
+            <div class="header-row">
+                <span class="header-label">Activity Number:</span>
+                <span class="header-value">{ActivityNumber}</span>
+            </div>
+            <div class="header-row">
+                <span class="header-label">Security Level:</span>
+                <span class="header-value">{SecurityLevel}</span>
+            </div>
+            
+            <div class="header-full-row">
+                <div class="header-grid">
+                    <div class="header-row">
+                        <span class="header-label">Inspection Date:</span>
+                        <span class="header-value">{InspectionDate}</span>
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">Inspector:</span>
+                        <span class="header-value">{InspectorName}</span>
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">Location:</span>
+                        <span class="header-value">{Address}</span>
+                    </div>
+                    <div class="header-row">
+                        <span class="header-label">CSO:</span>
+                        <span class="header-value">{CSOFullName}</span>
+                    </div>
+                    <div class="header-row" style="grid-column: 1 / -1;">
+                        <span class="header-label">Alternate CSO:</span>
+                        <span class="header-value">{AltCSOName}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Purpose Section -->
+    <div class="purpose-section">
+        <h2>Purpose</h2>
+        <p>An IT Security inspection was conducted at <strong>{CompanyName}</strong> to assess the organization's 
+        compliance with the security requirements for safeguarding <strong>{SecurityLevel}</strong> information 
+        in accordance with the Industrial Security Manual (ISM) and the Contract Security Program (CSP).</p>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 1: Information System / Physical Location</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section1_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 2: Threat Risk Assessment (TRA)</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+                <label><input type="checkbox"> N/A</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section2_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 3: Data Transfer</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section3_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 4 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 4: IT Media and Media Handling</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section4_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 5 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 5: Personnel Security</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section5_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 6 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 6: IT Personnel Security</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section6_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 7 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 7: IT Equipment / Information Technology Security</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section7_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 8 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 8: Recovery</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section8_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Section 9 -->
+    <div class="section-box">
+        <div class="section-header">
+            <span class="section-title">Section 9: Disposal</span>
+            <div class="section-status">
+                <label><input type="checkbox"> Pass</label>
+                <label><input type="checkbox"> Fail</label>
+            </div>
+        </div>
+        <div class="section-content">
+            <p class="placeholder-text">{Section9_Observations}</p>
+        </div>
+    </div>
+
+    <!-- Corrective Measures -->
+    <div class="measures-section">
+        <h2>Corrective Measures</h2>
+        <table class="measures-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Corrective Measure Description</th>
+                    <th>Section</th>
+                    <th>Done</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>{Measure1_Text}</td>
+                    <td>{Measure1_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>{Measure2_Text}</td>
+                    <td>{Measure2_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>{Measure3_Text}</td>
+                    <td>{Measure3_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>{Measure4_Text}</td>
+                    <td>{Measure4_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>{Measure5_Text}</td>
+                    <td>{Measure5_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>{Measure6_Text}</td>
+                    <td>{Measure6_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>{Measure7_Text}</td>
+                    <td>{Measure7_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>{Measure8_Text}</td>
+                    <td>{Measure8_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>{Measure9_Text}</td>
+                    <td>{Measure9_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>{Measure10_Text}</td>
+                    <td>{Measure10_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="measures-total">
+            Total Corrective Measures: <span>{TotalMeasures}</span>
+        </div>
+    </div>
+
+    <!-- Additional Remarks -->
+    <div class="remarks-box">
+        <div class="remarks-header">Additional Remarks</div>
+        <div class="remarks-content">
+            <p class="placeholder-text">{AdditionalRemarks}</p>
+        </div>
+    </div>
+
+    <!-- Supporting Documents -->
+    <div class="docs-box">
+        <div class="docs-header">Supporting Documents Reference</div>
+        <div class="docs-content">
+            <div class="docs-counts">
+                <div>Number of Supporting Documents: <span>{SupportingDocCount}</span></div>
+                <div>Number of Emails: <span>{EmailCount}</span></div>
+            </div>
+            <div class="docs-list">
+                <p>{Attachment1}</p>
+                <p>{Attachment2}</p>
+                <p>{Attachment3}</p>
+                <p>{Attachment4}</p>
+                <p>{Attachment5}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary & Sign-off -->
+    <div class="summary-box">
+        <div class="summary-header">Summary & Sign-off</div>
+        <div class="summary-content">
+            <p style="margin-bottom: 15px; font-size: 10pt;">
+                Based on the findings of this IT Security inspection, the following assessment and recommendation are provided:
+            </p>
+            
+            <div class="assessment-row">
+                <div class="assessment-group">
+                    <label>IT Security Assessment:</label>
+                    <div class="checkbox-options">
+                        <span><input type="checkbox"> Good</span>
+                        <span><input type="checkbox"> Adequate</span>
+                        <span><input type="checkbox"> Insufficient</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="assessment-row">
+                <div class="assessment-group">
+                    <label>Recommendation:</label>
+                    <div class="checkbox-options">
+                        <span><input type="checkbox"> Approved</span>
+                        <span><input type="checkbox"> Conditionally Approved</span>
+                        <span><input type="checkbox"> Not Approved</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line">
+                    <div class="signature-field">
+                        <div class="line"></div>
+                        <div class="label">Inspector Signature</div>
+                    </div>
+                    <div class="signature-field" style="max-width: 200px;">
+                        <div class="line"></div>
+                        <div class="label">Date</div>
+                    </div>
+                </div>
+                <div class="signature-info">
+                    <p><strong>{InspectorName}</strong></p>
+                    <p>IT Security Inspector</p>
+                    <p>Contract Security Program</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="page-footer">
+        <span>Contract Security Program | Industrial Security Sector</span>
+        <span>PROTECTED {SecurityLevel}</span>
+    </div>
+
+    <!-- 
+    ═══════════════════════════════════════════════════════════════════════════
+    CONTENT CONTROL REFERENCE
+    ═══════════════════════════════════════════════════════════════════════════
+    
+    To convert this HTML to a Word template with Content Controls:
+    1. Open this file in Microsoft Word
+    2. Save as .docx
+    3. Enable Developer tab (File → Options → Customize Ribbon → Developer)
+    4. For each {placeholder}, select it and insert a Content Control
+    
+    FIELD MAPPINGS:
+    ═══════════════════════════════════════════════════════════════════════════
+    
+    HEADER FIELDS (Dynamic - Green)
+    ─────────────────────────────────────────────────────────────────────────────
+    {CompanyName}        → Tag: CompanyName         → Plain Text Control
+    {OrgSiteNumber}      → Tag: OrgSiteNumber       → Plain Text Control
+    {ActivityNumber}     → Tag: ActivityNumber      → Plain Text Control
+    {ContractNumber}     → Tag: ContractNumber      → Plain Text Control
+    {SecurityLevel}      → Tag: SecurityLevel       → Plain Text Control
+    {ClientDepartment}   → Tag: ClientDepartment    → Plain Text Control
+    {InspectionDate}     → Tag: InspectionDate      → Date Picker Control
+    {InspectorName}      → Tag: InspectorName       → Plain Text Control
+    {Address}            → Tag: Address             → Plain Text Control
+    {CSOFullName}        → Tag: CSOFullName         → Plain Text Control
+    {AltCSOName}         → Tag: AltCSOName          → Plain Text Control
+    
+    SECTION OBSERVATIONS (User Input - Red)
+    ─────────────────────────────────────────────────────────────────────────────
+    {Section1_Observations} → Tag: Section1_Observations → Rich Text Control
+    {Section2_Observations} → Tag: Section2_Observations → Rich Text Control
+    {Section3_Observations} → Tag: Section3_Observations → Rich Text Control
+    {Section4_Observations} → Tag: Section4_Observations → Rich Text Control
+    {Section5_Observations} → Tag: Section5_Observations → Rich Text Control
+    {Section6_Observations} → Tag: Section6_Observations → Rich Text Control
+    {Section7_Observations} → Tag: Section7_Observations → Rich Text Control
+    {Section8_Observations} → Tag: Section8_Observations → Rich Text Control
+    {Section9_Observations} → Tag: Section9_Observations → Rich Text Control
+    
+    CORRECTIVE MEASURES (Repeating - Orange)
+    ─────────────────────────────────────────────────────────────────────────────
+    {Measure1_Text}   - {Measure10_Text}    → Tag: Measure#_Text    → Plain Text
+    {Measure1_Section} - {Measure10_Section} → Tag: Measure#_Section → Plain Text
+    {TotalMeasures}                          → Tag: TotalMeasures    → Plain Text
+    
+    SUPPORTING DOCUMENTS (Dynamic - Green)
+    ─────────────────────────────────────────────────────────────────────────────
+    {SupportingDocCount}   → Tag: SupportingDocCount   → Plain Text Control
+    {EmailCount}           → Tag: EmailCount           → Plain Text Control
+    {Attachment1} - {Attachment5} → Tag: Attachment#   → Plain Text Control
+    
+    ADDITIONAL REMARKS (User Input - Red)
+    ─────────────────────────────────────────────────────────────────────────────
+    {AdditionalRemarks}    → Tag: AdditionalRemarks    → Rich Text Control
+    
+    ═══════════════════════════════════════════════════════════════════════════
+    -->
+
+</body>
+</html>
