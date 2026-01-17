@@ -15,7 +15,78 @@ export interface TemplateMapping {
 
 export class ContentAutomationService {
   // Template mappings for each document type
-  // Hybrid Final Report Template Mapping (v2)
+  
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DEFINITIVE FINAL REPORT MAPPING (v3 - Consolidated Corrective Measures)
+  // ═══════════════════════════════════════════════════════════════════════════
+  static readonly FINAL_REPORT_DEFINITIVE_MAPPING: TemplateMapping = {
+    // ─────────────────────────────────────────────────────────────────────────
+    // GREEN - Dynamic Fields (auto-populated from database/forms)
+    // ─────────────────────────────────────────────────────────────────────────
+    'CompanyName': { id: 'company-name', type: 'dynamic', category: 'green' },
+    'OrgSiteNumber': { id: 'org-site-number', type: 'dynamic', category: 'green' },
+    'ActivityNumber': { id: 'activity-number', type: 'dynamic', category: 'green' },
+    'ContractNumber': { id: 'contract-number', type: 'dynamic', category: 'green' },
+    'SecurityLevel': { id: 'security-level', type: 'dynamic', category: 'green' },
+    'ClientDepartment': { id: 'client-department', type: 'dynamic', category: 'green' },
+    'InspectionDate': { id: 'inspection-date', type: 'dynamic', category: 'green' },
+    'InspectorName': { id: 'inspector-name', type: 'dynamic', category: 'green' },
+    'Address': { id: 'address', type: 'dynamic', category: 'green' },
+    'CSOFullName': { id: 'cso-full-name', type: 'dynamic', category: 'green' },
+    'AltCSOName': { id: 'alt-cso-name', type: 'dynamic', category: 'green' },
+    'SupportingDocCount': { id: 'supporting-doc-count', type: 'dynamic', category: 'green' },
+    'EmailCount': { id: 'email-count', type: 'dynamic', category: 'green' },
+    'Attachment1': { id: 'attachment-1', type: 'dynamic', category: 'green' },
+    'Attachment2': { id: 'attachment-2', type: 'dynamic', category: 'green' },
+    'Attachment3': { id: 'attachment-3', type: 'dynamic', category: 'green' },
+    'Attachment4': { id: 'attachment-4', type: 'dynamic', category: 'green' },
+    'Attachment5': { id: 'attachment-5', type: 'dynamic', category: 'green' },
+    
+    // ─────────────────────────────────────────────────────────────────────────
+    // RED - User Input Required (section observations)
+    // ─────────────────────────────────────────────────────────────────────────
+    'Section1_Observations': { id: 'section1-observations', type: 'user-input', category: 'red' },
+    'Section2_Observations': { id: 'section2-observations', type: 'user-input', category: 'red' },
+    'Section3_Observations': { id: 'section3-observations', type: 'user-input', category: 'red' },
+    'Section4_Observations': { id: 'section4-observations', type: 'user-input', category: 'red' },
+    'Section5_Observations': { id: 'section5-observations', type: 'user-input', category: 'red' },
+    'Section6_Observations': { id: 'section6-observations', type: 'user-input', category: 'red' },
+    'Section7_Observations': { id: 'section7-observations', type: 'user-input', category: 'red' },
+    'Section8_Observations': { id: 'section8-observations', type: 'user-input', category: 'red' },
+    'Section9_Observations': { id: 'section9-observations', type: 'user-input', category: 'red' },
+    'AdditionalRemarks': { id: 'additional-remarks', type: 'user-input', category: 'red' },
+    
+    // ─────────────────────────────────────────────────────────────────────────
+    // ORANGE - Repeating Elements (consolidated corrective measures)
+    // ─────────────────────────────────────────────────────────────────────────
+    'Measure1_Text': { id: 'measure-1-text', type: 'repeating', category: 'orange' },
+    'Measure1_Section': { id: 'measure-1-section', type: 'repeating', category: 'orange' },
+    'Measure2_Text': { id: 'measure-2-text', type: 'repeating', category: 'orange' },
+    'Measure2_Section': { id: 'measure-2-section', type: 'repeating', category: 'orange' },
+    'Measure3_Text': { id: 'measure-3-text', type: 'repeating', category: 'orange' },
+    'Measure3_Section': { id: 'measure-3-section', type: 'repeating', category: 'orange' },
+    'Measure4_Text': { id: 'measure-4-text', type: 'repeating', category: 'orange' },
+    'Measure4_Section': { id: 'measure-4-section', type: 'repeating', category: 'orange' },
+    'Measure5_Text': { id: 'measure-5-text', type: 'repeating', category: 'orange' },
+    'Measure5_Section': { id: 'measure-5-section', type: 'repeating', category: 'orange' },
+    'Measure6_Text': { id: 'measure-6-text', type: 'repeating', category: 'orange' },
+    'Measure6_Section': { id: 'measure-6-section', type: 'repeating', category: 'orange' },
+    'Measure7_Text': { id: 'measure-7-text', type: 'repeating', category: 'orange' },
+    'Measure7_Section': { id: 'measure-7-section', type: 'repeating', category: 'orange' },
+    'Measure8_Text': { id: 'measure-8-text', type: 'repeating', category: 'orange' },
+    'Measure8_Section': { id: 'measure-8-section', type: 'repeating', category: 'orange' },
+    'Measure9_Text': { id: 'measure-9-text', type: 'repeating', category: 'orange' },
+    'Measure9_Section': { id: 'measure-9-section', type: 'repeating', category: 'orange' },
+    'Measure10_Text': { id: 'measure-10-text', type: 'repeating', category: 'orange' },
+    'Measure10_Section': { id: 'measure-10-section', type: 'repeating', category: 'orange' },
+    
+    // ─────────────────────────────────────────────────────────────────────────
+    // PURPLE - Auto-calculated Fields
+    // ─────────────────────────────────────────────────────────────────────────
+    'TotalMeasures': { id: 'total-measures', type: 'auto-calculated', category: 'purple', calculation: 'countAllMeasures' },
+  };
+
+  // Legacy Hybrid Final Report Template Mapping (v2) - kept for backwards compatibility
   static readonly FINAL_REPORT_MAPPING: TemplateMapping = {
     // ═══════════════════════════════════════════════════════════════
     // GREEN - Dynamic Fields (auto-populated from database/forms)
