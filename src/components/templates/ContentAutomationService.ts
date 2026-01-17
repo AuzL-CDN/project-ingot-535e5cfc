@@ -17,6 +17,98 @@ export class ContentAutomationService {
   // Template mappings for each document type
   
   // ═══════════════════════════════════════════════════════════════════════════
+  // CLEAN FINAL REPORT MAPPING (v4 - 2-Column Boxed Layout)
+  // ═══════════════════════════════════════════════════════════════════════════
+  static readonly FINAL_REPORT_CLEAN_MAPPING: TemplateMapping = {
+    // ─────────────────────────────────────────────────────────────────────────
+    // GREEN - Dynamic Fields (auto-populated from database/forms)
+    // ─────────────────────────────────────────────────────────────────────────
+    'CompanyName': { id: 'company-name', type: 'dynamic', category: 'green' },
+    'OrgSiteNumber': { id: 'org-site-number', type: 'dynamic', category: 'green' },
+    'Address': { id: 'address', type: 'dynamic', category: 'green' },
+    'CSOFullName': { id: 'cso-full-name', type: 'dynamic', category: 'green' },
+    'AltCSOName': { id: 'alt-cso-name', type: 'dynamic', category: 'green' },
+    'ContractNumber': { id: 'contract-number', type: 'dynamic', category: 'green' },
+    'ActivityNumber': { id: 'activity-number', type: 'dynamic', category: 'green' },
+    'ClientDepartment': { id: 'client-department', type: 'dynamic', category: 'green' },
+    'SecurityLevel': { id: 'security-level', type: 'dynamic', category: 'green' },
+    'InspectionType': { id: 'inspection-type', type: 'dynamic', category: 'green' },
+    'InspectionDate': { id: 'inspection-date', type: 'dynamic', category: 'green' },
+    'InspectorName': { id: 'inspector-name', type: 'dynamic', category: 'green' },
+    'InspectorRegion': { id: 'inspector-region', type: 'dynamic', category: 'green' },
+    'InspectionStatus': { id: 'inspection-status', type: 'dynamic', category: 'green' },
+    'ReportDate': { id: 'report-date', type: 'dynamic', category: 'green' },
+    'FileReference': { id: 'file-reference', type: 'dynamic', category: 'green' },
+    'SupportingDocCount': { id: 'supporting-doc-count', type: 'dynamic', category: 'green' },
+    'EmailCount': { id: 'email-count', type: 'dynamic', category: 'green' },
+    
+    // ─────────────────────────────────────────────────────────────────────────
+    // RED - User Input Required (purpose & section observations - 3 lines each)
+    // ─────────────────────────────────────────────────────────────────────────
+    'PurposeStatement': { id: 'purpose-statement', type: 'user-input', category: 'red' },
+    'Section1_Obs_Line1': { id: 'section1-obs-line1', type: 'user-input', category: 'red' },
+    'Section1_Obs_Line2': { id: 'section1-obs-line2', type: 'user-input', category: 'red' },
+    'Section1_Obs_Line3': { id: 'section1-obs-line3', type: 'user-input', category: 'red' },
+    'Section2_Obs_Line1': { id: 'section2-obs-line1', type: 'user-input', category: 'red' },
+    'Section2_Obs_Line2': { id: 'section2-obs-line2', type: 'user-input', category: 'red' },
+    'Section2_Obs_Line3': { id: 'section2-obs-line3', type: 'user-input', category: 'red' },
+    'Section3_Obs_Line1': { id: 'section3-obs-line1', type: 'user-input', category: 'red' },
+    'Section3_Obs_Line2': { id: 'section3-obs-line2', type: 'user-input', category: 'red' },
+    'Section3_Obs_Line3': { id: 'section3-obs-line3', type: 'user-input', category: 'red' },
+    'Section4_Obs_Line1': { id: 'section4-obs-line1', type: 'user-input', category: 'red' },
+    'Section4_Obs_Line2': { id: 'section4-obs-line2', type: 'user-input', category: 'red' },
+    'Section4_Obs_Line3': { id: 'section4-obs-line3', type: 'user-input', category: 'red' },
+    'Section5_Obs_Line1': { id: 'section5-obs-line1', type: 'user-input', category: 'red' },
+    'Section5_Obs_Line2': { id: 'section5-obs-line2', type: 'user-input', category: 'red' },
+    'Section5_Obs_Line3': { id: 'section5-obs-line3', type: 'user-input', category: 'red' },
+    'Section6_Obs_Line1': { id: 'section6-obs-line1', type: 'user-input', category: 'red' },
+    'Section6_Obs_Line2': { id: 'section6-obs-line2', type: 'user-input', category: 'red' },
+    'Section6_Obs_Line3': { id: 'section6-obs-line3', type: 'user-input', category: 'red' },
+    'Section7_Obs_Line1': { id: 'section7-obs-line1', type: 'user-input', category: 'red' },
+    'Section7_Obs_Line2': { id: 'section7-obs-line2', type: 'user-input', category: 'red' },
+    'Section7_Obs_Line3': { id: 'section7-obs-line3', type: 'user-input', category: 'red' },
+    'Section8_Obs_Line1': { id: 'section8-obs-line1', type: 'user-input', category: 'red' },
+    'Section8_Obs_Line2': { id: 'section8-obs-line2', type: 'user-input', category: 'red' },
+    'Section8_Obs_Line3': { id: 'section8-obs-line3', type: 'user-input', category: 'red' },
+    'Section9_Obs_Line1': { id: 'section9-obs-line1', type: 'user-input', category: 'red' },
+    'Section9_Obs_Line2': { id: 'section9-obs-line2', type: 'user-input', category: 'red' },
+    'Section9_Obs_Line3': { id: 'section9-obs-line3', type: 'user-input', category: 'red' },
+    'AdditionalRemarks_Line1': { id: 'additional-remarks-line1', type: 'user-input', category: 'red' },
+    'AdditionalRemarks_Line2': { id: 'additional-remarks-line2', type: 'user-input', category: 'red' },
+    'AdditionalRemarks_Line3': { id: 'additional-remarks-line3', type: 'user-input', category: 'red' },
+    'AdditionalRemarks_Line4': { id: 'additional-remarks-line4', type: 'user-input', category: 'red' },
+    
+    // ─────────────────────────────────────────────────────────────────────────
+    // ORANGE - Repeating Elements (consolidated corrective measures table)
+    // ─────────────────────────────────────────────────────────────────────────
+    'Measure1_Text': { id: 'measure-1-text', type: 'repeating', category: 'orange' },
+    'Measure1_Section': { id: 'measure-1-section', type: 'repeating', category: 'orange' },
+    'Measure2_Text': { id: 'measure-2-text', type: 'repeating', category: 'orange' },
+    'Measure2_Section': { id: 'measure-2-section', type: 'repeating', category: 'orange' },
+    'Measure3_Text': { id: 'measure-3-text', type: 'repeating', category: 'orange' },
+    'Measure3_Section': { id: 'measure-3-section', type: 'repeating', category: 'orange' },
+    'Measure4_Text': { id: 'measure-4-text', type: 'repeating', category: 'orange' },
+    'Measure4_Section': { id: 'measure-4-section', type: 'repeating', category: 'orange' },
+    'Measure5_Text': { id: 'measure-5-text', type: 'repeating', category: 'orange' },
+    'Measure5_Section': { id: 'measure-5-section', type: 'repeating', category: 'orange' },
+    'Measure6_Text': { id: 'measure-6-text', type: 'repeating', category: 'orange' },
+    'Measure6_Section': { id: 'measure-6-section', type: 'repeating', category: 'orange' },
+    'Measure7_Text': { id: 'measure-7-text', type: 'repeating', category: 'orange' },
+    'Measure7_Section': { id: 'measure-7-section', type: 'repeating', category: 'orange' },
+    'Measure8_Text': { id: 'measure-8-text', type: 'repeating', category: 'orange' },
+    'Measure8_Section': { id: 'measure-8-section', type: 'repeating', category: 'orange' },
+    'Measure9_Text': { id: 'measure-9-text', type: 'repeating', category: 'orange' },
+    'Measure9_Section': { id: 'measure-9-section', type: 'repeating', category: 'orange' },
+    'Measure10_Text': { id: 'measure-10-text', type: 'repeating', category: 'orange' },
+    'Measure10_Section': { id: 'measure-10-section', type: 'repeating', category: 'orange' },
+    
+    // ─────────────────────────────────────────────────────────────────────────
+    // PURPLE - Auto-calculated Fields
+    // ─────────────────────────────────────────────────────────────────────────
+    'TotalMeasures': { id: 'total-measures', type: 'auto-calculated', category: 'purple', calculation: 'countAllMeasures' },
+  };
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // DEFINITIVE FINAL REPORT MAPPING (v3 - Consolidated Corrective Measures)
   // ═══════════════════════════════════════════════════════════════════════════
   static readonly FINAL_REPORT_DEFINITIVE_MAPPING: TemplateMapping = {
