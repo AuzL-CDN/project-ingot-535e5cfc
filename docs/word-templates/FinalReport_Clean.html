@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Inspection Report - Clean Edition</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.75in;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: Calibri, Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #1a1a1a;
+            background: white;
+        }
+        
+        .page {
+            width: 8.5in;
+            min-height: 11in;
+            padding: 0.75in;
+            page-break-after: always;
+            background: white;
+        }
+        
+        .page:last-child {
+            page-break-after: avoid;
+        }
+        
+        /* Security Banner */
+        .security-banner {
+            background: #003366;
+            color: white;
+            text-align: center;
+            padding: 8px;
+            font-weight: bold;
+            font-size: 11pt;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+        
+        /* Page Title */
+        .page-title {
+            text-align: center;
+            font-size: 14pt;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #003366;
+        }
+        
+        /* Box Container */
+        .box {
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            background: white;
+        }
+        
+        .box-header {
+            background: #003366;
+            color: white;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 10pt;
+        }
+        
+        .box-content {
+            padding: 12px;
+        }
+        
+        /* Two Column Grid */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        /* Info Row */
+        .info-row {
+            display: flex;
+            margin-bottom: 6px;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            min-width: 120px;
+            color: #333;
+        }
+        
+        .info-value {
+            flex: 1;
+            border-bottom: 1px solid #ccc;
+            min-height: 18px;
+            padding-left: 4px;
+        }
+        
+        /* Section Box */
+        .section-box {
+            border: 1px solid #ccc;
+            height: 100%;
+        }
+        
+        .section-header {
+            background: #003366;
+            color: white;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 9pt;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-number {
+            background: white;
+            color: #003366;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 8pt;
+            margin-right: 8px;
+        }
+        
+        .section-title {
+            flex: 1;
+        }
+        
+        .section-status {
+            display: flex;
+            gap: 10px;
+            font-size: 8pt;
+        }
+        
+        .section-status label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        
+        .section-status input[type="checkbox"] {
+            width: 12px;
+            height: 12px;
+        }
+        
+        .section-content {
+            padding: 10px;
+            min-height: 80px;
+        }
+        
+        .observation-line {
+            border-bottom: 1px solid #ddd;
+            min-height: 22px;
+            margin-bottom: 4px;
+            padding: 2px 0;
+        }
+        
+        .observation-line:last-child {
+            margin-bottom: 0;
+        }
+        
+        /* Corrective Measures Table */
+        .measures-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+        
+        .measures-table th {
+            background: #003366;
+            color: white;
+            padding: 8px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .measures-table th:first-child {
+            width: 30px;
+            text-align: center;
+        }
+        
+        .measures-table th:nth-child(3) {
+            width: 60px;
+            text-align: center;
+        }
+        
+        .measures-table th:last-child {
+            width: 40px;
+            text-align: center;
+        }
+        
+        .measures-table td {
+            border: 1px solid #ccc;
+            padding: 6px 8px;
+        }
+        
+        .measures-table td:first-child,
+        .measures-table td:nth-child(3),
+        .measures-table td:last-child {
+            text-align: center;
+        }
+        
+        .measures-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        /* Summary Boxes */
+        .summary-box {
+            border: 1px solid #ccc;
+        }
+        
+        .summary-header {
+            background: #003366;
+            color: white;
+            padding: 6px 12px;
+            font-weight: bold;
+            font-size: 9pt;
+        }
+        
+        .summary-content {
+            padding: 12px;
+            min-height: 80px;
+        }
+        
+        .summary-line {
+            border-bottom: 1px solid #ddd;
+            min-height: 20px;
+            margin-bottom: 4px;
+        }
+        
+        /* Recommendation Box */
+        .recommendation-box {
+            border: 2px solid #003366;
+            margin-top: 15px;
+        }
+        
+        .recommendation-header {
+            background: #003366;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .recommendation-content {
+            padding: 15px;
+        }
+        
+        .recommendation-options {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+        }
+        
+        .recommendation-options label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: bold;
+        }
+        
+        .assessment-row {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ccc;
+        }
+        
+        .assessment-label {
+            font-weight: bold;
+        }
+        
+        .assessment-options {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .assessment-options label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        /* Signature Block */
+        .signature-block {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #333;
+            padding-top: 5px;
+            margin-top: 40px;
+        }
+        
+        .signature-label {
+            font-size: 9pt;
+            color: #666;
+        }
+        
+        .inspector-info {
+            font-size: 9pt;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+        
+        /* Footer */
+        .page-footer {
+            position: absolute;
+            bottom: 0.5in;
+            left: 0.75in;
+            right: 0.75in;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8pt;
+            color: #666;
+            border-top: 1px solid #ccc;
+            padding-top: 8px;
+        }
+        
+        /* Centered single section */
+        .centered-section {
+            max-width: 48%;
+            margin: 0 auto 15px auto;
+        }
+        
+        /* Total row */
+        .total-row {
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px;
+            font-weight: bold;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+        
+        /* Purpose box */
+        .purpose-box {
+            background: #f8f9fa;
+            border: 1px solid #ccc;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .purpose-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        /* Document count items */
+        .doc-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .doc-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+<!-- PAGE 1: Header and Inspection Details -->
+<div class="page">
+    <div class="security-banner">{SecurityLevel}</div>
+    
+    <div class="page-title">IT SECURITY INSPECTION REPORT</div>
+    
+    <!-- Organization & Contract Info -->
+    <div class="two-col">
+        <div class="box">
+            <div class="box-header">ORGANIZATION INFORMATION</div>
+            <div class="box-content">
+                <div class="info-row">
+                    <span class="info-label">Organization:</span>
+                    <span class="info-value">{CompanyName}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Site Number:</span>
+                    <span class="info-value">{OrgSiteNumber}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Address:</span>
+                    <span class="info-value">{Address}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">CSO:</span>
+                    <span class="info-value">{CSOFullName}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Alternate CSO:</span>
+                    <span class="info-value">{AltCSOName}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="box">
+            <div class="box-header">CONTRACT INFORMATION</div>
+            <div class="box-content">
+                <div class="info-row">
+                    <span class="info-label">Contract Number:</span>
+                    <span class="info-value">{ContractNumber}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Activity Number:</span>
+                    <span class="info-value">{ActivityNumber}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Client Department:</span>
+                    <span class="info-value">{ClientDepartment}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Security Level:</span>
+                    <span class="info-value">{SecurityLevel}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Inspection Type:</span>
+                    <span class="info-value">{InspectionType}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Inspection Info -->
+    <div class="two-col">
+        <div class="box">
+            <div class="box-header">INSPECTION DETAILS</div>
+            <div class="box-content">
+                <div class="info-row">
+                    <span class="info-label">Inspection Date:</span>
+                    <span class="info-value">{InspectionDate}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Inspector:</span>
+                    <span class="info-value">{InspectorName}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Region:</span>
+                    <span class="info-value">{InspectorRegion}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="box">
+            <div class="box-header">INSPECTION STATUS</div>
+            <div class="box-content">
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value">{InspectionStatus}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Report Date:</span>
+                    <span class="info-value">{ReportDate}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">File Reference:</span>
+                    <span class="info-value">{FileReference}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Purpose Statement -->
+    <div class="purpose-box">
+        <div class="purpose-label">PURPOSE OF INSPECTION:</div>
+        <div>{PurposeStatement}</div>
+    </div>
+</div>
+
+<!-- PAGE 2: Sections 1-6 -->
+<div class="page">
+    <div class="security-banner">{SecurityLevel}</div>
+    
+    <div class="page-title" style="font-size: 12pt; margin-bottom: 15px;">INSPECTION FINDINGS - SECTIONS 1-6</div>
+    
+    <!-- Row 1: Sections 1 & 2 -->
+    <div class="two-col">
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">1</span>
+                <span class="section-title">Physical Location of Work</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s1_pass"> Pass</label>
+                    <label><input type="checkbox" name="s1_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section1_Obs_Line1}</div>
+                <div class="observation-line">{Section1_Obs_Line2}</div>
+                <div class="observation-line">{Section1_Obs_Line3}</div>
+            </div>
+        </div>
+        
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">2</span>
+                <span class="section-title">Threat & Risk Assessment</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s2_pass"> Pass</label>
+                    <label><input type="checkbox" name="s2_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section2_Obs_Line1}</div>
+                <div class="observation-line">{Section2_Obs_Line2}</div>
+                <div class="observation-line">{Section2_Obs_Line3}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Row 2: Sections 3 & 4 -->
+    <div class="two-col">
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">3</span>
+                <span class="section-title">Transfer of Data</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s3_pass"> Pass</label>
+                    <label><input type="checkbox" name="s3_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section3_Obs_Line1}</div>
+                <div class="observation-line">{Section3_Obs_Line2}</div>
+                <div class="observation-line">{Section3_Obs_Line3}</div>
+            </div>
+        </div>
+        
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">4</span>
+                <span class="section-title">IT Media Storage</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s4_pass"> Pass</label>
+                    <label><input type="checkbox" name="s4_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section4_Obs_Line1}</div>
+                <div class="observation-line">{Section4_Obs_Line2}</div>
+                <div class="observation-line">{Section4_Obs_Line3}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Row 3: Sections 5 & 6 -->
+    <div class="two-col">
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">5</span>
+                <span class="section-title">Personnel Security Screening</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s5_pass"> Pass</label>
+                    <label><input type="checkbox" name="s5_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section5_Obs_Line1}</div>
+                <div class="observation-line">{Section5_Obs_Line2}</div>
+                <div class="observation-line">{Section5_Obs_Line3}</div>
+            </div>
+        </div>
+        
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">6</span>
+                <span class="section-title">IT Personnel Security</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s6_pass"> Pass</label>
+                    <label><input type="checkbox" name="s6_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section6_Obs_Line1}</div>
+                <div class="observation-line">{Section6_Obs_Line2}</div>
+                <div class="observation-line">{Section6_Obs_Line3}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PAGE 3: Sections 7-9 and Corrective Measures -->
+<div class="page">
+    <div class="security-banner">{SecurityLevel}</div>
+    
+    <div class="page-title" style="font-size: 12pt; margin-bottom: 15px;">INSPECTION FINDINGS - SECTIONS 7-9</div>
+    
+    <!-- Row 1: Sections 7 & 8 -->
+    <div class="two-col">
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">7</span>
+                <span class="section-title">IT Equipment & Configuration</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s7_pass"> Pass</label>
+                    <label><input type="checkbox" name="s7_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section7_Obs_Line1}</div>
+                <div class="observation-line">{Section7_Obs_Line2}</div>
+                <div class="observation-line">{Section7_Obs_Line3}</div>
+            </div>
+        </div>
+        
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">8</span>
+                <span class="section-title">Recovery & Backup</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s8_pass"> Pass</label>
+                    <label><input type="checkbox" name="s8_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section8_Obs_Line1}</div>
+                <div class="observation-line">{Section8_Obs_Line2}</div>
+                <div class="observation-line">{Section8_Obs_Line3}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Centered Section 9 -->
+    <div class="centered-section">
+        <div class="section-box">
+            <div class="section-header">
+                <span class="section-number">9</span>
+                <span class="section-title">Disposal of IT Media</span>
+                <div class="section-status">
+                    <label><input type="checkbox" name="s9_pass"> Pass</label>
+                    <label><input type="checkbox" name="s9_fail"> Fail</label>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="observation-line">{Section9_Obs_Line1}</div>
+                <div class="observation-line">{Section9_Obs_Line2}</div>
+                <div class="observation-line">{Section9_Obs_Line3}</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Corrective Measures Table -->
+    <div class="box" style="margin-top: 20px;">
+        <div class="box-header">CORRECTIVE MEASURES</div>
+        <table class="measures-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Description</th>
+                    <th>Section</th>
+                    <th>Done</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>{Measure1_Text}</td>
+                    <td>{Measure1_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>{Measure2_Text}</td>
+                    <td>{Measure2_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>{Measure3_Text}</td>
+                    <td>{Measure3_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>{Measure4_Text}</td>
+                    <td>{Measure4_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>{Measure5_Text}</td>
+                    <td>{Measure5_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>{Measure6_Text}</td>
+                    <td>{Measure6_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>{Measure7_Text}</td>
+                    <td>{Measure7_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>{Measure8_Text}</td>
+                    <td>{Measure8_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>{Measure9_Text}</td>
+                    <td>{Measure9_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>{Measure10_Text}</td>
+                    <td>{Measure10_Section}</td>
+                    <td><input type="checkbox"></td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="total-row">Total Measures: {TotalMeasures}</div>
+    </div>
+</div>
+
+<!-- PAGE 4: Summary and Sign-off -->
+<div class="page">
+    <div class="security-banner">{SecurityLevel}</div>
+    
+    <div class="page-title" style="font-size: 12pt; margin-bottom: 15px;">SUMMARY & RECOMMENDATION</div>
+    
+    <!-- Additional Remarks and Supporting Docs -->
+    <div class="two-col">
+        <div class="summary-box">
+            <div class="summary-header">ADDITIONAL REMARKS</div>
+            <div class="summary-content">
+                <div class="summary-line">{AdditionalRemarks_Line1}</div>
+                <div class="summary-line">{AdditionalRemarks_Line2}</div>
+                <div class="summary-line">{AdditionalRemarks_Line3}</div>
+                <div class="summary-line">{AdditionalRemarks_Line4}</div>
+            </div>
+        </div>
+        
+        <div class="summary-box">
+            <div class="summary-header">SUPPORTING DOCUMENTS</div>
+            <div class="summary-content">
+                <div class="doc-item">
+                    <span>Documents Attached:</span>
+                    <span>{SupportingDocCount}</span>
+                </div>
+                <div class="doc-item">
+                    <span>Emails Attached:</span>
+                    <span>{EmailCount}</span>
+                </div>
+                <div class="doc-item">
+                    <span>Checklist Attached:</span>
+                    <span><input type="checkbox" name="checklist_attached"> Yes</span>
+                </div>
+                <div class="doc-item">
+                    <span>Video Recording:</span>
+                    <span><input type="checkbox" name="video_attached"> Yes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recommendation Box -->
+    <div class="recommendation-box">
+        <div class="recommendation-header">RECOMMENDATION</div>
+        <div class="recommendation-content">
+            <div class="recommendation-options">
+                <label>
+                    <input type="checkbox" name="approved">
+                    <strong>APPROVED</strong> for processing at {SecurityLevel}
+                </label>
+                <label>
+                    <input type="checkbox" name="conditional">
+                    <strong>CONDITIONALLY APPROVED</strong> (pending corrective measures)
+                </label>
+                <label>
+                    <input type="checkbox" name="not_approved">
+                    <strong>NOT APPROVED</strong>
+                </label>
+            </div>
+            
+            <div class="assessment-row">
+                <span class="assessment-label">Overall Assessment:</span>
+                <div class="assessment-options">
+                    <label><input type="checkbox" name="assess_good"> Good</label>
+                    <label><input type="checkbox" name="assess_adequate"> Adequate</label>
+                    <label><input type="checkbox" name="assess_insufficient"> Insufficient</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Signature Block -->
+    <div class="signature-block">
+        <div>
+            <div class="signature-line">
+                <span class="signature-label">Inspector Signature</span>
+            </div>
+            <div class="inspector-info">
+                <div><strong>{InspectorName}</strong></div>
+                <div>IT Security Inspector</div>
+                <div>Contract Security Program</div>
+                <div>Industrial Security Sector</div>
+            </div>
+        </div>
+        <div>
+            <div class="signature-line">
+                <span class="signature-label">Date</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer Note -->
+    <div style="margin-top: 40px; padding: 12px; background: #f8f9fa; border: 1px solid #ccc; font-size: 8pt; color: #666;">
+        <strong>Distribution:</strong> Original to CSO, Copy to Contract Security Program file.<br>
+        <strong>Retention:</strong> This document contains Protected information and must be stored accordingly.
+    </div>
+</div>
+
+</body>
+</html>
