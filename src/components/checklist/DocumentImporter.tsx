@@ -54,6 +54,7 @@ export const DocumentImporter = ({ checklistType, onImport, onFileUpload }: Docu
       console.error('Document import error:', error);
       toast.error('An error occurred while processing the document');
     } finally {
+      URL.revokeObjectURL(fileUrl);
       setIsProcessing(false);
     }
   };

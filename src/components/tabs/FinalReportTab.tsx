@@ -9,10 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { FileText, Eye, Save, Calendar, Building, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { CorrectiveMeasure } from '@/hooks/useInspectionState';
+import type { CorrectiveMeasure, MainFormData } from '@/hooks/useInspectionState';
 
 interface FinalReportTabProps {
-  mainForm: any;
+  mainForm: MainFormData;
   correctiveMeasures: CorrectiveMeasure[];
   saveActivity: () => any;
 }

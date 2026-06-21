@@ -5,7 +5,7 @@
  */
 
 // Error reporting (disable in production)
-error_reporting(E_ALL);
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 
@@ -13,10 +13,12 @@ ini_set('log_errors', 1);
 date_default_timezone_set('America/Toronto');
 
 // Session settings
+session_name('INGOT_SESSION');
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
+ini_set('session.cookie_secure', 1);
 ini_set('session.cookie_samesite', 'Lax');
-ini_set('session.gc_maxlifetime', 86400); // 24 hours
+ini_set('session.gc_maxlifetime', 28800); // 8 hours
+ini_set('session.cookie_lifetime', 28800); // 8 hours
 
 // Database Configuration - IONOS Production
 // ============================================================================
@@ -25,16 +27,16 @@ ini_set('session.gc_maxlifetime', 86400); // 24 hours
 //      DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
 //   2. Or update the fallback values below directly
 // ============================================================================
-define('DB_HOST', getenv('DB_HOST') ?: 'db5019381304.hosting-data.io');
+define('DB_HOST', getenv('DB_HOST') ?: '');
 define('DB_PORT', getenv('DB_PORT') ?: '3306');
-define('DB_NAME', getenv('DB_NAME') ?: 'dbs15164102');
-define('DB_USER', getenv('DB_USER') ?: 'dbu4409535');
-define('DB_PASS', getenv('DB_PASS') ?: ''); // Set via IONOS environment panel
+define('DB_NAME', getenv('DB_NAME') ?: '');
+define('DB_USER', getenv('DB_USER') ?: '');
+define('DB_PASS', getenv('DB_PASS') ?: '');
 define('DB_CHARSET', 'utf8mb4');
 
 // Application settings
 define('APP_NAME', 'INGOT');
-define('APP_URL', getenv('APP_URL') ?: 'https://ingot.watchnexus.ca');
+define('APP_URL', getenv('APP_URL') ?: '');
 define('API_VERSION', '1.0.0');
 
 // CORS settings
@@ -96,7 +98,8 @@ function setCorsHeaders(): void {
     
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
+    header('Access-Control-Expose-Headers: X-CSRF-Token');
     header('Access-Control-Max-Age: 86400');
     
     // Handle preflight requests
@@ -120,3 +123,11 @@ function setJsonHeaders(): void {
 // Apply headers
 setCorsHeaders();
 setJsonHeaders();
+
+// CSRF validation for state-changing requests with active sessions
+if (in_array(getRequestMethod(), ['POST', 'PUT', 'DELETE'])) {
+    $skipCsrf = strpos($_SERVER['SCRIPT_NAME'] ?? '', 'auth.php') !== false;
+    if (isset($_SESSION['user_id']) && !$skipCsrf) {
+        validateCsrfToken();
+    }
+}

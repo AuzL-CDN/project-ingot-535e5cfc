@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -24,6 +24,7 @@ interface SupportingDocumentsProps {
 export const SupportingDocuments = ({ currentActivity, checklistFiles = [] }: SupportingDocumentsProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<FileUpload[]>([]);
   const [dragOver, setDragOver] = useState<string | null>(null);
+  const intervalRefs = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   // Auto-import checklist files to Main Files category
   useEffect(() => {
@@ -106,6 +107,13 @@ export const SupportingDocuments = ({ currentActivity, checklistFiles = [] }: Su
     handleFileUpload(files, categoryId);
   };
 
+  useEffect(() => {
+    return () => {
+      intervalRefs.current.forEach(clearInterval);
+      intervalRefs.current.clear();
+    };
+  }, []);
+
   const handleFileUpload = (files: File[], categoryId: string) => {
     if (!currentActivity) {
       alert('Please save an activity first before uploading files.');
@@ -136,10 +144,12 @@ export const SupportingDocuments = ({ currentActivity, checklistFiles = [] }: Su
           )
         );
       }, 200);
+      intervalRefs.current.set(fileUpload.id, progressInterval);
 
       // Complete upload after simulation
       setTimeout(() => {
         clearInterval(progressInterval);
+        intervalRefs.current.delete(fileUpload.id);
         setUploadedFiles(prev => 
           prev.map(f => 
             f.id === fileUpload.id 

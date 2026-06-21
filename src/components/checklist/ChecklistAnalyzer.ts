@@ -1,4 +1,5 @@
-import type { ChecklistType, ChecklistResponse, ChecklistAnalysis } from '@/types/checklist';
+import type { ChecklistType, ChecklistResponse, ChecklistAnalysis, ChecklistQuestion } from '@/types/checklist';
+import type { MainFormData } from '@/hooks/useInspectionState';
 import { getChecklistSections } from '@/types/checklist';
 
 export class ChecklistAnalyzer {
@@ -6,7 +7,7 @@ export class ChecklistAnalyzer {
   async analyzeResponses(
     checklistType: ChecklistType,
     responses: Record<string, ChecklistResponse>,
-    mainFormData: any
+    mainFormData: MainFormData
   ): Promise<ChecklistAnalysis[]> {
     const sections = getChecklistSections(checklistType);
     const analyses: ChecklistAnalysis[] = [];
@@ -27,9 +28,9 @@ export class ChecklistAnalyzer {
   }
 
   private async analyzeQuestion(
-    question: any,
+    question: ChecklistQuestion,
     response: ChecklistResponse,
-    mainFormData: any
+    mainFormData: MainFormData
   ): Promise<ChecklistAnalysis | null> {
     const { id, questionText, finalReportMapping } = question;
     const { value, notes } = response;
@@ -164,16 +165,13 @@ export class ChecklistAnalyzer {
     };
   }
 
-  generateFinalReportUpdates(analyses: ChecklistAnalysis[]): any {
-    const updates: any = {};
+  generateFinalReportUpdates(analyses: ChecklistAnalysis[]): Record<string, string> {
+    const updates: Record<string, string> = {};
 
-    // Group analyses by Final Report section
     const sectionUpdates: Record<string, string[]> = {};
 
     analyses.forEach(analysis => {
       if (analysis.finalReportContent) {
-        // Map to Final Report sections based on question mappings
-        // This would need to be expanded based on the actual Final Report structure
         const section = this.mapToFinalReportSection(analysis.questionId);
         if (!sectionUpdates[section]) {
           sectionUpdates[section] = [];
@@ -182,7 +180,6 @@ export class ChecklistAnalyzer {
       }
     });
 
-    // Convert to update format that Final Report can consume
     Object.entries(sectionUpdates).forEach(([section, contents]) => {
       updates[section] = contents.join('\n\n');
     });

@@ -221,7 +221,7 @@ export const useInspectionState = () => {
             results.push(activity);
           }
         } catch (e) {
-          // Skip invalid records
+          console.warn(`[useInspectionState] Skipped invalid localStorage record: ${key}`);
         }
       }
     }

@@ -1,0 +1,2 @@
+# Deny web access to cron scripts - must be run from CLI only
+Deny from all

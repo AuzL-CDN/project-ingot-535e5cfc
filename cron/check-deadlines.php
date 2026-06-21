@@ -6,6 +6,12 @@
  * Cron command: php /path/to/cron/check-deadlines.php
  */
 
+// Ensure this runs only from CLI
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit("Access denied\n");
+}
+
 require_once __DIR__ . '/../api/config.php';
 
 echo "Starting deadline check at " . date('Y-m-d H:i:s') . "\n";

@@ -1,11 +1,45 @@
 <?php
 /**
  * INGOT API Middleware
- * Authentication and authorization helpers
+ * Authentication, authorization, and CSRF protection helpers
  */
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/response.php';
+
+/**
+ * Generate and store a CSRF token in the session
+ */
+function generateCsrfToken(): string {
+    startSession();
+    $token = bin2hex(random_bytes(32));
+    $_SESSION['csrf_token'] = $token;
+    $_SESSION['csrf_token_expires'] = time() + 7200; // 2 hour expiry
+    return $token;
+}
+
+/**
+ * Validate a CSRF token from the request header
+ */
+function validateCsrfToken(): void {
+    if (getRequestMethod() === 'GET') {
+        return;
+    }
+    startSession();
+    $headerToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+    $sessionToken = $_SESSION['csrf_token'] ?? '';
+    $expires = $_SESSION['csrf_token_expires'] ?? 0;
+
+    if (empty($headerToken) || empty($sessionToken)) {
+        sendError('CSRF token missing', 403);
+    }
+    if (!hash_equals($sessionToken, $headerToken)) {
+        sendError('CSRF token invalid', 403);
+    }
+    if (time() > $expires) {
+        sendError('CSRF token expired. Refresh the page and try again.', 403);
+    }
+}
 
 /**
  * Start session if not already started
@@ -136,6 +170,9 @@ function setAuthSession(int $userId, string $email, string $displayName = ''): v
     $_SESSION['email'] = $email;
     $_SESSION['display_name'] = $displayName;
     $_SESSION['logged_in_at'] = time();
+    
+    // Generate CSRF token for this session
+    generateCsrfToken();
 }
 
 /**

@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Mail, Eye, FileText, Building, Hash } from 'lucide-react';
+import type { MainFormData } from '@/hooks/useInspectionState';
 
 interface MemorandumTabProps {
-  mainForm: any;
+  mainForm: MainFormData;
 }
 
 export const MemorandumTab = ({ mainForm }: MemorandumTabProps) => {

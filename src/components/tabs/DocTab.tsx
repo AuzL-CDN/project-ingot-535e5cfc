@@ -5,9 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { FileCheck, Eye, FileText, Building, MapPin } from 'lucide-react';
+import type { MainFormData } from '@/hooks/useInspectionState';
 
 interface DocTabProps {
-  mainForm: any;
+  mainForm: MainFormData;
 }
 
 export const DocTab = ({ mainForm }: DocTabProps) => {

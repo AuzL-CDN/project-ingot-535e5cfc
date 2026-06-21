@@ -9,14 +9,7 @@ AddHandler application/x-httpd-php84 .php .phtml
     SetHandler application/x-httpd-php84
 </FilesMatch>
 
-# CORS Headers
-<IfModule mod_headers.c>
-    Header set Access-Control-Allow-Origin "*"
-    Header set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
-</IfModule>
-
-# Handle preflight OPTIONS requests
+# Handle preflight OPTIONS requests (CORS handled by PHP in config.php)
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteCond %{REQUEST_METHOD} OPTIONS

@@ -247,6 +247,7 @@ function handleBulkImport(): void {
         
     } catch (Exception $e) {
         $db->rollBack();
-        sendError('Import failed: ' . $e->getMessage(), 500);
+        error_log('Organization import failed: ' . $e->getMessage());
+        sendError('Import failed. Please check your data and try again.', 500);
     }
 }

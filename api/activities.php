@@ -163,6 +163,12 @@ function handleCreateActivity(): void {
     
     // Create deadlines based on inspection class
     createDeadlines($db, $activityId, $data['inspection_class']);
+
+    logAuditEvent('activity_created', $userId, [
+        'activity_id' => (int)$activityId,
+        'activity_number' => $data['activity_number'],
+        'inspection_class' => $data['inspection_class']
+    ]);
     
     // Return created activity
     $stmt = $db->prepare('SELECT * FROM activities WHERE id = ?');
@@ -229,6 +235,8 @@ function handleUpdateActivity(int $id): void {
     $sql = 'UPDATE activities SET ' . implode(', ', $updateFields) . ' WHERE id = ?';
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
+
+    logAuditEvent('activity_updated', $userId, ['activity_id' => $id]);
     
     // Return updated activity
     $stmt = $db->prepare('SELECT * FROM activities WHERE id = ?');
@@ -259,6 +267,8 @@ function handleDeleteActivity(int $id): void {
     if ($stmt->rowCount() === 0) {
         sendNotFound('Activity not found');
     }
+
+    logAuditEvent('activity_deleted', $userId, ['activity_id' => $id]);
     
     sendSuccess([], 'Activity deleted');
 }
@@ -284,6 +294,8 @@ function handleCompleteActivity(int $id): void {
     if ($stmt->rowCount() === 0) {
         sendNotFound('Activity not found');
     }
+
+    logAuditEvent('activity_completed', $userId, ['activity_id' => $id]);
     
     sendSuccess([], 'Activity completed');
 }

@@ -43,15 +43,33 @@ function checkRateLimit(string $ip): bool {
     $db = getDB();
     
     // Clean old entries (older than 15 minutes)
-    $stmt = $db->prepare('DELETE FROM rate_limits WHERE created_at < DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
+    $stmt = $db->prepare('DELETE FROM rate_limits WHERE first_attempt < DATE_SUB(NOW(), INTERVAL 15 MINUTE)');
     $stmt->execute();
     
-    // Count recent attempts
-    $stmt = $db->prepare('SELECT COUNT(*) as attempts FROM rate_limits WHERE ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE)');
+    // Check per-minute rate (5 max)
+    $stmt = $db->prepare('SELECT COUNT(*) as attempts FROM rate_limits WHERE ip_address = ? AND first_attempt > DATE_SUB(NOW(), INTERVAL 1 MINUTE)');
     $stmt->execute([$ip]);
-    $result = $stmt->fetch();
+    $perMinute = (int)$stmt->fetch()['attempts'];
+    if ($perMinute >= 5) {
+        return false;
+    }
     
-    return $result['attempts'] < 5; // Max 5 attempts per minute
+    // Check cumulative rate (20 max per hour)
+    $stmt = $db->prepare('SELECT COUNT(*) as attempts FROM rate_limits WHERE ip_address = ? AND first_attempt > DATE_SUB(NOW(), INTERVAL 1 HOUR)');
+    $stmt->execute([$ip]);
+    $perHour = (int)$stmt->fetch()['attempts'];
+    if ($perHour >= 20) {
+        return false;
+    }
+    
+    // Check if IP is blocked
+    $stmt = $db->prepare('SELECT blocked_until FROM rate_limits WHERE ip_address = ? AND blocked_until > NOW() LIMIT 1');
+    $stmt->execute([$ip]);
+    if ($stmt->fetch()) {
+        return false;
+    }
+    
+    return true;
 }
 
 /**
@@ -59,7 +77,7 @@ function checkRateLimit(string $ip): bool {
  */
 function recordLoginAttempt(string $ip): void {
     $db = getDB();
-    $stmt = $db->prepare('INSERT INTO rate_limits (ip_address, endpoint) VALUES (?, ?)');
+    $stmt = $db->prepare('INSERT INTO rate_limits (ip_address, action_type, first_attempt, last_attempt) VALUES (?, ?, NOW(), NOW())');
     $stmt->execute([$ip, 'login']);
 }
 
@@ -71,7 +89,10 @@ function handleLogin(): void {
         sendError('Method not allowed', 405);
     }
     
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    if (strpos($ip, ',') !== false) {
+        $ip = trim(explode(',', $ip)[0]);
+    }
     
     // Check rate limiting
     if (!checkRateLimit($ip)) {
@@ -178,7 +199,7 @@ function handleChangePassword(): void {
     }
     
     if (!empty($errors)) {
-        sendError(implode('. ', $errors), 400);
+        sendError('Password does not meet security requirements.', 400);
     }
     
     $userId = getCurrentUserId();
@@ -301,7 +322,10 @@ function handleRequestPasswordReset(): void {
         sendError('Method not allowed', 405);
     }
     
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    if (strpos($ip, ',') !== false) {
+        $ip = trim(explode(',', $ip)[0]);
+    }
     
     // Rate limit password reset requests
     if (!checkRateLimit($ip)) {
@@ -309,17 +333,17 @@ function handleRequestPasswordReset(): void {
     }
     
     $data = getJsonBody();
-    $username = trim($data['username'] ?? '');
+    $identifier = trim($data['username'] ?? $data['email'] ?? '');
     
-    if (empty($username)) {
-        sendError('Username is required', 400);
+    if (empty($identifier)) {
+        sendError('Username or email is required', 400);
     }
     
     $db = getDB();
     
-    // Find user by username
-    $stmt = $db->prepare('SELECT id, username, display_name FROM users WHERE username = ?');
-    $stmt->execute([$username]);
+    // Find user by username or email
+    $stmt = $db->prepare('SELECT id, username, display_name FROM users WHERE username = ? OR email = ?');
+    $stmt->execute([$identifier, $identifier]);
     $user = $stmt->fetch();
     
     // Always return success to prevent username enumeration

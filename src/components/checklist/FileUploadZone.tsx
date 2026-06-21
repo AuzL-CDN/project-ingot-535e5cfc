@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -24,6 +24,18 @@ export const FileUploadZone = ({
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, []);
 
   const onDrop = useCallback(async (acceptedFiles: File[], rejectedFiles: any[]) => {
     // Handle rejected files
@@ -46,10 +58,13 @@ export const FileUploadZone = ({
 
     try {
       // Simulate upload progress
-      const interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setUploadProgress(prev => {
           if (prev >= 90) {
-            clearInterval(interval);
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
             return 90;
           }
           return prev + 10;
@@ -59,8 +74,13 @@ export const FileUploadZone = ({
       // In a real implementation, files would be uploaded to Supabase Storage
       // For now, we'll simulate the upload process
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      clearInterval(interval);
+
+      if (!mountedRef.current) return;
+
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       setUploadProgress(100);
       
       // Call the upload handler

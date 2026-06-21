@@ -15,11 +15,15 @@
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/response.php';
+require_once __DIR__ . '/middleware.php';
+
+// Require admin privileges to run seeding
+requireAdmin();
 
 // Safety check - prevent accidental re-runs
 $lockFile = __DIR__ . '/.seed-completed';
 if (file_exists($lockFile)) {
-    sendError('Seeding already completed. Delete ' . $lockFile . ' to run again.', 400);
+    sendError('Seeding already completed.', 400);
 }
 
 // User data: [lastname, firstname, role]
@@ -111,7 +115,6 @@ try {
                 'username' => $username,
                 'email' => $email,
                 'display_name' => $displayName,
-                'password' => $password, // Only shown during seeding!
                 'role' => $role,
                 'must_change_password' => true
             ];
@@ -140,16 +143,8 @@ try {
             'errors' => count($results['errors'])
         ],
         'details' => $results,
-        'credentials' => array_map(function($user) {
-            return [
-                'username' => $user['username'],
-                'password' => $user['password'],
-                'role' => $user['role'],
-                'note' => 'Password change required on first login'
-            ];
-        }, $results['created']),
-        'warning' => '⚠️ DELETE THIS FILE (seed-users.php) IMMEDIATELY FOR SECURITY!'
-    ], JSON_PRETTY_PRINT);
+        'note' => 'Password change required on first login'
+    ]);
     
 } catch (Exception $e) {
     sendError('Seeding failed: ' . $e->getMessage(), 500);

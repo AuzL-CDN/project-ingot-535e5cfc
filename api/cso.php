@@ -22,14 +22,17 @@ $search = getQueryParam('search', '');
 if ($action === 'import') {
     requireAdmin();
     handleBulkImport();
-} elseif ($action === 'count') {
-    handleCount();
-} elseif (!empty($orgSiteId)) {
-    handleGetByOrgSite($orgSiteId);
-} elseif (!empty($search)) {
-    handleSearch($search);
 } else {
-    handleList();
+    requireAuth();
+    if ($action === 'count') {
+        handleCount();
+    } elseif (!empty($orgSiteId)) {
+        handleGetByOrgSite($orgSiteId);
+    } elseif (!empty($search)) {
+        handleSearch($search);
+    } else {
+        handleList();
+    }
 }
 
 /**
@@ -248,9 +251,10 @@ function handleBulkImport(): void {
             $imported++;
             
         } catch (Exception $e) {
+            error_log('CSO import failed for row ' . $index . ': ' . $e->getMessage());
             $errors[] = [
                 'index' => $index,
-                'error' => $e->getMessage()
+                'error' => 'Import failed for this row'
             ];
         }
     }

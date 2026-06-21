@@ -5,7 +5,7 @@
 
 const API_BASE = '/api';
 
-interface ApiResponse<T = any> {
+interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   error?: string;
@@ -17,25 +17,72 @@ async function fetchApi<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE}${endpoint}`;
-  
-  const defaultOptions: RequestInit = {
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
+
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...options.headers as Record<string, string>,
   };
 
+  const csrfToken = getCsrfToken();
+  if (csrfToken && options.method && options.method !== 'GET') {
+    headers['X-CSRF-Token'] = csrfToken;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
   try {
-    const response = await fetch(url, { ...defaultOptions, ...options });
+    const response = await fetch(url, {
+      credentials: 'include',
+      headers,
+      signal: controller.signal,
+      ...options,
+    });
+
+    clearTimeout(timeoutId);
+
+    // Store CSRF token from response header if present
+    const csrfHeader = response.headers.get('X-CSRF-Token');
+    if (csrfHeader) {
+      setCsrfToken(csrfHeader);
+    }
+
+    if (!response.ok) {
+      let errorMessage = `Request failed with status ${response.status}`;
+      try {
+        const errorBody = await response.json();
+        errorMessage = errorBody.error || errorBody.message || errorMessage;
+      } catch {
+      }
+      return { success: false, error: errorMessage };
+    }
+
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('API Error:', error);
+    clearTimeout(timeoutId);
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return { success: false, error: 'Request timed out' };
+    }
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Network error',
+      error: 'Network error. Please check your connection.',
     };
+  }
+}
+
+function getCsrfToken(): string | null {
+  try {
+    return sessionStorage.getItem('csrf_token');
+  } catch {
+    return null;
+  }
+}
+
+export function setCsrfToken(token: string): void {
+  try {
+    sessionStorage.setItem('csrf_token', token);
+  } catch {
   }
 }
 
@@ -222,7 +269,7 @@ export const api = {
       fetchApi<{ requests: any[]; counts: Record<string, number> }>(`/password-resets.php?status=${status}`),
 
     approve: (requestId: number) =>
-      fetchApi<{ temporary_password: string; username: string }>(`/password-resets.php?action=approve&id=${requestId}`, {
+      fetchApi<{ request_id: number; user_id: number; username: string; display_name: string }>(`/password-resets.php?action=approve&id=${requestId}`, {
         method: 'POST',
       }),
 

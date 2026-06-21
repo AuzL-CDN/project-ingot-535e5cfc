@@ -144,8 +144,18 @@ function handleCreateUser(): void {
         sendError('Email already registered', 409);
     }
     
+    // Check if username already exists
+    if (!empty($data['username'])) {
+        $username = trim($data['username']);
+        $stmt = $db->prepare('SELECT id FROM users WHERE username = ?');
+        $stmt->execute([$username]);
+        if ($stmt->fetch()) {
+            sendError('Username already taken', 409);
+        }
+    }
+    
     // Hash password
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    $passwordHash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
     
     // Create user
     $stmt = $db->prepare('
@@ -307,6 +317,19 @@ function handleDeleteUser(int $userId): void {
         sendNotFound('User not found');
     }
     
+    // Check if this is the last admin
+    $stmt = $db->prepare("SELECT COUNT(*) as cnt FROM user_roles WHERE role = 'admin' AND user_id != ?");
+    $stmt->execute([$userId]);
+    $adminCount = (int)$stmt->fetch()['cnt'];
+    
+    $stmt = $db->prepare("SELECT role FROM user_roles WHERE user_id = ? AND role = 'admin'");
+    $stmt->execute([$userId]);
+    $isTargetAdmin = (bool)$stmt->fetch();
+    
+    if ($isTargetAdmin && $adminCount === 0) {
+        sendError('Cannot delete the last administrator account', 403);
+    }
+    
     // Delete user (cascades to roles, profile, activities, etc.)
     $stmt = $db->prepare('DELETE FROM users WHERE id = ?');
     $stmt->execute([$userId]);
@@ -347,7 +370,7 @@ function handleResetPassword(): void {
     }
     
     // Hash and update password
-    $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+    $passwordHash = password_hash($newPassword, PASSWORD_BCRYPT, ['cost' => 12]);
     
     $stmt = $db->prepare('UPDATE users SET password_hash = ? WHERE id = ?');
     $stmt->execute([$passwordHash, $userId]);

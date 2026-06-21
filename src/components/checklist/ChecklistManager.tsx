@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -10,13 +10,14 @@ import { DocumentImporter } from './DocumentImporter';
 import { HardwareManager } from '@/components/hardware/HardwareManager';
 import { SecurityFeaturesManager } from '@/components/hardware/SecurityFeaturesManager';
 import type { ChecklistType, ChecklistData, ChecklistResponse, ChecklistAnalysis } from '@/types/checklist';
+import type { MainFormData } from '@/hooks/useInspectionState';
 import type { HardwareData, SecurityFeatureDetail } from '@/types/hardware';
 import { getChecklistSections } from '@/types/checklist';
 
 interface ChecklistManagerProps {
-  mainForm: any;
+  mainForm: MainFormData;
   onAnalysisComplete: (analysis: ChecklistAnalysis[]) => void;
-  onFinalReportUpdate: (updates: any) => void;
+  onFinalReportUpdate: (updates: Record<string, string>) => void;
   onChecklistFileUpload?: (file: File) => void;
 }
 
@@ -57,6 +58,14 @@ export const ChecklistManager = ({
     '1F': [],
     '1G': []
   });
+  const blobUrlsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    return () => {
+      blobUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      blobUrlsRef.current = [];
+    };
+  }, []);
 
   const currentSections = getChecklistSections(activeChecklist);
   const currentData = checklistData[activeChecklist];
@@ -90,15 +99,18 @@ export const ChecklistManager = ({
   }, [activeChecklist]);
 
   const handleFileUpload = useCallback((questionId: string, files: File[]) => {
-    // In a real implementation, files would be uploaded to Supabase Storage
-    const fileRecords = files.map(file => ({
-      id: `${questionId}_${Date.now()}_${Math.random()}`,
-      name: file.name,
-      url: URL.createObjectURL(file), // Temporary URL for preview
-      type: file.type,
-      size: file.size,
-      uploadedAt: new Date()
-    }));
+    const fileRecords = files.map(file => {
+      const url = URL.createObjectURL(file);
+      blobUrlsRef.current.push(url);
+      return {
+        id: `${questionId}_${Date.now()}_${Math.random()}`,
+        name: file.name,
+        url,
+        type: file.type,
+        size: file.size,
+        uploadedAt: new Date()
+      };
+    });
 
     setChecklistData(prev => ({
       ...prev,

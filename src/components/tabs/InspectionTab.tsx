@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { ChecklistManager } from '@/components/checklist/ChecklistManager';
 import type { ChecklistAnalysis } from '@/types/checklist';
+import type { MainFormData } from '@/hooks/useInspectionState';
 
 interface InspectionTabProps {
-  mainForm: any;
-  onFinalReportUpdate?: (updates: any) => void;
+  mainForm: MainFormData;
+  onFinalReportUpdate?: (updates: Record<string, string>) => void;
   onChecklistFileUpload?: (file: File) => void;
 }
 
@@ -13,14 +14,12 @@ export const InspectionTab = ({ mainForm, onFinalReportUpdate, onChecklistFileUp
 
   const handleAnalysisComplete = (analysis: ChecklistAnalysis[]) => {
     setAnalysisResults(analysis);
-    console.log('Checklist analysis complete:', analysis);
   };
 
-  const handleFinalReportUpdate = (updates: any) => {
+  const handleFinalReportUpdate = (updates: Record<string, string>) => {
     if (onFinalReportUpdate) {
       onFinalReportUpdate(updates);
     }
-    console.log('Final report updates:', updates);
   };
 
 

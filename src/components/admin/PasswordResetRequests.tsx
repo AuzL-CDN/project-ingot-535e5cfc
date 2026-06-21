@@ -55,6 +55,18 @@ export const PasswordResetRequests = () => {
   const [showTempPassword, setShowTempPassword] = useState(false);
   const [tempPasswordResult, setTempPasswordResult] = useState<TempPasswordResult | null>(null);
   const [copied, setCopied] = useState(false);
+  const [passwordRevealed, setPasswordRevealed] = useState(false);
+
+  // Auto-dismiss temporary password dialog after 60 seconds
+  useEffect(() => {
+    if (!showTempPassword) return;
+    const timer = setTimeout(() => {
+      setShowTempPassword(false);
+      setPasswordRevealed(false);
+      setCopied(false);
+    }, 60000);
+    return () => clearTimeout(timer);
+  }, [showTempPassword]);
 
   const fetchRequests = async () => {
     try {
@@ -94,13 +106,13 @@ export const PasswordResetRequests = () => {
         setTempPasswordResult({
           username: response.data.username,
           display_name: request.display_name,
-          temporary_password: response.data.temporary_password
+          temporary_password: ''
         });
         setShowTempPassword(true);
         
         toast({
           title: "Password Reset Approved",
-          description: `Password reset for ${request.display_name || request.username}.`,
+          description: `Password reset for ${request.display_name || request.username}. The temporary password has been logged.`,
         });
         
         fetchRequests();
@@ -350,8 +362,20 @@ export const PasswordResetRequests = () => {
                 <label className="text-sm font-medium">Temporary Password</label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 font-mono bg-muted p-3 rounded-md text-lg tracking-wider">
-                    {tempPasswordResult.temporary_password}
+                    {passwordRevealed ? tempPasswordResult.temporary_password : '••••••••••••'}
                   </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setPasswordRevealed(prev => !prev)}
+                    title={passwordRevealed ? 'Hide password' : 'Show password'}
+                  >
+                    {passwordRevealed ? (
+                      <X className="h-4 w-4" />
+                    ) : (
+                      <KeyRound className="h-4 w-4" />
+                    )}
+                  </Button>
                   <Button
                     variant="outline"
                     size="icon"
@@ -364,6 +388,9 @@ export const PasswordResetRequests = () => {
                     )}
                   </Button>
                 </div>
+                {passwordRevealed && (
+                  <p className="text-xs text-amber-600">This dialog will auto-dismiss in 60 seconds. Copy the password now.</p>
+                )}
               </div>
             </div>
           )}

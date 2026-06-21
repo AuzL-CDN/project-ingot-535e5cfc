@@ -34,10 +34,10 @@ interface AuthContextType {
   mustChangePassword: boolean;
   profileCompleted: boolean;
   loading: boolean;
-  signIn: (username: string, password: string) => Promise<{ error: any | null }>;
-  signUp: (email: string, password: string, displayName: string) => Promise<{ error: any | null }>;
+  signIn: (username: string, password: string) => Promise<{ error: { message: string } | null }>;
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: { message: string } | null }>;
   signOut: () => Promise<void>;
-  changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: any | null }>;
+  changePassword: (currentPassword: string, newPassword: string) => Promise<{ error: { message: string } | null }>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -77,15 +77,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [roles, setRoles] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // DEV MODE: Enable admin access on localhost only
-  const isDevMode = import.meta.env.DEV && 
+  // DEV MODE: Enable mock admin access only when explicitly opted in via env var
+  const isDevMode = import.meta.env.VITE_DEV_SKIP_AUTH === 'true' && 
     (typeof window !== 'undefined' && 
      (window.location.hostname === 'localhost' || 
       window.location.hostname === '127.0.0.1'));
 
   const fetchUserData = useCallback(async () => {
     try {
-      console.log('[AuthProvider] Fetching session from PHP API...');
       const response = await api.auth.session();
       
       if (response.success && response.data?.user) {
@@ -93,25 +92,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const profileData = response.data.profile;
         const userRoles = response.data.roles || [];
         
-        console.log('[AuthProvider] Session loaded:', {
-          username: userData.username,
-          email: userData.email,
-          roles: userRoles,
-          mustChangePassword: userData.must_change_password,
-          profileCompleted: profileData?.profile_completed
-        });
-        
         setUser(userData);
         setProfile(profileData);
         setRoles(userRoles);
       } else {
-        console.log('[AuthProvider] No active session');
         setUser(null);
         setProfile(null);
         setRoles([]);
       }
     } catch (error) {
-      console.error('[AuthProvider] Failed to fetch session:', error);
       setUser(null);
       setProfile(null);
       setRoles([]);
@@ -134,14 +123,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await api.auth.login(username, password);
       
       if (response.success) {
-        console.log('[AuthProvider] Sign in successful');
         await fetchUserData();
         return { error: null };
       } else {
         return { error: { message: response.error || 'Login failed' } };
       }
     } catch (error) {
-      console.error('[AuthProvider] Sign in error:', error);
       return { error: { message: 'Network error during login' } };
     }
   }, [fetchUserData]);
@@ -156,14 +143,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const response = await api.auth.changePassword(currentPassword, newPassword);
       
       if (response.success) {
-        console.log('[AuthProvider] Password changed successfully');
         await fetchUserData();
         return { error: null };
       } else {
         return { error: { message: response.error || 'Password change failed' } };
       }
     } catch (error) {
-      console.error('[AuthProvider] Password change error:', error);
       return { error: { message: 'Network error during password change' } };
     }
   }, [fetchUserData]);
@@ -171,9 +156,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signOut = useCallback(async () => {
     try {
       await api.auth.logout();
-      console.log('[AuthProvider] Signed out');
     } catch (error) {
-      console.error('[AuthProvider] Sign out error:', error);
     } finally {
       setUser(null);
       setProfile(null);

@@ -171,9 +171,8 @@ function handleApproveRequest(int $requestId): void {
         'request_id' => $requestId,
         'user_id' => $request['user_id'],
         'username' => $request['username'],
-        'display_name' => $request['display_name'],
-        'temporary_password' => $tempPassword
-    ], 'Password reset approved. Please provide the temporary password to the user.');
+        'display_name' => $request['display_name']
+    ], 'Password reset approved. The temporary password has been logged securely. Please provide it to the user.');
 }
 
 /**

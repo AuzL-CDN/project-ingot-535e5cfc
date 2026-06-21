@@ -90,7 +90,8 @@ CREATE TABLE profiles (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
-    INDEX idx_profile_completed (profile_completed)
+    INDEX idx_profile_completed (profile_completed),
+    INDEX idx_profiles_enc_version (encryption_version)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -167,7 +168,9 @@ CREATE TABLE cso_contacts (
     INDEX idx_org_site_id (org_site_id),
     INDEX idx_role (role),
     INDEX idx_full_name (full_name),
-    UNIQUE KEY unique_org_role_index (org_site_id, role, acso_index)
+    INDEX idx_cso_enc_version (encryption_version),
+    UNIQUE KEY unique_org_role_index (org_site_id, role, acso_index),
+    FOREIGN KEY (org_site_id) REFERENCES organizations(org_site_id) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -202,6 +205,7 @@ CREATE TABLE password_reset_requests (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (resolved_by) REFERENCES users(id) ON DELETE SET NULL,
     INDEX idx_user_id (user_id),
+    INDEX idx_resolved_by (resolved_by),
     INDEX idx_status (status),
     INDEX idx_requested_at (requested_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -234,7 +238,6 @@ DELIMITER ;
 
 -- =====================================================
 -- INITIAL ADMIN USER SETUP
--- Password: Admin@Ingot2026! (pre-hashed with bcrypt)
 -- Change this password immediately after first login!
 -- =====================================================
 -- INSERT INTO users (username, email, password_hash, display_name, must_change_password) 
@@ -246,6 +249,14 @@ DELIMITER ;
 -- CLEANUP: Remove expired sessions and old rate limits
 -- Run daily via cron job
 -- =====================================================
--- DELETE FROM sessions WHERE expires_at < NOW();
--- DELETE FROM rate_limits WHERE last_attempt < DATE_SUB(NOW(), INTERVAL 1 DAY);
--- DELETE FROM audit_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);
+-- CREATE EVENT cleanup_expired_sessions
+--     ON SCHEDULE EVERY 1 DAY
+--     DO DELETE FROM sessions WHERE expires_at < NOW();
+-- 
+-- CREATE EVENT cleanup_old_rate_limits
+--     ON SCHEDULE EVERY 1 DAY
+--     DO DELETE FROM rate_limits WHERE last_attempt < DATE_SUB(NOW(), INTERVAL 1 DAY);
+-- 
+-- CREATE EVENT cleanup_old_audit_logs
+--     ON SCHEDULE EVERY 1 DAY
+--     DO DELETE FROM audit_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 90 DAY);

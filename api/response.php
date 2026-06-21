@@ -67,6 +67,12 @@ function sendValidationError(array $errors): void {
  * Get JSON request body
  */
 function getJsonBody(): array {
+    // Reject payloads over 2MB
+    $contentLength = (int)($_SERVER['CONTENT_LENGTH'] ?? 0);
+    if ($contentLength > 2 * 1024 * 1024) {
+        sendError('Request body too large. Maximum size is 2MB.', 413);
+    }
+    
     $input = file_get_contents('php://input');
     if (empty($input)) {
         return [];
@@ -106,5 +112,9 @@ function validateEmail(string $email): bool {
  * Sanitize string input
  */
 function sanitizeString(string $input): string {
+    return trim($input);
+}
+
+function sanitizeForHtml(string $input): string {
     return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
 }
