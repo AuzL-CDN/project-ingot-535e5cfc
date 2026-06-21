@@ -1,0 +1,70 @@
+{
+  "ApprovalLetter.docx": {
+    "replacements": {
+      "[security level]": "securityLevel",
+      "[site address]": "siteAddress",
+      "[security level] (colored)": "securityLevel",
+      "[date] (colored)": "date",
+      "[declaration letter date]": "declarationLetterDate",
+      "[name of company]": "companyName"
+    },
+    "textReplacements": {
+      "Full Name of CSO": "inspectorInitials",
+      "Company Name": "companyName",
+      ", Org Number": "orgNumber",
+      "Contract Type and Contract Number": "contractInfo"
+    },
+    "contentControls": {
+      "Click or tap to enter a date.": { "field": "date", "type": "date" },
+      "Choose an item.||approves||renews": { "field": "approvalAction1", "type": "dropdown" },
+      "Choose an item.||approved||renewed": { "field": "approvalAction2", "type": "dropdown" },
+      "Choose an item.||is both site-specific and contract-specific,||reaffirms the previously issued IT Written Approval(s) for this site,": { "field": "approvalAction3", "type": "dropdown" }
+    }
+  },
+  "CSC_ApprovalLetter.docx": {
+    "replacements": {
+      "[security level]": "securityLevel",
+      "[site address]": "siteAddress",
+      "[declaration letter date]": "declarationLetterDate",
+      "[name of company]": "companyName"
+    },
+    "textReplacements": {
+      "Full Name of CSO": "inspectorInitials",
+      "Company Name": "companyName",
+      ", Org Number": "orgNumber",
+      "Contract Type and Contract Number": "contractInfo"
+    },
+    "contentControls": {
+      "Click or tap to enter a date.": { "field": "date", "type": "date" },
+      "Choose an item.||approves||renews": { "field": "approvalAction1", "type": "dropdown" },
+      "Choose an item.||approved||renewed": { "field": "approvalAction2", "type": "dropdown" },
+      "Choose an item.||is both site-specific and contract-specific,||reaffirms the previously issued IT Written Approval(s) for this site,": { "field": "approvalAction3", "type": "dropdown" }
+    }
+  },
+  "FinalReport.docx": {
+    "textReplacements": {
+      "XXXXXXXXXXXXXX": "companyName",
+      "Organization Name": "companyName",
+      "Organization Number": "orgNumber",
+      "Gov. Department": "govDepartment",
+      "Contract Number": "contractNumber",
+      "Award Date": "awardDate",
+      "Expiry Date": "expiryDate",
+      "Activity Number": "activityNumber"
+    }
+  },
+  "Memorandum.docx": {
+    "textReplacements": {
+      "Today's Date": "todayDate",
+      "Required Level": "requiredLevel",
+      "Activity Type": "activityType",
+      "Activity #": "activityNumber",
+      "Contract #": "contractNumber",
+      "Organization Name": "companyName",
+      "DISIS #": "disisNumber",
+      "Physical Address": "siteAddress",
+      "Name of Official": "inspectorInitials",
+      "Email Address": "email"
+    }
+  }
+}

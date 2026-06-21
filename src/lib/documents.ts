@@ -42,7 +42,39 @@ function dataCell(text: string): TableCell {
   });
 }
 
+/**
+ * Generate an Approval Letter .docx using the official government template.
+ * Falls back to programmatic generation if the template is unavailable.
+ */
 export async function generateApprovalLetter(data: ApprovalLetterData): Promise<void> {
+  try {
+    const { generateApprovalLetter: templateGen } = await import('./templateMailMerge');
+    // We need mainForm data, which is partially derived from approvalLetter data
+    const { useInspectionState } = await import('@/hooks/useInspectionState');
+    // Since we can't call a hook outside a component, build the mainForm mock directly
+    const mainForm: MainFormData = {
+      companyName: data.companyName,
+      csoFullName: data.csoFullName,
+      csoEmail: data.csoEmail,
+      orgSiteNumber: data.orgNumber,
+      securityLevel: data.securityLevel,
+      date: data.date,
+      activityNumber: '',
+      address: '',
+      clientDepartment: '',
+      contractType: data.contracts?.split(':')[0]?.trim() || '',
+      contractNumber: data.contracts?.split(':')[1]?.trim() || '',
+      inspectionType: '',
+      inspectionClass: '',
+      numberOfACSOs: 0,
+      acsos: [],
+    };
+    return templateGen(mainForm, data);
+  } catch (err) {
+    console.warn('[documents] Template unavailable, using programmatic generation:', err);
+    // fall through to programmatic
+  }
+
   const checkboxes = new Table({
     rows: [
       new TableRow({ children: [
@@ -128,6 +160,13 @@ export async function generateFinalReport(
   correctiveMeasures: CorrectiveMeasure[],
   reportData: Record<string, string>
 ): Promise<void> {
+  try {
+    const { generateFinalReport: templateGen } = await import('./templateMailMerge');
+    return templateGen(mainForm, reportData);
+  } catch (err) {
+    console.warn('[documents] Template unavailable, using programmatic generation:', err);
+  }
+
   const children: (Paragraph | Table)[] = [
     new Paragraph({ children: [new TextRun({ text: 'GOVERNMENT OF CANADA', bold: true, size: 24, font: 'Calibri' })], alignment: AlignmentType.CENTER, spacing: { after: 0 } }),
     new Paragraph({ children: [new TextRun({ text: 'FINAL REPORT', bold: true, size: 28, font: 'Calibri' })], alignment: AlignmentType.CENTER, spacing: { after: 200 } }),
@@ -211,6 +250,13 @@ export async function generateFinalReport(
 }
 
 export async function generateMemorandum(mainForm: MainFormData, memoData: Record<string, string>): Promise<void> {
+  try {
+    const { generateMemorandum: templateGen } = await import('./templateMailMerge');
+    return templateGen(mainForm, memoData);
+  } catch (err) {
+    console.warn('[documents] Template unavailable, using programmatic generation:', err);
+  }
+
   const infoTable = new Table({
     rows: [
       new TableRow({ children: [headerCell('Field', 35), headerCell('Details', 65)] }),
