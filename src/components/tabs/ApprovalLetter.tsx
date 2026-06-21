@@ -6,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { CheckCircle, FileText, Users, Eye } from 'lucide-react';
+import { CheckCircle, FileText, Users, Eye, Download } from 'lucide-react';
 import { ApprovalLetterData } from '@/hooks/useInspectionState';
+import { generateApprovalLetter } from '@/lib/documents';
 
 interface ApprovalLetterProps {
   approvalLetter: ApprovalLetterData;
@@ -72,6 +73,19 @@ CC:
 ${approvalLetter.ccs.map(cc => `${cc.name} - ${cc.title}, ${cc.department} (${cc.email})`).join('\n')}
 ` : ''}
     `.trim();
+  };
+
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleExportDocx = async () => {
+    setIsGenerating(true);
+    try {
+      await generateApprovalLetter(approvalLetter);
+    } catch (err) {
+      console.error('Failed to generate document:', err);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -370,10 +384,10 @@ ${approvalLetter.ccs.map(cc => `${cc.name} - ${cc.title}, ${cc.department} (${cc
             </div>
           )}
 
-          <div className="pt-4 border-t">
-            <Button className="w-full">
-              <FileText className="h-4 w-4 mr-2" />
-              PDF only
+          <div className="pt-4 border-t space-y-2">
+            <Button className="w-full" onClick={handleExportDocx} disabled={isGenerating}>
+              <Download className="h-4 w-4 mr-2" />
+              {isGenerating ? 'Generating...' : 'Download Approval Letter (.docx)'}
             </Button>
           </div>
         </CardContent>

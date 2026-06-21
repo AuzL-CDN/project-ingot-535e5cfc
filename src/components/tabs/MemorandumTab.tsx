@@ -5,8 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Mail, Eye, FileText, Building, Hash } from 'lucide-react';
+import { Mail, Eye, FileText, Building, Hash, Download } from 'lucide-react';
 import type { MainFormData } from '@/hooks/useInspectionState';
+import { generateMemorandum } from '@/lib/documents';
 
 interface MemorandumTabProps {
   mainForm: MainFormData;
@@ -14,6 +15,7 @@ interface MemorandumTabProps {
 
 export const MemorandumTab = ({ mainForm }: MemorandumTabProps) => {
   const [showPreview, setShowPreview] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [memoData, setMemoData] = useState({
     date: new Date().toISOString().split('T')[0],
     contractLevel: '',
@@ -263,10 +265,10 @@ Contact: [Inspector Contact Information]
             </div>
           </div>
 
-          <div className="pt-4 border-t">
-            <Button className="w-full">
-              <FileText className="h-4 w-4 mr-2" />
-              Generate Memorandum (DOCX + PDF)
+          <div className="pt-4 border-t space-y-2">
+            <Button className="w-full" onClick={async () => { setIsExporting(true); try { await generateMemorandum(mainForm, memoData); } catch (err) { console.error(err); } finally { setIsExporting(false); } }} disabled={isExporting}>
+              <Download className="h-4 w-4 mr-2" />
+              {isExporting ? 'Generating...' : 'Download Memorandum (.docx)'}
             </Button>
           </div>
         </CardContent>

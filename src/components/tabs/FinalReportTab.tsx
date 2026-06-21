@@ -7,9 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { FileText, Eye, Save, Calendar, Building, AlertTriangle } from 'lucide-react';
+import { FileText, Eye, Save, Calendar, Building, AlertTriangle, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { CorrectiveMeasure, MainFormData } from '@/hooks/useInspectionState';
+import { generateFinalReport } from '@/lib/documents';
 
 interface FinalReportTabProps {
   mainForm: MainFormData;
@@ -37,6 +38,19 @@ export const FinalReportTab = ({ mainForm, correctiveMeasures, saveActivity }: F
     backupPlan: ''
   });
   const { toast } = useToast();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportDocx = async () => {
+    setIsExporting(true);
+    try {
+      await generateFinalReport(mainForm, correctiveMeasures, reportData);
+      toast({ title: "Report Generated", description: "Final report downloaded as .docx" });
+    } catch (err) {
+      toast({ title: "Export Failed", description: "Could not generate the document.", variant: "destructive" });
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const handleSave = () => {
     saveActivity();
@@ -557,9 +571,9 @@ PROTECTED A
                     Current workflow: Generate report → Convert to PDF → Manual signature → Upload/distribute
                   </p>
                 </div>
-                <Button className="w-full">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Generate Final Report (Manual Signature Required)
+                <Button className="w-full" onClick={handleExportDocx} disabled={isExporting}>
+                  <Download className="h-4 w-4 mr-2" />
+                  {isExporting ? 'Generating...' : 'Download Final Report (.docx)'}
                 </Button>
               </div>
             </TabsContent>

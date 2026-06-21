@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useInspectionState } from '@/hooks/useInspectionState';
 import { TabNavigation } from './tabs/TabNavigation';
 import { InspectorInfo } from './tabs/InspectorInfo';
@@ -18,22 +17,20 @@ import { DISISNotesTab } from './tabs/DISISNotesTab';
 import { ResourcesTab } from './tabs/ResourcesTab';
 import { AdminTab } from './tabs/AdminTab';
 import { UserMenuDropdown } from '@/components/UserMenuDropdown';
-import { WelcomeTransition } from '@/components/WelcomeTransition';
 import { useTranslation } from '@/hooks/useTranslation';
-import { useAuth } from './auth/AuthProvider';
 
-export type TabId = 
-  | 'inspector' 
-  | 'main' 
-  | 'search' 
-  | 'approval' 
+export type TabId =
+  | 'inspector'
+  | 'main'
+  | 'search'
+  | 'approval'
   | 'emails'
   | 'disisnotes'
-  | 'status' 
-  | 'doc' 
-  | 'memorandum' 
-  | 'inspection' 
-  | 'corrective' 
+  | 'status'
+  | 'doc'
+  | 'memorandum'
+  | 'inspection'
+  | 'corrective'
   | 'documents'
   | 'finalreport'
   | 'resources'
@@ -42,38 +39,10 @@ export type TabId =
 export const InspectionApp = () => {
   const [activeTab, setActiveTab] = useState<TabId>('inspector');
   const [checklistFiles, setChecklistFiles] = useState<File[]>([]);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [welcomeUserName, setWelcomeUserName] = useState('');
   const inspectionState = useInspectionState();
-  const { user, loading } = useAuth();
-  const location = useLocation();
 
   const { mainForm, inspector, isActivityCompleted, globalState } = inspectionState;
   const { t } = useTranslation(globalState.globalUILanguage === 'fr' ? 'french' : 'english');
-  
-  // Check for welcome transition trigger
-  useEffect(() => {
-    const state = location.state as { justLoggedIn?: boolean; userName?: string } | null;
-    if (state?.justLoggedIn && state?.userName) {
-      setWelcomeUserName(state.userName);
-      setShowWelcome(true);
-      // Clear the state so refresh doesn't re-trigger
-      window.history.replaceState({}, document.title);
-    }
-  }, [location.state]);
-
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
 
   // Check if inspector profile is set up
   const isInspectorSetup = !!(inspector.name && inspector.initials && inspector.email);
@@ -128,12 +97,6 @@ export const InspectionApp = () => {
 
   return (
     <>
-      {showWelcome && (
-        <WelcomeTransition 
-          userName={welcomeUserName} 
-          onComplete={() => setShowWelcome(false)} 
-        />
-      )}
       <div className="min-h-screen bg-gradient-subtle">
       <div className="bg-card border-b shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">

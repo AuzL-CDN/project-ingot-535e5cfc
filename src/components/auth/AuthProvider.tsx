@@ -1,5 +1,4 @@
-import { createContext, useContext, ReactNode, useEffect, useState, useCallback } from 'react';
-import { api } from '@/lib/api';
+import { createContext, useContext, ReactNode } from 'react';
 
 interface User {
   id: number;
@@ -41,27 +40,52 @@ interface AuthContextType {
   refreshProfile: () => Promise<void>;
 }
 
-// Default context value for when provider isn't available (e.g., during HMR)
-const defaultAuthContext: AuthContextType = {
-  user: null,
-  session: null,
-  profile: null,
-  roles: [],
-  isAdmin: false,
+const mockAuthContext: AuthContextType = {
+  user: {
+    id: 1,
+    email: 'inspector@ingot.local',
+    username: 'inspector',
+    display_name: 'Inspector',
+    must_change_password: false,
+    created_at: new Date().toISOString()
+  },
+  session: {
+    user: {
+      id: 1,
+      email: 'inspector@ingot.local',
+      username: 'inspector',
+      display_name: 'Inspector',
+      must_change_password: false,
+      created_at: new Date().toISOString()
+    }
+  },
+  profile: {
+    id: 1,
+    user_id: 1,
+    display_name: 'Inspector',
+    email: 'inspector@ingot.local',
+    initials: 'IN',
+    phone: null,
+    profile_completed: true,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  roles: ['admin'],
+  isAdmin: true,
   isModerator: false,
   isDev: false,
   isM365: false,
   mustChangePassword: false,
-  profileCompleted: false,
-  loading: true,
-  signIn: async () => ({ error: { message: 'Auth not ready' } }),
-  signUp: async () => ({ error: { message: 'Auth not ready' } }),
+  profileCompleted: true,
+  loading: false,
+  signIn: async () => ({ error: null }),
+  signUp: async () => ({ error: { message: 'Registration disabled' } }),
   signOut: async () => {},
-  changePassword: async () => ({ error: { message: 'Auth not ready' } }),
+  changePassword: async () => ({ error: null }),
   refreshProfile: async () => {},
 };
 
-const AuthContext = createContext<AuthContextType>(defaultAuthContext);
+const AuthContext = createContext<AuthContextType>(mockAuthContext);
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -72,164 +96,5 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [roles, setRoles] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // DEV MODE: Enable mock admin access only when explicitly opted in via env var
-  const isDevMode = import.meta.env.VITE_DEV_SKIP_AUTH === 'true' && 
-    (typeof window !== 'undefined' && 
-     (window.location.hostname === 'localhost' || 
-      window.location.hostname === '127.0.0.1'));
-
-  const fetchUserData = useCallback(async () => {
-    try {
-      const response = await api.auth.session();
-      
-      if (response.success && response.data?.user) {
-        const userData = response.data.user;
-        const profileData = response.data.profile;
-        const userRoles = response.data.roles || [];
-        
-        setUser(userData);
-        setProfile(profileData);
-        setRoles(userRoles);
-      } else {
-        setUser(null);
-        setProfile(null);
-        setRoles([]);
-      }
-    } catch (error) {
-      setUser(null);
-      setProfile(null);
-      setRoles([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const refreshProfile = useCallback(async () => {
-    if (!user) return;
-    await fetchUserData();
-  }, [user, fetchUserData]);
-
-  useEffect(() => {
-    fetchUserData();
-  }, [fetchUserData]);
-
-  const signIn = useCallback(async (username: string, password: string) => {
-    try {
-      const response = await api.auth.login(username, password);
-      
-      if (response.success) {
-        await fetchUserData();
-        return { error: null };
-      } else {
-        return { error: { message: response.error || 'Login failed' } };
-      }
-    } catch (error) {
-      return { error: { message: 'Network error during login' } };
-    }
-  }, [fetchUserData]);
-
-  const signUp = useCallback(async (email: string, password: string, displayName: string) => {
-    // Sign up is disabled for Login Prime 1 - admin only user creation
-    return { error: { message: 'Registration is disabled. Contact your administrator.' } };
-  }, []);
-
-  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
-    try {
-      const response = await api.auth.changePassword(currentPassword, newPassword);
-      
-      if (response.success) {
-        await fetchUserData();
-        return { error: null };
-      } else {
-        return { error: { message: response.error || 'Password change failed' } };
-      }
-    } catch (error) {
-      return { error: { message: 'Network error during password change' } };
-    }
-  }, [fetchUserData]);
-
-  const signOut = useCallback(async () => {
-    try {
-      await api.auth.logout();
-    } catch (error) {
-    } finally {
-      setUser(null);
-      setProfile(null);
-      setRoles([]);
-    }
-  }, []);
-
-  // Compute derived state
-  const mustChangePassword = user?.must_change_password ?? false;
-  const profileCompleted = profile?.profile_completed ?? false;
-
-  // In dev mode, override with mock admin user
-  const value: AuthContextType = isDevMode ? {
-    user: { 
-      id: 1, 
-      email: 'dev@localhost',
-      username: 'devadmin',
-      display_name: 'Dev Admin',
-      must_change_password: false,
-      created_at: new Date().toISOString()
-    },
-    session: {
-      user: { 
-        id: 1, 
-        email: 'dev@localhost',
-        username: 'devadmin',
-        display_name: 'Dev Admin',
-        must_change_password: false,
-        created_at: new Date().toISOString()
-      }
-    },
-    profile: {
-      id: 1,
-      user_id: 1,
-      display_name: 'Dev Admin',
-      email: 'dev@localhost',
-      initials: 'DA',
-      phone: null,
-      profile_completed: true,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    },
-    roles: ['admin'],
-    isAdmin: true,
-    isModerator: false,
-    isDev: true,
-    isM365: false,
-    mustChangePassword: false,
-    profileCompleted: true,
-    loading: false,
-    signIn,
-    signUp,
-    signOut,
-    changePassword,
-    refreshProfile,
-  } : {
-    user,
-    session: user ? { user } : null,
-    profile,
-    roles,
-    isAdmin: roles.includes('admin'),
-    isModerator: roles.includes('moderator'),
-    isDev: false,
-    isM365: false,
-    mustChangePassword,
-    profileCompleted,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    changePassword,
-    refreshProfile,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={mockAuthContext}>{children}</AuthContext.Provider>;
 };
