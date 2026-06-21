@@ -8,12 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Mail, Eye, FileText, Building, Hash, Download } from 'lucide-react';
 import type { MainFormData } from '@/hooks/useInspectionState';
 import { generateMemorandum } from '@/lib/documents';
+import { useToast } from '@/hooks/use-toast';
 
 interface MemorandumTabProps {
   mainForm: MainFormData;
 }
 
 export const MemorandumTab = ({ mainForm }: MemorandumTabProps) => {
+  const { toast } = useToast();
   const [showPreview, setShowPreview] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [memoData, setMemoData] = useState({
@@ -266,7 +268,7 @@ Contact: [Inspector Contact Information]
           </div>
 
           <div className="pt-4 border-t space-y-2">
-            <Button className="w-full" onClick={async () => { setIsExporting(true); try { await generateMemorandum(mainForm, memoData); } catch (err) { console.error(err); } finally { setIsExporting(false); } }} disabled={isExporting}>
+            <Button className="w-full" onClick={async () => { setIsExporting(true); try { await generateMemorandum(mainForm, memoData); toast({ title: "Document Generated", description: "Memorandum downloaded as .docx" }); } catch (err) { toast({ title: "Export Failed", description: "Could not generate the document.", variant: "destructive" }); } finally { setIsExporting(false); } }} disabled={isExporting}>
               <Download className="h-4 w-4 mr-2" />
               {isExporting ? 'Generating...' : 'Download Memorandum (.docx)'}
             </Button>

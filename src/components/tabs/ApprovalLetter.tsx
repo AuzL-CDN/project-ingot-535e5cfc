@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { CheckCircle, FileText, Users, Eye, Download } from 'lucide-react';
 import { ApprovalLetterData } from '@/hooks/useInspectionState';
 import { generateApprovalLetter } from '@/lib/documents';
+import { useToast } from '@/hooks/use-toast';
 
 interface ApprovalLetterProps {
   approvalLetter: ApprovalLetterData;
@@ -77,12 +78,15 @@ ${approvalLetter.ccs.map(cc => `${cc.name} - ${cc.title}, ${cc.department} (${cc
 
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const { toast } = useToast();
+
   const handleExportDocx = async () => {
     setIsGenerating(true);
     try {
       await generateApprovalLetter(approvalLetter);
+      toast({ title: "Document Generated", description: "Approval letter downloaded as .docx" });
     } catch (err) {
-      console.error('Failed to generate document:', err);
+      toast({ title: "Export Failed", description: "Could not generate the document.", variant: "destructive" });
     } finally {
       setIsGenerating(false);
     }
